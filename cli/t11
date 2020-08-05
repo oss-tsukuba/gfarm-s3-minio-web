@@ -1,0 +1,97 @@
+#! /bin/sh
+
+export AWS_PROFILE=user1
+
+ENDPOINT_URL=https://192.168.224.22
+ENDPOINT_URL=http://192.168.224.22
+
+DEBUG=--debug
+DEBUG=
+
+. ./subr
+
+sets3v4() {
+	aws configure set default.s3.signature_version s3v4
+}
+
+test0() {
+#	aws s3 ls        s3://myb
+#	aws s3 ls        s3://myb/
+	aws s3 mb        s3://mybucket
+	aws s3 cp k/foo  s3://mybucket/myobject
+	aws s3 ls        s3://mybucket
+	aws s3 cp        s3://mybucket/myobject k/bar
+	openssl sha1 -r k/foo k/bar
+	aws s3 cp k/32M  s3://mybucket/myobject32
+	aws s3 ls        s3://mybucket
+	aws s3 cp        s3://mybucket/myobject32 k/baz
+	openssl sha1 -r k/32M k/baz
+}
+
+testA() {
+	aws s3 ls        s3://
+
+	aws s3 mb        s3://mybucket
+	aws s3 mb        s3://sss
+
+	aws s3 cp k/32M  s3://mybucket/myobject
+	aws s3 cp k/32M  s3://sss/user2/herbucket/object1
+	aws s3 cp k/32M  s3://sss/user2/herbucket/object2
+	aws s3 cp k/32M  s3://sss/user2/herbucket/blob3
+	aws s3 cp s3://sss/user2/herbucket/blob3/ s3://sss/user2/herbucket/blob4
+	aws s3 cp s3://sss/user2/herbucket/ s3://sss/user2/xherbucket
+
+	aws s3 ls        s3://
+	aws s3 ls        s3://sss
+	aws s3 ls        s3://sss/
+	aws s3 ls        s3://sss/user2
+	aws s3 ls        s3://sss/user2/
+	aws s3 ls        s3://sss/user2/
+	aws s3 ls        s3://sss/user2/herbucket
+	aws s3 ls        s3://sss/user2/herbucket/
+
+	aws s3 cp        s3://sss/user2/herbucket/blob3 k/bar
+	openssl sha1 -r k/32M k/bar
+
+	aws s3 rm        s3://sss/user2/herbucket/blob3
+	aws s3 rm        s3://sss/user2/herbucket/object2
+	aws s3 rm        s3://sss/user2/herbucket/object1
+	aws s3 rm        s3://mybucket/myobject
+
+	aws s3 rb        s3://sss
+	aws s3 rb        s3://mybucket
+}
+
+testB() {
+	aws s3 ls        s3://
+}
+
+test_deeppath() {
+	aws s3 mb        s3://sss/user2
+	#aws s3 mb        s3://sss/user2	--- fail on client side
+	aws s3 rb        s3://sss
+}
+
+test_mv() {
+	aws s3 mb        s3://mybucket
+	aws s3 cp k/foo  s3://mybucket/myobject
+	aws s3 mv s3://mybucket/myobject s3://mybucket/myobject2
+	aws s3 rm        s3://mybucket/myobject2
+	aws s3 rm        s3://mybucket/myobject
+	aws s3 rb        s3://mybucket
+}
+
+rm -f k/foo k/bar
+
+cat <<EOF > k/foo
+@@@@@ $(date)
+EOF
+
+#sets3v4
+test0
+#testA
+#testB
+#test_mv
+#test_deeppath
+
+exit 0

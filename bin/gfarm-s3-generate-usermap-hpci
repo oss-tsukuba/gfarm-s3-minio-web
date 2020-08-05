@@ -1,0 +1,13 @@
+#! /bin/sh
+
+#cat /etc/grid-security/grid-mapfile
+
+parse() {
+	sed 's/^"[^"]*\[\(hpci[0-9]*\)\]" \([a-zA-Z0-9_][a-zA-Z0-9_]*\)$/\1:\2:\1/'
+}
+
+cat <<EOF | parse
+"/C=JP/O=NII/OU=HPCI/CN=Shingo%40Nishioka[hpci005858]" snis
+"/C=JP/O=NII/OU=HPCI/CN=Takuya%40Ishibashi[hpci001971]" takuya
+"/C=JP/O=NII/OU=HPCI/CN=INOUE%40Kiyoshi[hpci001970]" k_inoue
+EOF

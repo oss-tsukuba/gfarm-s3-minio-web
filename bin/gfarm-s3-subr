@@ -1,0 +1,767 @@
+#################################################
+### utilities & common subroutines
+#################################################
+
+generate_access_key() {			# void
+	uuid|tr -d -
+}
+
+generate_secret_key() {			# void
+	openssl rand -base64 36
+}
+
+USERMAP_FIELD_GLOBAL_USERNAME=1
+USERMAP_FIELD_LOCAL_USERNAME=2
+USERMAP_FIELD_ACCESS_KEY=3
+
+lookup_usermap_by_field_key() {
+	awk < "$3" \
+		-v key="$2" \
+		-v field="$1" \
+		-F : \
+		'! /^#/ && $field == key { print }'
+}
+
+lookup_usermap_by_global_username() {	# global-username mapfile
+	lookup_usermap_by_field_key "$USERMAP_FIELD_GLOBAL_USERNAME" "$1" "$2"
+}
+
+lookup_usermap_by_local_username() {	# local-username mapfile
+	lookup_usermap_by_field_key "$USERMAP_FIELD_LOCAL_USERNAME" "$1" "$2"
+}
+
+lookup_usermap_by_access_key() {	# access_key mapfile
+	lookup_usermap_by_field_key "$USERMAP_FIELD_ACCESS_KEY" "$1" "$2"
+}
+
+get_key_stream() {
+	awk \
+		-v field="$1" \
+		-F : \
+		'{ print $field }'
+}
+
+get_global_username_stream() {
+	get_key_stream "$USERMAP_FIELD_GLOBAL_USERNAME"
+}
+
+get_local_username_stream() {
+	get_key_stream "$USERMAP_FIELD_LOCAL_USERNAME"
+}
+
+get_access_key_stream() {
+	get_key_stream "$USERMAP_FIELD_ACCESS_KEY"
+}
+
+
+get_global_username() {
+	echo "$1" | get_key_stream "$USERMAP_FIELD_GLOBAL_USERNAME"
+}
+
+get_local_username() {
+	echo "$1" | get_key_stream "$USERMAP_FIELD_LOCAL_USERNAME"
+}
+
+get_access_key() {
+	echo "$1" | get_key_stream "$USERMAP_FIELD_ACCESS_KEY"
+}
+
+
+gfkey_hash() {
+	openssl sha256 -r|awk '{ print $1 }'
+}
+
+filter_add_to_usermap() {
+	awk \
+		-v global_username="$1" \
+		-v local_username="$2" \
+		-v access_key="$3" \
+		-v usermap_field_global_username="$USERMAP_FIELD_GLOBAL_USERNAME" \
+		-v usermap_field_local_username="$USERMAP_FIELD_LOCAL_USERNAME" \
+		-v usermap_field_access_key="$USERMAP_FIELD_ACCESS_KEY" \
+		-F : \
+		'{ print }
+		 END {	f[usermap_field_global_username] = global_username
+			f[usermap_field_local_username] = local_username
+			f[usermap_field_access_key] = access_key
+			printf("%s:%s:%s\n", f[1], f[2], f[3]) }'
+}
+
+PORTMAP_FIELD_LOCAL_USERNAME=1
+PORTMAP_FIELD_PORT=2
+PORTMAP_FIELD_PID=3
+
+lookup_portmap() {
+	if [ -n "$2" ]; then
+		echo "$2"
+		return 0
+	fi
+	< "$GFARMS3_USER_PORT_MAP" awk \
+		-v local_username="$1" \
+		-v portmap_field_local_username="$PORTMAP_FIELD_LOCAL_USERNAME" \
+		-v portmap_field_port="$PORTMAP_FIELD_PORT" \
+		-v portmap_field_pid="$PORTMAP_FIELD_PID" \
+		-F : \
+		'$portmap_field_local_username == local_username { printf("%s:%s\n", $portmap_field_port, $portmap_field_pid) }'
+}
+
+update_portmap() {
+	local tmpfile=$(mktemp "$GFARMS3_USER_PORT_MAP.XXXXXX") || return 1
+	(flock 3
+		< "$GFARMS3_USER_PORT_MAP" "$@" > "$tmpfile"
+		chmod 644 "$tmpfile" "$GFARMS3_USER_PORT_MAP"
+		mv $tmpfile "$GFARMS3_USER_PORT_MAP"
+		chmod 444 "$GFARMS3_USER_PORT_MAP"
+	) 3> $GFARM_S3_LOCKDIR/update_portmap.lock
+}
+
+add_to_portmap() {
+	update_portmap filter_add_to_portmap "$@"
+}
+
+#del_from_portmap() {
+#	update_portmap filter_del_from_portmap "$@"
+#}
+
+#################################################
+### gfarm-s3-configtest
+#################################################
+
+list_unused_ports() {
+	if [ -n "$2" ]; then
+		echo "$2"
+		return 0
+	fi
+	ports_in_use=$(mktemp "/tmp/tmpfile.XXXXXX") || return 1
+	< "$GFARMS3_USER_PORT_MAP" filter_list_occupied_ports "$1" | sort > "$ports_in_use"
+	< "$GFARMS3_USER_PORT_MAP" filter_list_occupied_port_by_a_user "$1"
+	seq $GFARMS3_PORT_MIN 1 $GFARMS3_PORT_MAX | sort | comm -23 - "$ports_in_use" | sort -n
+	rm -f "$ports_in_use"
+}
+
+filter_add_to_portmap() {
+	awk \
+		-v local_username="$1" \
+		-v port="$2" \
+		-v pid="$3" \
+		-v portmap_field_local_username="$PORTMAP_FIELD_LOCAL_USERNAME" \
+		-v portmap_field_port="$PORTMAP_FIELD_PORT" \
+		-v portmap_field_pid="$PORTMAP_FIELD_PID" \
+		-F : \
+		'$portmap_field_local_username != local_username { print }
+		 END {	f[portmap_field_local_username] = local_username
+			f[portmap_field_port] = port
+			f[portmap_field_pid] = pid
+			printf("%s:%s:%s\n", f[1], f[2], f[3]) }'
+}
+
+#filter_del_from_portmap() {
+#	awk \
+#		-v local_username="$1" \
+#		-v portmap_field_local_username="$PORTMAP_FIELD_LOCAL_USERNAME" \
+#		-F : \
+#		'$portmap_field_local_username != local_username { print }'
+#}
+
+filter_list_occupied_port_by_a_user() {
+	awk \
+		-v local_username="$1" \
+		-v portmap_field_local_username="$PORTMAP_FIELD_LOCAL_USERNAME" \
+		-v portmap_field_port="$PORTMAP_FIELD_PORT" \
+		-F : \
+		'$portmap_field_local_username == local_username { print $portmap_field_port }' 
+}
+
+filter_list_occupied_ports() {
+	awk \
+		-v portmap_field_port="$PORTMAP_FIELD_PORT" \
+		-F : \
+		'{ print $portmap_field_port }' 
+}
+
+filter_list_users_in_portmap() {
+	awk \
+		-v portmap_field_local_username="$PORTMAP_FIELD_LOCAL_USERNAME" \
+		-F : \
+		'{ print $portmap_field_local_username }' 
+}
+
+configtest_format_test() {
+	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local status=0
+	grep -v '^#' "$1"|
+	grep -v '^[^:][^:]*:[^:][^:]*:[^:][^:]*$' >$tmpfile
+	if [ -s $tmpfile ]; then
+		echo "MALFORMED ENTRY:" 1>&2
+		cat $tmpfile 1>&2
+		status=1
+	fi
+	rm $tmpfile
+	return $status
+}
+
+configtest_global_username_test() {
+	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local status=0
+	grep -v '^#' "$1"|
+	get_global_username_stream|sort|uniq -d>$tmpfile
+	if [ -s $tmpfile ]; then
+		echo "DUPLICATED GLOBAL USERNAME:" 1>&2
+		cat $tmpfile 1>&2
+		status=1
+	fi
+	rm $tmpfile
+	return $status
+}
+
+check_global_username() {
+	echo "checking global_username: $1" 1>&2
+	if [ -z "$1" ]; then
+		## empty string
+		return 1
+	fi
+	return 0
+}
+
+check_local_username() {
+	echo "checking local_username: $1" 1>&2
+	if [ -z "$1" ]; then
+		## empty string
+		return 1
+	fi
+	return 0
+}
+
+check_access_key() {
+	echo "checking access_key: $1" 1>&2
+	if ! echo "$1" | grep -q '^[a-zA-Z0-9_]*$'; then
+		echo "invalid char in access_key. (a-zA-Z0-9_)" 1>&2
+		return 1
+	fi
+	len=$(expr length "$1")
+	if ! [ $len -ge $GFARM_S3_ACCESS_KEY_MIN_LEN -a $len -le 128 ]; then
+		echo "access_key length must be $GFARM_S3_ACCESS_KEY_MIN_LEN .. 128" 1>&2
+		return 1
+	fi
+	return 0
+}
+
+configtest_global_username_test_2() {
+	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local status=0
+	grep -v '^#' "$1"|
+	get_global_username_stream|grep '^[ 	]*$'>$tmpfile
+	if [ -s $tmpfile ]; then
+		echo "MALFORMED GLOBAL USERNAME:" 1>&2
+		cat $tmpfile 1>&2
+		status=1
+	fi
+	for global_username in $(grep -v '^#' "$1"|get_global_username_stream); do
+		if ! check_global_username "$global_username"; then
+			status=1
+		fi
+	done
+	rm $tmpfile
+	return $status
+}
+
+configtest_local_username_test() {
+	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local status=0
+	grep -v '^#' "$1"|
+	get_local_username_stream|sort|uniq -d>$tmpfile
+	if [ -s $tmpfile ]; then
+		echo "DUPLICATED LOCAL USERNAME:" 1>&2
+		cat $tmpfile 1>&2
+		status=1
+	fi
+	for local_username in $(grep -v '^#' "$1"|get_local_username_stream); do
+		if ! check_local_username "$local_username"; then
+			status=1
+		fi
+	done
+	rm $tmpfile
+	return $status
+}
+
+configtest_access_key_test() {
+	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local status=0
+	grep -v '^#' "$1"|
+	get_access_key_stream|sort|uniq -d>$tmpfile
+	if [ -s $tmpfile ]; then
+		echo "DUPLICATED ACCESS_KEY:" 1>&2
+		cat $tmpfile 1>&2
+		status=1
+	fi
+	for access_key in $(grep -v '^#' "$1"|get_access_key_stream); do
+		echo "checking access_key: $access_key" 1>&2
+		if ! check_access_key "$access_key"; then
+			status=1
+		fi
+	done
+	rm $tmpfile
+	return $status
+}
+
+configtest_local_user_exisence_test() {
+	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local status=0
+	for user in $(grep -v '^#' "$1"|get_local_username_stream); do
+		if ! id $user >/dev/null; then
+			echo "NO SUCH LOCALUSER: $user" 1>&2
+			status=1
+		fi
+	done
+	rm $tmpfile
+	return $status
+}
+
+configtest_all() {
+	local status=0
+
+	echo configtest_all: 1>&2
+	sed 's/^/> /' "$1" 1>&2
+
+	if ! configtest_format_test "$1"; then return 1; fi
+	# when format_test fails, the following tests will not be performed
+	if ! configtest_global_username_test "$1"; then status=1; fi
+	if ! configtest_global_username_test_2 "$1"; then status=1; fi
+	if ! configtest_local_username_test "$1"; then status=1; fi
+	if ! configtest_access_key_test "$1"; then status=1; fi
+	if ! configtest_local_user_exisence_test "$1"; then status=1; fi
+	echo status=$status 1>&2
+	return $status
+}
+
+update_usermap() {
+	local tmpfile=$(mktemp "$GFARMS3_LOCAL_USER_MAP.XXXXXX") || return 1
+	(flock 3
+		if ! "$@" "$GFARMS3_LOCAL_USER_MAP" "$tmpfile"; then
+			echo edit failed 1>&2
+			echo "update_usermap: $GFARMS3_LOCAL_USER_MAP: unchanged" 1>&2
+			rm -f "$tmpfile"
+			return 1
+		fi
+		if cmp "$GFARMS3_LOCAL_USER_MAP" "$tmpfile" >/dev/null; then
+			echo no edit 1>&2
+			echo "update_usermap: $GFARMS3_LOCAL_USER_MAP: unchanged" 1>&2
+			rm -f "$tmpfile"
+			return 1
+		fi
+		if ! configtest_all "$tmpfile"; then
+			echo configtest failed 1>&2
+			echo "update_usermap: $GFARMS3_LOCAL_USER_MAP: unchanged" 1>&2
+			rm -f "$tmpfile"
+			return 1
+		fi
+
+		for user in $(users_subject_to_be_stopped "$GFARMS3_LOCAL_USER_MAP" "$tmpfile" "$GFARMS3_USER_PORT_MAP"); do
+			echo "STOP [$user]'s MinIO" 1>&2
+			if ! stop_per_user_server "$user"; then
+				echo "STOP FAILED" 1>&2
+			fi
+		done
+
+		cp -fp $GFARMS3_LOCAL_USER_MAP $GFARMS3_LOCAL_USER_MAP.bak
+		chmod 600 $GFARMS3_LOCAL_USER_MAP.bak
+		chmod 644 "$tmpfile" "$GFARMS3_LOCAL_USER_MAP"
+		mv "$tmpfile" "$GFARMS3_LOCAL_USER_MAP"
+		chmod 444 "$GFARMS3_LOCAL_USER_MAP"
+	) 3> $GFARM_S3_LOCKDIR/update_usermap.lock
+}
+
+# - MinIO is runni g &&
+# (local username is deleted ||
+#  access_key of a local user is changed ||
+#  global_user of a local user is changed)
+
+sort_usermap_by_local_username() {
+	sort -t: -k "$USERMAP_FIELD_LOCAL_USERNAME" 
+}
+
+list_changed_local_user() {
+	local tmp1=$(mktemp /tmp/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
+	local tmp2=$(mktemp /tmp/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
+	grep -v '^#' "$1" | sort_usermap_by_local_username > $tmp1
+	grep -v '^#' "$2" | sort_usermap_by_local_username > $tmp2
+
+	join -t: -1$USERMAP_FIELD_LOCAL_USERNAME -2$USERMAP_FIELD_LOCAL_USERNAME \
+		-o "\
+1.$USERMAP_FIELD_LOCAL_USERNAME,\
+1.$USERMAP_FIELD_GLOBAL_USERNAME,\
+2.$USERMAP_FIELD_GLOBAL_USERNAME,\
+1.$USERMAP_FIELD_ACCESS_KEY,\
+2.$USERMAP_FIELD_ACCESS_KEY" \
+		$tmp1 $tmp2 |
+	awk -F : '$2 != $3 || $4 != $5 { print $1 }'
+	rm -f $tmp1 $tmp2
+}
+
+extract_local_username() {
+	grep -v '^#' | get_local_username_stream 
+}
+
+list_removed_local_user() {
+	local tmp1=$(mktemp /tmp/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
+	local tmp2=$(mktemp /tmp/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
+	< "$1" extract_local_username | sort > $tmp1
+	< "$2" extract_local_username | sort > $tmp2
+	comm -23 $tmp1 $tmp2
+	rm -f $tmp1 $tmp2
+}
+
+users_subject_to_be_stopped() {
+	local modified_user_tmp=$(mktemp /tmp/modified_user_tmp.XXXXXX) || exit 1
+	(list_changed_local_user "$1" "$2"
+	 list_removed_local_user "$1" "$2")|sort|uniq > $modified_user_tmp
+
+	local pormap_users_tmp=$(mktemp /tmp/pormap_users_tmp.XXXXXX) || exit 1
+	< "$3" filter_list_users_in_portmap |sort > $pormap_users_tmp
+
+	comm -12 $modified_user_tmp $pormap_users_tmp
+	rm -f $modified_user_tmp $pormap_users_tmp
+}
+
+#################################################
+### gfarm-s3-login
+#################################################
+
+mysudo() {
+	iflag=
+	if [ x$1 = x-i ]; then
+		iflag=-i
+		shift
+	fi
+	local local_user=$1
+	shift
+	if [ -z "$local_user" ]; then
+		echo sudo $iflag "$@" 1>&2
+		sudo $iflag "$@"
+	else
+		echo sudo $iflag -u "$local_user" "$@" 1>&2
+		sudo $iflag -u "$local_user" "$@"
+	fi
+}
+
+challenge_auth() {
+	local global_username="$1"
+	local user_provided_key="$2"
+	local local_user="$3"
+
+	export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
+
+	case $GFARMS3_LOGIN_METHOD in
+	*myproxy-logon*)
+		echo "$user_provided_key" |
+		mysudo "$local_user" $MYPROXY_LOGON -S \
+			${MYPROXY_SERVER:+-s "$MYPROXY_SERVER"} \
+			-l "$global_username" \
+			${PROXY_LIFETIME:+-t "$PROXY_LIFETIME"} 1>&2
+		if [ $? = 0 ]; then
+			echo SUCCESS $MYPROXY_LOGON 1>&2
+			echo myproxy-logon
+			return 0
+		else
+			echo FAIL $MYPROXY_LOGON 1>&2
+		fi
+		;;
+	esac
+
+	case $GFARMS3_LOGIN_METHOD in
+	*grid-proxy-init*)
+		echo "$user_provided_key" |
+		mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 1>&2
+		if [ $? = 0 ]; then
+			echo SUCCESS $GRID_PROXY_INIT 1>&2
+				echo grid-proxy-init
+			return 0
+		else
+			echo FAIL $GRID_PROXY_INIT 1>&2
+		fi
+		;;
+	esac
+
+	case $GFARMS3_LOGIN_METHOD in
+	*gfarm-shared-key*)
+		if [ "$user_provided_key" = "$(mysudo "$local_user" $GFKEY -l|gfkey_hash)" ]; then
+			echo SUCCESS gfkey digest 1>&2
+			echo gfkey
+			return 0
+		else
+			echo FAIL gfkey digest 1>&2
+		fi
+		;;
+	esac
+
+	return 1
+}
+
+spawn_per_user_server() {	# local_username
+	local user="$1"
+	local gfarm_shared_dir="$2"
+	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
+	if [ -z "$usermap_entry" ]; then
+		echo "user not found: $user" 1>&2
+		return 1
+	fi
+	local local_username=$(get_local_username "$usermap_entry")
+	local access_key=$(get_access_key "$usermap_entry")
+	if ! local port=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --start --access_key "$access_key" --gfarm_shared_dir "$gfarm_shared_dir"); then
+		retrun 1
+	fi
+	local status=0
+	if [ -n "$port" ]; then
+		echo "MinIO started" 1>&2
+
+##### port ga portmap ni naikoto wo kakunin suru...
+
+		if ! add_to_portmap "$local_username" "${port%:*}" "${port#*:}"; then
+			status=1
+		fi
+		##if ! $GFARM_S3_BIN/gfarm-s3-update-reverse-proxy; then
+		if ! update_reverse_proxy; then
+			status=1
+		fi
+	else
+		echo "MinIO is already running" 1>&2
+	fi
+	return $status
+}
+
+stop_per_user_server() {	# local_username
+	local user="$1"
+	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
+	if [ -z "$usermap_entry" ]; then
+		echo "user not found: $user" 1>&2
+		return 1
+	fi
+	local local_username=$(get_local_username "$usermap_entry")
+	local access_key=$(get_access_key "$usermap_entry")
+	local status=0
+	if ! local port=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --stop --access_key "$access_key"); then
+		echo "Stop MinIO failed" 1>&2
+		status=1
+		## FALLTHRU
+	fi
+#	if ! del_from_portmap "$local_username"; then
+#		status=1
+#	fi
+	##if ! $GFARM_S3_BIN/gfarm-s3-update-reverse-proxy; then
+	if ! update_reverse_proxy; then
+		status=1
+	fi
+	return $status
+}
+
+get_per_user_status() {	# local_username
+	local user="$1"
+	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
+	if [ -z "$usermap_entry" ]; then
+		echo "user not found: $user" 1>&2
+		return 1
+	fi
+	local local_username=$(get_local_username "$usermap_entry")
+	local access_key=$(get_access_key "$usermap_entry")
+	mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --status --access_key "$access_key"
+}
+
+certificate_timeleft_grid_proxy_info() {
+	local expiration_date=-1
+	local timeleft=$(mysudo "$local_username" $GRID_PROXY_INFO -timeleft)
+	if [ x"$timeleft" != x"-1" ]; then
+		current_time=$(date +%s)
+		expiration_date=$((timeleft + current_time))
+	fi
+	echo "$expiration_date"
+}
+
+certificate_timeleft_gfkey() {
+	local v=$(gfkey -e)
+	date --date="${v#expiration time is }" +%s
+}
+
+#################################################
+### gfarm-s3-update-reverse-proxy
+#################################################
+
+sort_usermap_by_local_username() {
+	sort -t: -k "$USERMAP_FIELD_LOCAL_USERNAME"
+}
+
+sort_portmap_by_local_username() {
+	sort -t: -k "$PORTMAP_FIELD_LOCAL_USERNAME"
+}
+
+generate_apache_conf() {
+	local local_user_map_tmp=$(mktemp /tmp/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
+	local user_port_map_tmp=$(mktemp /tmp/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
+	grep -v "^#" "$GFARMS3_LOCAL_USER_MAP" | sort_usermap_by_local_username >$local_user_map_tmp
+	grep -v "^#" "$GFARMS3_USER_PORT_MAP" | sort_portmap_by_local_username >$user_port_map_tmp
+	join -t: -1"$USERMAP_FIELD_LOCAL_USERNAME" -2"$PORTMAP_FIELD_LOCAL_USERNAME" \
+		-o "1.$USERMAP_FIELD_ACCESS_KEY,2.$PORTMAP_FIELD_PORT" \
+		$local_user_map_tmp $user_port_map_tmp | awk \
+		-F : \
+		'! /^#/ {
+			printf("RewriteCond \"%%{HTTP:Authorization}\" \"Credential=%s/\"\n", $1)
+			printf("RewriteRule \"^/(.*)$\" \"http://127.0.0.1:%s/$1\" [P]\n", $2)
+		}'
+	rm $local_user_map_tmp $user_port_map_tmp
+}
+
+generate_nginx_conf() {
+	return 0
+}
+
+restart_apache() {
+	#local how=restart
+	local how=graceful
+	sudo $APACHECTL $how
+}
+
+restart_nginx() {
+	return 0
+}
+
+update_reverse_proxy() {
+	local tmpfile=$(mktemp "$GFARMS3_APACHE_REWRITE_CONF.XXXXXX") || return 1
+	local status=0
+	if ! generate_apache_conf > "$tmpfile"; then
+		return 1
+	fi
+
+	if cmp "$tmpfile" "$GFARMS3_APACHE_REWRITE_CONF" >/dev/null; then
+		echo "no change" 1>&2
+		rm "$tmpfile"
+	else
+		mv "$tmpfile" "$GFARMS3_APACHE_REWRITE_CONF"
+		if ! restart_apache; then
+			status=1
+		fi
+	fi
+	return $status
+}
+
+#################################################
+### gfarm-s3-server
+#################################################
+
+mymc() {
+	$MC_PATH ${GFARMS3_MC_CONFIG_DIR:+--config-dir "$GFARMS3_MC_CONFIG_DIR"} "$@"
+}
+
+mc_config() {
+	local address="$1"
+	ENDPOINT_URL="http://$address"
+	mymc config host add \
+		"$MC_PROFILE" \
+		"$ENDPOINT_URL" \
+		"$MINIO_ACCESS_KEY" \
+		"$MINIO_SECRET_KEY" 1>&2
+}
+
+mc_stop() {
+	mymc admin service stop $MC_PROFILE
+}
+
+## @param    (none)
+## @envvar   USER  -- cureent user
+##           uport -- port to be tried, unless empty strnig
+## @return   0 -- success    1 -- fail
+## @stdout   (empty)  -- success without spawning MinIO || fail
+##           port:pid -- success, MinIO's PID == pid
+start_server() {
+	local gfarm_shared_dir="$1"
+	for port in $(list_unused_ports "$USER" "$uport"); do
+		if try_start_a_server "$gfarm_shared_dir" "$port"; then
+			return 0
+		fi
+	done
+	echo "NO PORT AVAILABLE" 1>&2
+	return 1
+}
+
+try_start_a_server() {
+	local gfarm_shared_dir="$1"
+	local port="$2"
+	local address=127.0.0.1:"$port"
+	if mc_config $address; then
+		## MinIO is already running
+		## success with empty stdout
+		return 0
+	fi
+	local tmpfile=$(mktemp /tmp/minio-log.XXXXXX) || return 1
+	local pidfile=$(mktemp /tmp/minio-log.XXXXXX) || (rm -f $tmpfile; return 1)
+	(HOME="$GFARMS3_METADIR" $MINIO_PATH gateway gfarm \
+		--address "$address" \
+		"$gfarm_shared_dir" \
+		"$GFARMS3_GFARM_SHARED_VIRTUAL_NAME" & \
+	 echo "$port:$!" 1>&3; \
+	 wait; \
+	 echo "Invocation Failed") <&- >$tmpfile 2>&1 3>$pidfile &
+	for i in $(seq 1 1 60); do
+		if egrep -l "^(Endpoint|Invocation Failed)" $tmpfile 1>&2; then
+			## MinIO started, and wrote greeting message to stdout
+			## or MinIO exited (for some reason)
+			break
+		fi
+		sleep 1
+	done
+
+	if ! grep -l "^Endpoint" $tmpfile 1>&2; then
+		rm -f $tmpfile $pidfile
+		return 1
+	fi
+
+#	rm -f $tmpfile
+	if ! mc_config $address; then
+		rm $pidfile
+		return 1
+	fi
+	cat $pidfile
+	rm $pidfile
+}
+
+stop_server() {
+	local port_pid=$(lookup_portmap "$USER" "$uport")
+	local port="${port_pid%:*}"
+	local pid="${port_pid#*:}"
+	if [ -z "$port" -o -z "$pid" ]; then
+		return 1
+	fi
+	try_stop_a_server "$port" "$pid"
+}
+
+try_stop_a_server() {
+	local port="$1"
+	address=127.0.0.1:"$port"
+	if mc_config $address; then
+		if mc_stop; then
+			return 0
+		fi
+	fi
+	for i in $(seq 1 1 $GFARM_S3_KILL_COUNT); do
+		sleep 1
+		if ! kill -0 $pid; then                                                  
+			return 0
+		fi
+		kill -TERM $pid
+	done
+	kill -KILL $pid
+	return 0
+}
+
+status_server() {
+	local port_pid=$(lookup_portmap "$USER" "$uport")
+	local port="${port_pid%:*}"
+	if [ -z "$port" ]; then
+		return 1
+	fi
+	get_server_status "$port"
+}
+
+get_server_status() {
+	local port="$1"
+	local address=127.0.0.1:"$port"
+	mc_config $address 1>&2
+}

@@ -1,0 +1,38 @@
+#! /bin/sh
+
+set -o xtrace
+
+#export MINIO_KMS_KES_ENDPOINT=https://play.min.io:7373
+#export MINIO_KMS_KES_KEY_FILE=/home/user1/work/tst/root.key
+#export MINIO_KMS_KES_CERT_FILE=/home/user1/work/tst/root.cert
+#export MINIO_KMS_KES_KEY_NAME=my-minio-key
+#export MINIO_KMS_AUTO_ENCRYPTION=on
+
+NASVOL=/mnt/data/nas1
+NASVOL=/home/hp120273/hpci005858/tmp/nas1
+ADDRESS=127.0.0.1:9001
+
+mkdir -p $NASVOL
+
+export MINIO_ACCESS_KEY=K4XcKzocrUhrnCAKrx2Z
+export MINIO_SECRET_KEY=39e+URNfFv/CCgs4bYcBMusR7ngMLOxEf6cpXWpB
+
+export GLOBUS_GSSAPI_NAME_COMPATIBILITY=HYBRID
+
+type=server
+type=gateway
+
+gateway=
+if [ "$type" = gateway ]; then
+	#gateway=nas
+	gateway=gfarm
+fi
+if [ "$gateway" = gfarm ]; then
+	NASVOL=gfarm://$NASVOL
+fi
+
+#CERTS_DIR=$HOME/.gfarm-s3/.minio/certs
+# ${CERTS_DIR:+--certs-dir $CERTS_DIR}
+
+
+(cd / && HOME=$HOME/.gfarm-s3 minio $type $gateway ${ADDRESS:+--address $ADDRESS} $NASVOL sss)

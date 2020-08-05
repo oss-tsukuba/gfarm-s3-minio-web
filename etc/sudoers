@@ -1,0 +1,5 @@
+user2 ALL=(%gfarms3) NOPASSWD: /home/user1/work/gfarm-s3-minio-web/bin/gfarm-s3-server
+user2 ALL=(%gfarms3) NOPASSWD: /usr/bin/grid-proxy-info
+user2 ALL=(%gfarms3) NOPASSWD: /usr/bin/grid-proxy-init
+user2 ALL=(%gfarms3) NOPASSWD: /usr/bin/myproxy-logon
+user2 ALL=(%gfarms3) NOPASSWD: /usr/local/bin/gfkey

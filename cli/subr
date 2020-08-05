@@ -1,0 +1,8 @@
+aws()
+{
+	echo +aws "$@"
+	/usr/local/bin/aws ${DEBUG} \
+		--no-verify-ssl \
+		${ENDPOINT_URL:+--endpoint-url $ENDPOINT_URL} \
+		"$@"
+}

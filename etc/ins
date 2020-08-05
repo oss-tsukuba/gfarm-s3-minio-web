@@ -1,0 +1,51 @@
+#! /bin/sh
+
+#set -o xtrace
+
+. ./gfarm-s3.conf
+
+if [ ! -e $GFARMS3_METADIR ]; then
+	echo mkdir -p $GFARMS3_METADIR
+	mkdir -p $GFARMS3_METADIR
+fi
+
+GFARM_S3_CONF=/usr/local/etc/gfarm-s3.conf
+
+if ! cmp gfarm-s3.conf $GFARM_S3_CONF; then
+	echo cp gfarm-s3.conf $GFARM_S3_CONF
+	sudo cp gfarm-s3.conf $GFARM_S3_CONF
+fi
+
+if ! cmp secret_key $GFARMS3_SECRET_KEY; then
+	echo cp secret_key $GFARMS3_SECRET_KEY 
+	     cp secret_key $GFARMS3_SECRET_KEY 
+fi
+
+if ! cmp gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP; then
+	echo cp gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP
+	sudo cp gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP
+fi
+
+if ! sudo cmp sudoers /etc/sudoers.d/gfarm-s3; then
+	 echo cp sudoers /etc/sudoers.d/gfarm-s3
+	 sudo cp sudoers /etc/sudoers.d/gfarm-s3
+fi
+
+if [ ! -e $GFARMS3_USER_PORT_MAP ]; then
+	echo touch $GFARMS3_USER_PORT_MAP
+	echo chown user2 $GFARMS3_USER_PORT_MAP
+	sudo touch $GFARMS3_USER_PORT_MAP
+	sudo chown user2 $GFARMS3_USER_PORT_MAP
+fi
+
+if ! cmp gfarm.conf /etc/rsyslog.d/gfarm.conf; then
+	echo cp gfarm.conf /etc/rsyslog.d/gfarm.conf
+	sudo cp gfarm.conf /etc/rsyslog.d/gfarm.conf
+fi
+
+if ! cmp gfarm.pc /usr/lib64/pkgconfig/gfarm.pc; then
+	echo cp gfarm.pc /usr/lib64/pkgconfig/gfarm.pc
+	sudo cp gfarm.pc /usr/lib64/pkgconfig/gfarm.pc
+fi
+
+sudo chown user2 /usr/local/etc /usr/local/etc/gfarm-s3.conf /usr/local/etc/gfarm_s3_local_user_map

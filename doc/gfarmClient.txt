@@ -1,0 +1,187 @@
+package gfarmClient が提供するインタフェース
+=======================================================================
+
+* ソースコード
+   minio/pkg/gfarm/gfarmClient.go
+   minio/pkg/gfarm/gfarmClientMsgEnums.go
+
+* package os と同じレイヤ、同様のインタフェース
+  Gfarm (package gfarmClient)の場合
+      minio - gateway/gfarm - gfarm.Client - [package gfarmClient]
+  OS (package os)の場合  (gfarm.Client は共通に使用可能)
+      minio - gateway/gfarm - gfarm.Client -  package os
+
+========  =============================================================
+実装状況  型、関数
+========  =============================================================
+完了      type File struct
+完了      type FileInfo struct
+完了      type FsInfo struct
+
+完了      func Stat(path string) (FileInfo, error)
+完了      func OpenFile(path string, flag int, perm os.FileMode) (*File, error)
+完了      func (f *File) Close() error
+完了      func (f *File) ReadAt(b []byte, off int64) (int, error)
+完了      func (f *File) Read(b []byte) (int, error)
+完了      func (f *File) Write(b []byte) (int, error)
+完了      func Rename(from, to string) error
+完了      func Remove(path string) error
+完了      func Mkdir(path string, perm os.FileMode) error
+完了      func MkdirAll(path string, perm os.FileMode) error
+完了      func ReadDir(dirname string) ([]FileInfo, error)
+完了      func (r FileInfo) Name() string
+完了      func (r FileInfo) Size() int64
+完了      func (r FileInfo) Mode() os.FileMode
+完了      func (r FileInfo) ModTime() time.Time
+完了      func (r FileInfo) IsDir() bool
+完了      func StatFs() (FsInfo, error)
+========  =============================================================
+
+
+package gfarmClient 内部実装
+=======================================================================
+
+* package gfarmClient 内部で定義し使用する関数
+* 多くは同名のlibgfarm(C.)関数の呼び出し
+========  =============================================================
+実装状況  型、関数
+========  =============================================================
+完了      type gfError struct
+完了      func (e gfError) Error() string
+完了      func gfCheckError(code C.int) error
+完了      func Gfarm_initialize() error
+完了      func Gfarm_terminate() error
+完了      func gfs_stat(path string, sb *C.struct_gfs_stat) error
+完了      func gfs_stat_free(sb *C.struct_gfs_stat) ()
+完了      func gfarm_s_isdir(mode C.gfarm_mode_t) bool
+               -- マクロ GFARM_S_ISDIR の呼出し
+完了      func gfs_pio_open(path string, flags C.int, gf *C.GFS_File) error
+完了      func gfs_pio_create(path string, flags C.int, mode os.FileMode, gf *C.GFS_File) error
+完了      func gfs_pio_close(f C.GFS_File) error
+完了      func gfs_pio_pread(f C.GFS_File, b *byte, len int, off int64, n *C.int) error
+完了      func gfs_pio_read(f C.GFS_File, b *byte, len int, n *C.int) error
+完了      func gfs_pio_write(f C.GFS_File, b *byte, len int, n *C.int) error
+完了      func gfs_rename(from, to string) error
+完了      func gfs_unlink(path string) error
+完了      func gfs_rmdir(path string) error
+完了      func gfs_mkdir(path string, mode os.FileMode) error
+完了      func gfarm_url_dir(path string) string
+完了      func gfs_mkdir_p(path string, mode os.FileMode, lv int) error
+               -- gfs_mkdir, gfs_stat, gfs_s_isdir, gfs_mkdir_p(再帰) を使用
+完了      func gfs_opendir_caching(path string, d *C.GFS_Dir) error
+完了      func gfs_readdir(d C.GFS_Dir, entry **C.struct_gfs_dirent) error
+完了      func gfs_closedir(d C.GFS_Dir) error
+完了      func gfs_hook_open_flags_gfarmize(open_flags int) C.int
+完了      func uncache_path(path string) ()
+完了      func uncache_parent(path string) ()
+完了      func gfs_statfs(buf *C.struct_statvfs) error
+
+完了      const GFARM2FS_SYSLOG_PRIORITY_DEBUG = "debug"
+
+完了      func gflog_syslog_name_to_priority(name string) C.int
+完了      func gflog_syslog_name_to_facility(name string) C.int
+完了      func gflog_set_priority_level(syslog_priority C.int) ()
+完了      func gflog_syslog_open(syslog_flags, syslog_priority C.int) ()
+完了      func gflog_debug(msg_no C.int, format string) ()
+完了      func LSetXattr(path, name string, value unsafe.Pointer, size uintptr, flags int) error
+完了      func LGetXattrCached(path, name string, value unsafe.Pointer, size *uintptr) error
+完了      func gfs_lsetxattr(path, name string, value unsafe.Pointer, size C.size_t, flags C.int) error
+完了      func gfs_lgetxattr_cached(path, name string, value unsafe.Pointer, sizep *C.size_t) error
+========  =============================================================
+
+* package gfarmClient 内部で使用するC.の定数
+======================================  ===============================
+名称                                    備考
+======================================  ===============================
+C.NULL
+C.LOG_PID
+--------------------------------------  -------------------------------
+C.GFARM_ERR_NOT_A_DIRECTORY
+C.GFARM_ERR_NO_ERROR
+C.GFARM_ERR_NO_SUCH_FILE_OR_DIRECTORY
+C.GFARM_FILE_APPEND
+C.GFARM_FILE_EXCLUSIVE
+C.GFARM_FILE_RDONLY
+C.GFARM_FILE_RDWR
+C.GFARM_FILE_TRUNC
+C.GFARM_FILE_WRONLY
+--------------------------------------  -------------------------------
+C.GFARM_MSG_UNFIXED
+C.GFARM_S_ALLPERM
+C.GFS_MAXNAMLEN
+C.GFS_XATTR_CREATE
+C.GFS_XATTR_REPLACE
+======================================  ===============================
+
+* package gfarmClient 内部で使用するC.の型
+======================================  ===============================
+名称                                    備考
+======================================  ===============================
+C.int
+C.long
+C.ulong
+C.char
+C.size_t
+--------------------------------------  -------------------------------
+C.gfarm_mode_t                          os.FileMode
+C.gfarm_off_t                           int64
+C.GFS_Dir
+C.GFS_File                              上位にはopaqueな型にくるんで渡す
+C.struct_gfarm_timespec
+C.struct_gfs_dirent
+C.struct_gfs_stat
+C.struct_statvfs
+======================================  ===============================
+
+* package gfarmClient 内部で使用するC.の関数
+======================================  ===============================
+名称                                    備考
+======================================  ===============================
+C.free
+C.CString
+C.GoString
+--------------------------------------  -------------------------------
+C.gfarm_error_string
+C.gfarm_initialize
+C.gfarm_s_isdir                         マクロ呼出し関数
+C.gfarm_terminate
+C.gfarm_url_dir
+C.gfs_closedir
+C.gfs_mkdir
+C.gfs_opendir_caching
+C.gfs_pio_close
+C.gfs_pio_create
+C.gfs_pio_open
+C.gfs_pio_pread
+C.gfs_pio_read
+C.gfs_pio_write
+C.gfs_readdir
+C.gfs_rename
+C.gfs_rmdir
+C.gfs_stat
+C.gfs_stat_cache_purge
+C.gfs_stat_free
+C.gfs_statfs
+C.gfs_unlink
+--------------------------------------  -------------------------------
+C.gflog_set_priority_level
+C.gflog_syslog_open
+C.gflog_syslog_name_to_facility
+C.gflog_syslog_name_to_priority
+C.gflog_syslog_name_to_priority
+C.gflog_set_priority_level
+C.gflog_debug2   =>   マクロ gflog_debug を2引数で呼出し
+--------------------------------------  -------------------------------
+C.gfs_lgetxattr_cached
+C.gfs_lsetxattr
+======================================  ===============================
+
+* package gfarmClient 内部で使用するC.のメンバ
+======================================  ===============================
+名称                                    備考
+======================================  ===============================
+.d_name                                 C.struct_gfs_dirent
+.st_mtimespec                           C.struct_gfs_stat
+.st_mode                                C.struct_gfs_stat
+.st_size                                C.struct_gfs_stat
+======================================  ===============================

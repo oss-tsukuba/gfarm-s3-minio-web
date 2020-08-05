@@ -1,0 +1,31 @@
+# gfarm-s3-logon
+GFARM_S3_BIN=@GFARM_S3_BIN@
+GFARMS3_LOCAL_USER_MAP=/usr/local/etc/gfarm_s3_local_user_map
+GFARMS3_USER_PORT_MAP=/usr/local/var/gfarm-s3/gfarm_s3_user_port_map
+
+GFARMS3_LOGIN_METHOD=myproxy-logon,grid-proxy-init,gfarm-shared-key
+MYPROXY_LOGON=/usr/bin/myproxy-logon
+GRID_PROXY_INIT=/usr/bin/grid-proxy-init
+MYPROXY_SERVER=portal.hpci.nii.ac.jp
+PROXY_LIFETIME=168
+GFKEY=/usr/local/bin/gfkey
+GRID_PROXY_INFO=/usr/bin/grid-proxy-info
+
+GFARMS3_APACHE_REWRITE_CONF=/usr/local/var/gfarm-s3/rewrite.conf
+APACHECTL=/usr/sbin/apachectl
+
+# gfarm-s3-server
+MINIO_PATH=/home/user1/go/bin/minio
+MC_PATH=/home/user1/go/bin/mc
+GFARMS3_GFARM_SHARED_DIR=gfarm:///home/hp120273/hpci005858/tmp/gfarms3
+GFARMS3_GFARM_SHARED_VIRTUAL_NAME=sss
+GFARMS3_CACHE_BASEDIR=/mnt/data/tmp
+GFARMS3_CACHE_SIZE_MB=8
+GFARMS3_PARTFILE_DIGEST=yes
+GFARMS3_METADIR=~/.gfarm-s3
+GFARMS3_SECRET_KEY=$GFARMS3_METADIR/secret_key
+GFARMS3_MC_CONFIG_DIR=$GFARMS3_METADIR/.mc
+
+GFARMS3_PORT_MIN=9001
+#GFARMS3_PORT_MAX=32767
+GFARMS3_PORT_MAX=9003

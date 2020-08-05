@@ -1,0 +1,2 @@
+#! /bin/sh
+echo KEY=$(openssl rand -base64 20|tr -d /|head -c 13) >> $HOME/work/s3g/sbin/keys

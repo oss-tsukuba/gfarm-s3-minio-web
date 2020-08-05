@@ -1,0 +1,3 @@
+#! /bin/sh
+pkg-config --libs gfarm
+pkg-config --cflags gfarm

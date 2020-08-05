@@ -1,0 +1,2 @@
+#! /bin/sh
+./gfarm-s3-diff-local-usermap etc/old etc/new etc/map

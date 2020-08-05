@@ -1,0 +1,12 @@
+#! /bin/sh
+
+set -o xtrace
+
+export GLOBUS_GSSAPI_NAME_COMPATIBILITY=HYBRID
+
+. $HOME/work/s3g/sbin/keys
+
+cd $HOME
+echo $KEY | myproxy-logon -S -s portal.hpci.nii.ac.jp -l $HPCIID -t 168
+# 代理証明書ダウンロードパスワードを指定
+# /tmp の下に grid-proxy-init と同様の代理証明書が作成される。
