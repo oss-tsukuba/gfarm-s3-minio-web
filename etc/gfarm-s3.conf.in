@@ -1,5 +1,6 @@
 # gfarm-s3-logon
 GFARM_S3_PREFIX=@PREFIX@
+GFARM_S3_TMP=/tmp
 GFARM_S3_BIN=/home/user1/work/gfarm-s3-minio-web/bin
 GFARM_S3_ETC=$GFARM_S3_PREFIX/etc
 GFARM_S3_VAR=$GFARM_S3_PREFIX/var/gfarm-s3

@@ -128,7 +128,7 @@ list_unused_ports() {
 		echo "$2"
 		return 0
 	fi
-	local ports_in_use=$(mktemp "/tmp/tmpfile.XXXXXX") || return 1
+	local ports_in_use=$(mktemp $GFARM_S3_TMP/tmpfile.XXXXXX) || return 1
 	< "$GFARMS3_USER_PORT_MAP" filter_list_occupied_ports "$1" | sort > "$ports_in_use"
 	< "$GFARMS3_USER_PORT_MAP" filter_list_occupied_port_by_a_user "$1"
 	seq $GFARMS3_PORT_MIN 1 $GFARMS3_PORT_MAX | sort | comm -23 - "$ports_in_use" | sort -n
@@ -175,7 +175,7 @@ filter_list_users_in_portmap() {
 }
 
 configtest_format_test() {
-	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local tmpfile=$(mktemp $GFARM_S3_TMP/gfarm-s3-configtest.XXXXXX) || return 1
 	local status=0
 	grep -v '^#' "$1"|
 	grep -v '^[^:][^:]*:[^:][^:]*:[^:][^:]*$' >$tmpfile
@@ -189,7 +189,7 @@ configtest_format_test() {
 }
 
 configtest_global_username_test() {
-	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local tmpfile=$(mktemp $GFARM_S3_TMP/gfarm-s3-configtest.XXXXXX) || return 1
 	local status=0
 	grep -v '^#' "$1"|
 	get_global_username_stream|sort|uniq -d>$tmpfile
@@ -235,7 +235,7 @@ check_access_key() {
 }
 
 configtest_global_username_test_2() {
-	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local tmpfile=$(mktemp $GFARM_S3_TMP/gfarm-s3-configtest.XXXXXX) || return 1
 	local status=0
 	grep -v '^#' "$1"|
 	get_global_username_stream|grep '^[ 	]*$'>$tmpfile
@@ -254,7 +254,7 @@ configtest_global_username_test_2() {
 }
 
 configtest_local_username_test() {
-	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local tmpfile=$(mktemp $GFARM_S3_TMP/gfarm-s3-configtest.XXXXXX) || return 1
 	local status=0
 	grep -v '^#' "$1"|
 	get_local_username_stream|sort|uniq -d>$tmpfile
@@ -273,7 +273,7 @@ configtest_local_username_test() {
 }
 
 configtest_access_key_test() {
-	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local tmpfile=$(mktemp $GFARM_S3_TMP/gfarm-s3-configtest.XXXXXX) || return 1
 	local status=0
 	grep -v '^#' "$1"|
 	get_access_key_stream|sort|uniq -d>$tmpfile
@@ -293,7 +293,7 @@ configtest_access_key_test() {
 }
 
 configtest_local_user_exisence_test() {
-	local tmpfile=$(mktemp /tmp/gfarm-s3-configtest.XXXXXX) || return 1
+	local tmpfile=$(mktemp $GFARM_S3_TMP/gfarm-s3-configtest.XXXXXX) || return 1
 	local status=0
 	for user in $(grep -v '^#' "$1"|get_local_username_stream); do
 		if ! id $user >/dev/null; then
@@ -370,8 +370,8 @@ sort_usermap_by_local_username() {
 }
 
 list_changed_local_user() {
-	local tmp1=$(mktemp /tmp/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
-	local tmp2=$(mktemp /tmp/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
+	local tmp1=$(mktemp $GFARM_S3_TMP/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
+	local tmp2=$(mktemp $GFARM_S3_TMP/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
 	grep -v '^#' "$1" | sort_usermap_by_local_username > $tmp1
 	grep -v '^#' "$2" | sort_usermap_by_local_username > $tmp2
 
@@ -392,8 +392,8 @@ extract_local_username() {
 }
 
 list_removed_local_user() {
-	local tmp1=$(mktemp /tmp/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
-	local tmp2=$(mktemp /tmp/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
+	local tmp1=$(mktemp $GFARM_S3_TMP/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
+	local tmp2=$(mktemp $GFARM_S3_TMP/gfarm-s3-diff-local-usermap.XXXXXX) || exit 1
 	< "$1" extract_local_username | sort > $tmp1
 	< "$2" extract_local_username | sort > $tmp2
 	comm -23 $tmp1 $tmp2
@@ -401,11 +401,11 @@ list_removed_local_user() {
 }
 
 users_subject_to_be_stopped() {
-	local modified_user_tmp=$(mktemp /tmp/modified_user_tmp.XXXXXX) || exit 1
+	local modified_user_tmp=$(mktemp $GFARM_S3_TMP/modified_user_tmp.XXXXXX) || exit 1
 	(list_changed_local_user "$1" "$2"
 	 list_removed_local_user "$1" "$2")|sort|uniq > $modified_user_tmp
 
-	local pormap_users_tmp=$(mktemp /tmp/pormap_users_tmp.XXXXXX) || exit 1
+	local pormap_users_tmp=$(mktemp $GFARM_S3_TMP/pormap_users_tmp.XXXXXX) || exit 1
 	< "$3" filter_list_users_in_portmap |sort > $pormap_users_tmp
 
 	comm -12 $modified_user_tmp $pormap_users_tmp
@@ -578,8 +578,8 @@ sort_portmap_by_local_username() {
 }
 
 generate_apache_conf() {
-	local local_user_map_tmp=$(mktemp /tmp/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
-	local user_port_map_tmp=$(mktemp /tmp/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
+	local local_user_map_tmp=$(mktemp $GFARM_S3_TMP/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
+	local user_port_map_tmp=$(mktemp $GFARM_S3_TMP/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
 	grep -v "^#" "$GFARMS3_LOCAL_USER_MAP" | sort_usermap_by_local_username >$local_user_map_tmp
 	grep -v "^#" "$GFARMS3_USER_PORT_MAP" | sort_portmap_by_local_username >$user_port_map_tmp
 	join -t: -1"$USERMAP_FIELD_LOCAL_USERNAME" -2"$PORTMAP_FIELD_LOCAL_USERNAME" \
@@ -674,8 +674,8 @@ try_start_a_server() {
 		## success with empty stdout
 		return 0
 	fi
-	local tmpfile=$(mktemp /tmp/minio-log.XXXXXX) || return 1
-	local pidfile=$(mktemp /tmp/minio-log.XXXXXX) || (rm -f $tmpfile; return 1)
+	local tmpfile=$(mktemp $GFARM_S3_TMP/minio-log.XXXXXX) || return 1
+	local pidfile=$(mktemp $GFARM_S3_TMP/minio-pid.XXXXXX) || (rm -f $tmpfile; return 1)
 	(HOME="$GFARMS3_METADIR" $MINIO_PATH gateway gfarm \
 		--address "$address" \
 		"$gfarm_shared_dir" \
@@ -697,7 +697,7 @@ try_start_a_server() {
 		return 1
 	fi
 
-#	rm -f $tmpfile
+	rm -f $tmpfile
 	if ! mc_config $address; then
 		rm $pidfile
 		return 1
