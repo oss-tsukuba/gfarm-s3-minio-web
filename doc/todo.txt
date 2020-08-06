@@ -6,6 +6,61 @@
      全体の概要が俯瞰できるチャートなどを作成する (文章ではばらばらで
      概要が把握しにくいため) 
 
+
+  [全体構成]
+
+
+MinIO
+
+
+System utilities:
+	gfarm-s3-login			-- Interface for WebAPi
+					   start/stop/status MinIO
+					   update user_port_map & rewrite.conf
+	gfarm-s3-server			-- start/stop MinIO
+
+User_map administration tools:
+	gfarm-s3-configtest		-- Check gfarm_s3_local_user_map consistency
+	gfarm-s3-useradd		-- Add a user to gfarm_s3_local_user_map
+	gfarm-s3-viusermap		-- Edit gfarm_s3_local_user_map
+	gfarm-s3-generate-usermap-hpci	-- Generate gfarm_s3_local_user_map from grid-mapfile
+	gfarm-s3-sharedsecret-password	-- Show user's "gfkey -l" hash
+
+Tools for develop/debug purpose:
+	gfarm-s3-diff-local-usermap
+	gfarm-s3-update-reverse-proxy
+
+Subroutines:
+	gfarm-s3-subr			-- subroutine collection
+
+Configuration files:
+	gfarm-s3.conf			-- Main configuration
+
+	gfarm.pc			-- pkg-config description
+					   NG /usr/local/lib/pkgconfing
+					   NG /usr/local/share/pkgconfing
+					   OK /usr/share/pkgconfig
+					   OK PKG_CONFIG_PATH
+
+	~/.gfarm-s3/secret_key		-- S3 secret key of user
+
+	/etc/sudoers.d/gfarm-s3		-- sudo settings for WebUI-User
+
+Reverse Porxy configuration:
+	etc/gfarm_s3_local_user_map	-- user list
+					   updated by  gfarm-s3-useradd and gfarm-s3-viusermap
+	etc/apache-gfarm-s3.conf	-- static part of reverse-proxy configuration
+
+	var/gfarm_s3_user_port_map	-- port list of each user
+					   updated by 
+	var/rewrite.conf		-- essential part of reverse-proxy configuration
+					   dynamically generated from gfarm_s3_local_user_map
+
+Lock files ($GFARM_S3_LOCKDIR):
+	var/update_portmap.lock		-- lock file while editing 
+	var/update_usermap.lock		-- lock file while editing gfarm_s3_local_user_map
+
+
   [90%] MinIO改修                                                 {-7/E}
 
      [100%] package gfarm -- MinIOとgatewayとのインタフェース
