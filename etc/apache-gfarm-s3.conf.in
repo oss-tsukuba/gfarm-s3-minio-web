@@ -1,0 +1,29 @@
+ServerName 192.168.224.22
+<VirtualHost *:80>
+#<VirtualHost *:443>
+#	SSLEngine on
+#	SSLCertificateFile /home/user1/work/s3g/etc/server.crt
+#	SSLCertificateKeyFile /home/user1/work/s3g/etc/server.key
+
+	DocumentRoot "@DOCUMENTROOT@"
+	ServerAdmin root@localhost
+	CustomLog logs/access_log common
+	ErrorLog logs/error_log
+#	LogLevel debug rewrite:trace8
+#	LogLevel debug trace8
+
+	RewriteEngine on
+
+	Include @GFARMS3_APACHE_REWRITE_CONF@
+
+	ProxyPreserveHost on
+	ProxyAddHeaders off
+
+	<Directory "@DOCUMENTROOT@">
+		AllowOverride FileInfo AuthConfig Limit Indexes
+		Options MultiViews Indexes SymLinksIfOwnerMatch Includes
+		AllowOverride All
+		Require all granted 
+	</Directory>
+
+</VirtualHost>

@@ -1,23 +1,39 @@
 # gfarm-s3-logon
-GFARM_S3_BIN=@GFARM_S3_BIN@
-GFARMS3_LOCAL_USER_MAP=/usr/local/etc/gfarm_s3_local_user_map
-GFARMS3_USER_PORT_MAP=/usr/local/var/gfarm-s3/gfarm_s3_user_port_map
+GFARM_S3_PREFIX=/usr/local
+GFARM_S3_BIN=/home/user1/work/gfarm-s3-minio-web/bin
+GFARM_S3_ETC=$GFARM_S3_PREFIX/etc
+GFARM_S3_VAR=$GFARM_S3_PREFIX/var/gfarm-s3
+GFARMS3_LOCAL_USER_MAP=$GFARM_S3_ETC/gfarm_s3_local_user_map
+GFARMS3_USER_PORT_MAP=$GFARM_S3_VAR/gfarm_s3_user_port_map
 
 GFARMS3_LOGIN_METHOD=myproxy-logon,grid-proxy-init,gfarm-shared-key
+#GFARMS3_LOGIN_METHOD=myproxy-logon,grid-proxy-init
+#GFARMS3_LOGIN_METHOD=myproxy-logon,gfarm-shared-key
+#GFARMS3_LOGIN_METHOD=grid-proxy-init,gfarm-shared-key
+#GFARMS3_LOGIN_METHOD=myproxy-logon
+#GFARMS3_LOGIN_METHOD=grid-proxy-init
+#GFARMS3_LOGIN_METHOD=gfarm-shared-key
+#GFARMS3_LOGIN_METHOD=
+
+GFARM_S3_KILL_COUNT=5
+GFARM_S3_LOCKDIR=$GFARM_S3_VAR
+
 MYPROXY_LOGON=/usr/bin/myproxy-logon
 GRID_PROXY_INIT=/usr/bin/grid-proxy-init
 MYPROXY_SERVER=portal.hpci.nii.ac.jp
 PROXY_LIFETIME=168
 GFKEY=/usr/local/bin/gfkey
 GRID_PROXY_INFO=/usr/bin/grid-proxy-info
+GFARM_S3_ACCESS_KEY_MIN_LEN=8
 
-GFARMS3_APACHE_REWRITE_CONF=/usr/local/var/gfarm-s3/rewrite.conf
+GFARMS3_APACHE_REWRITE_MASTER_CONF=/etc/httpd/conf.d/gfarm-s3.conf
+GFARMS3_APACHE_REWRITE_CONF=$GFARM_S3_VAR/rewrite.conf
 APACHECTL=/usr/sbin/apachectl
 
 # gfarm-s3-server
 MINIO_PATH=/home/user1/go/bin/minio
 MC_PATH=/home/user1/go/bin/mc
-GFARMS3_GFARM_SHARED_DIR=gfarm:///home/hp120273/hpci005858/tmp/gfarms3
+GFARMS3_GFARM_SHARED_DIR=/home/hp120273/hpci005858/tmp/gfarms3
 GFARMS3_GFARM_SHARED_VIRTUAL_NAME=sss
 GFARMS3_CACHE_BASEDIR=/mnt/data/tmp
 GFARMS3_CACHE_SIZE_MB=8

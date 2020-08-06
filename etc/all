@@ -1,4 +1,0 @@
-#! /bin/sh
-
-sudo groupadd gfarms3
-sudo usermod -a -G gfarms3 user1

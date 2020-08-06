@@ -4,48 +4,82 @@
 
 . ./gfarm-s3.conf
 
-if [ ! -e $GFARMS3_METADIR ]; then
-	echo mkdir -p $GFARMS3_METADIR
-	mkdir -p $GFARMS3_METADIR
-fi
+PREFIX=/usr/local
+USER1=user1
+WEBUI_USER=user2
 
-GFARM_S3_CONF=/usr/local/etc/gfarm-s3.conf
+PKGCONFIG_D=/usr/local/share/pkgconfig
+APACHE_DOCUMENTROOT=/usr/local/share/www
 
-if ! cmp gfarm-s3.conf $GFARM_S3_CONF; then
-	echo cp gfarm-s3.conf $GFARM_S3_CONF
-	sudo cp gfarm-s3.conf $GFARM_S3_CONF
-fi
+check_n_install() {
+	if ! cmp "$1" "$2"; then
+		echo cp "$1" "$2"
+		sudo cp "$1" "$2"
+	fi
+}
 
-if ! cmp secret_key $GFARMS3_SECRET_KEY; then
-	echo cp secret_key $GFARMS3_SECRET_KEY 
-	     cp secret_key $GFARMS3_SECRET_KEY 
-fi
+check_n_create_dir() {
+	if [ ! -d "$1" ]; then
+		echo mkdir -p "$1"
+		sudo mkdir -p "$1"
+		if [ $# = 2 ]; then
+			echo chown "$2" "$1"
+			sudo chown "$2" "$1"
+		fi
+	fi
+}
 
-if ! cmp gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP; then
-	echo cp gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP
-	sudo cp gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP
-fi
+check_n_create_file() {
+	if [ ! -e "$1" ]; then
+		echo touch "$1"
+		sudo touch "$1"
+		if [ $# = 2 ]; then
+			echo chown "$2" "$1"
+			sudo chown "$2" "$1"
+		fi
+	fi
+}
 
-if ! sudo cmp sudoers /etc/sudoers.d/gfarm-s3; then
-	 echo cp sudoers /etc/sudoers.d/gfarm-s3
-	 sudo cp sudoers /etc/sudoers.d/gfarm-s3
-fi
+sed < gfarm-s3.conf.in > gfarm-s3.conf \
+	-e 's@PREFIX@'"$PREFIX"''
+chmod a-w gfarm-s3.conf
 
-if [ ! -e $GFARMS3_USER_PORT_MAP ]; then
-	echo touch $GFARMS3_USER_PORT_MAP
-	echo chown user2 $GFARMS3_USER_PORT_MAP
-	sudo touch $GFARMS3_USER_PORT_MAP
-	sudo chown user2 $GFARMS3_USER_PORT_MAP
-fi
+sed < apache-gfarm-s3.conf.in > apache-gfarm-s3.conf \
+	-e '/^[ 	]*#/d' \
+	-e 's@DOCUMENTROOT@'"$APACHE_DOCUMENTROOT"'' \
+	-e 's@GFARMS3_APACHE_REWRITE_CONF@'"$GFARMS3_APACHE_REWRITE_CONF"''
+chmod a-w apache-gfarm-s3.conf
 
-if ! cmp gfarm.conf /etc/rsyslog.d/gfarm.conf; then
-	echo cp gfarm.conf /etc/rsyslog.d/gfarm.conf
-	sudo cp gfarm.conf /etc/rsyslog.d/gfarm.conf
-fi
+check_n_create_dir $GFARMS3_METADIR
 
-if ! cmp gfarm.pc /usr/lib64/pkgconfig/gfarm.pc; then
-	echo cp gfarm.pc /usr/lib64/pkgconfig/gfarm.pc
-	sudo cp gfarm.pc /usr/lib64/pkgconfig/gfarm.pc
-fi
+check_n_install gfarm-s3.conf /usr/local/etc/gfarm-s3.conf
 
-sudo chown user2 /usr/local/etc /usr/local/etc/gfarm-s3.conf /usr/local/etc/gfarm_s3_local_user_map
+check_n_install secret_key $GFARMS3_SECRET_KEY 
+
+check_n_install gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP
+
+check_n_install sudoers $SUDOERS_D/gfarm-s3
+
+check_n_create_file $GFARMS3_USER_PORT_MAP $WEBUI_USER
+
+check_n_install gfarm.conf /etc/rsyslog.d/gfarm.conf
+
+check_n_create_dir $PKGCONFIG_D
+check_n_install gfarm.pc $PKGCONFIG_D/gfarm.pc
+
+sudo chown $WEBUI_USER /usr/local/etc/gfarm_s3_local_user_map
+
+sudo groupadd gfarms3
+sudo usermod -a -G gfarms3 $USER1
+
+check_n_create_dir $(dirname $GFARMS3_APACHE_REWRITE_CONF) $WEBUI_USER
+check_n_create_file $GFARMS3_APACHE_REWRITE_CONF $WEBUI_USER
+
+check_n_create_dir $APACHE_DOCUMENTROOT
+check_n_create_file $APACHE_DOCUMENTROOT/index.html
+
+check_n_install apache-gfarm-s3.conf $GFARMS3_APACHE_REWRITE_MASTER_CONF
+
+sudo systemctl enable httpd
+sudo systemctl start httpd
+sudo chmod og+rX /var/log/httpd
