@@ -128,7 +128,7 @@ list_unused_ports() {
 		echo "$2"
 		return 0
 	fi
-	ports_in_use=$(mktemp "/tmp/tmpfile.XXXXXX") || return 1
+	local ports_in_use=$(mktemp "/tmp/tmpfile.XXXXXX") || return 1
 	< "$GFARMS3_USER_PORT_MAP" filter_list_occupied_ports "$1" | sort > "$ports_in_use"
 	< "$GFARMS3_USER_PORT_MAP" filter_list_occupied_port_by_a_user "$1"
 	seq $GFARMS3_PORT_MIN 1 $GFARMS3_PORT_MAX | sort | comm -23 - "$ports_in_use" | sort -n
@@ -417,7 +417,7 @@ users_subject_to_be_stopped() {
 #################################################
 
 mysudo() {
-	iflag=
+	local iflag=
 	if [ x$1 = x-i ]; then
 		iflag=-i
 		shift
@@ -554,7 +554,7 @@ certificate_timeleft_grid_proxy_info() {
 	local expiration_date=-1
 	local timeleft=$(mysudo "$local_username" $GRID_PROXY_INFO -timeleft)
 	if [ x"$timeleft" != x"-1" ]; then
-		current_time=$(date +%s)
+		local current_time=$(date +%s)
 		expiration_date=$((timeleft + current_time))
 	fi
 	echo "$expiration_date"
@@ -636,7 +636,7 @@ mymc() {
 
 mc_config() {
 	local address="$1"
-	ENDPOINT_URL="http://$address"
+	local ENDPOINT_URL="http://$address"
 	mymc config host add \
 		"$MC_PROFILE" \
 		"$ENDPOINT_URL" \
@@ -718,7 +718,7 @@ stop_server() {
 
 try_stop_a_server() {
 	local port="$1"
-	address=127.0.0.1:"$port"
+	local address=127.0.0.1:"$port"
 	if mc_config $address; then
 		if mc_stop; then
 			return 0

@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import unittest
+from runminio import runminio
 
 class TestStringMethods(unittest.TestCase):
 
@@ -15,5 +16,9 @@ class TestStringMethods(unittest.TestCase):
         res = self.aws(["s3", "ls", "s3://"])
         self.assertTrue(res.strip("\n").endswith("ok"))
 
+def main():
+    runminio()
+
 if __name__ == "__main__":
-    unittest.main()
+    #unittest.main()
+    main()
