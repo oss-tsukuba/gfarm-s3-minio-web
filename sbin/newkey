@@ -1,2 +1,2 @@
 #! /bin/sh
-echo KEY=$(openssl rand -base64 20|tr -d /|head -c 13) >> $HOME/work/s3g/sbin/keys
+echo KEY=$(openssl rand -base64 20|tr -d /|head -c 13) >> $HOME/work/gfarm-s3-minio-web/sbin/keys

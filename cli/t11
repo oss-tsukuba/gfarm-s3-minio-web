@@ -15,8 +15,8 @@ sets3v4() {
 }
 
 test0() {
-#	aws s3 ls        s3://myb
-#	aws s3 ls        s3://myb/
+	aws s3 ls        s3://myb
+	aws s3 ls        s3://myb/
 	aws s3 mb        s3://mybucket
 	aws s3 cp k/foo  s3://mybucket/myobject
 	aws s3 ls        s3://mybucket
@@ -63,7 +63,12 @@ testA() {
 }
 
 testB() {
-	aws s3 ls        s3://
+	aws s3 ls        s3://nonexistent/foo/bar
+	aws s3 mb        s3://nonexistent/foo/bar
+	aws s3 cp k/foo  s3://mybucket/aa/foo
+	aws s3 cp k/foo  s3://mybucket/aa/bar
+	aws s3 rm        s3://mybucket/aa/bar
+	aws s3 cp k/foo  s3://mybucket/bar/foo
 }
 
 test_deeppath() {
@@ -87,11 +92,18 @@ cat <<EOF > k/foo
 @@@@@ $(date)
 EOF
 
-#sets3v4
-test0
-#testA
-#testB
-#test_mv
-#test_deeppath
+if [ $# = 1 ]; then
+	cmd="$1"
+else
+	cmd=test0
+fi
+
+case "$cmd" in
+sets3v4|test0|testA|testB|test_deeppath|test_mv)
+	$cmd;;
+*)
+	echo "usage: $0 sets3v4|test0|testA|testB|test_deeppath|test_mv"
+	exit 1;;
+esac
 
 exit 0
