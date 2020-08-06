@@ -2,8 +2,6 @@
 
 #set -o xtrace
 
-. ./gfarm-s3.conf
-
 PREFIX=/usr/local
 USER1=user1
 WEBUI_USER=user2
@@ -40,15 +38,22 @@ check_n_create_file() {
 	fi
 }
 
-sed < gfarm-s3.conf.in > gfarm-s3.conf \
-	-e 's@PREFIX@'"$PREFIX"''
-chmod a-w gfarm-s3.conf
+gen_conf() {
+	local conffile="$1"
+	shift
+	rm -f "$conffile"
+	sed < "$conffile".in > "$conffile" "$@"
+	chmod a-w "$conffile"
+}
 
-sed < apache-gfarm-s3.conf.in > apache-gfarm-s3.conf \
+gen_conf gfarm-s3.conf -e 's@PREFIX@'"$PREFIX"''
+
+. ./gfarm-s3.conf
+
+gen_conf apache-gfarm-s3.conf \
 	-e '/^[ 	]*#/d' \
 	-e 's@DOCUMENTROOT@'"$APACHE_DOCUMENTROOT"'' \
 	-e 's@GFARMS3_APACHE_REWRITE_CONF@'"$GFARMS3_APACHE_REWRITE_CONF"''
-chmod a-w apache-gfarm-s3.conf
 
 check_n_create_dir $GFARMS3_METADIR
 
