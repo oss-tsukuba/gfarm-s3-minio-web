@@ -119,10 +119,6 @@ add_to_portmap() {
 	update_portmap filter_add_to_portmap "$@"
 }
 
-#del_from_portmap() {
-#	update_portmap filter_del_from_portmap "$@"
-#}
-
 #################################################
 ### gfarm-s3-configtest
 #################################################
@@ -154,14 +150,6 @@ filter_add_to_portmap() {
 			f[portmap_field_pid] = pid
 			printf("%s:%s:%s\n", f[1], f[2], f[3]) }'
 }
-
-#filter_del_from_portmap() {
-#	awk \
-#		-v local_username="$1" \
-#		-v portmap_field_local_username="$PORTMAP_FIELD_LOCAL_USERNAME" \
-#		-F : \
-#		'$portmap_field_local_username != local_username { print }'
-#}
 
 filter_list_occupied_port_by_a_user() {
 	awk \
@@ -371,10 +359,11 @@ update_usermap() {
 	) 3> $GFARM_S3_LOCKDIR/update_usermap.lock
 }
 
-# - MinIO is runni g &&
-# (local username is deleted ||
-#  access_key of a local user is changed ||
-#  global_user of a local user is changed)
+# - MinIO is running &&
+#   (local username is deleted ||
+#    access_key of a local user is changed ||
+#    global_user of a local user is changed)
+#   => stop MinIO
 
 sort_usermap_by_local_username() {
 	sort -t: -k "$USERMAP_FIELD_LOCAL_USERNAME" 
@@ -513,13 +502,12 @@ spawn_per_user_server() {	# local_username
 	local status=0
 	if [ -n "$port" ]; then
 		echo "MinIO started" 1>&2
-
-##### port ga portmap ni naikoto wo kakunin suru...
-
+		## No need to check `port' confliction,
+		## as a port # that returned by gfarm-s3-server is
+		## actually allocated for current user.
 		if ! add_to_portmap "$local_username" "${port%:*}" "${port#*:}"; then
 			status=1
 		fi
-		##if ! $GFARM_S3_BIN/gfarm-s3-update-reverse-proxy; then
 		if ! update_reverse_proxy; then
 			status=1
 		fi
@@ -544,10 +532,6 @@ stop_per_user_server() {	# local_username
 		status=1
 		## FALLTHRU
 	fi
-#	if ! del_from_portmap "$local_username"; then
-#		status=1
-#	fi
-	##if ! $GFARM_S3_BIN/gfarm-s3-update-reverse-proxy; then
 	if ! update_reverse_proxy; then
 		status=1
 	fi
