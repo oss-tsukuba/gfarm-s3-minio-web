@@ -584,7 +584,7 @@ XXX
         | GFARMS3_PARTFILE_DIGEST=yes
         | GFARMS3_METADIR=~/.gfarm-s3
         | GFARMS3_SECRET_KEY=$GFARMS3_METADIR/secret_key
-        | GFARM_S3_BIN=/home/user1/work/s3g/bin
+        | GFARM_S3_BIN=/home/user1/work/gfarm-s3-minio-web/bin
         | GFARMS3_USER_PORT_MAP=/usr/local/var/gfarm-s3/gfarm_s3_user_port_map
         | GFARMS3_LOGIN_METHOD=myproxy-logon,grind-proxy-init,gfarm-shared-key
         | GFARMS3_APACHE_REWRITE_CONF=/usr/local/var/gfarm-s3/rewrite.conf

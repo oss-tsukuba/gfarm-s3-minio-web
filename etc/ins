@@ -63,7 +63,7 @@ check_n_install secret_key $GFARMS3_SECRET_KEY
 
 check_n_install gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP
 
-check_n_install sudoers $SUDOERS_D/gfarm-s3
+check_n_install sudoers /etc/sudoers.d/gfarm-s3
 
 check_n_create_file $GFARMS3_USER_PORT_MAP $WEBUI_USER
 

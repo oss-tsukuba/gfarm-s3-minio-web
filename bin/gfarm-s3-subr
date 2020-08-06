@@ -693,11 +693,11 @@ try_start_a_server() {
 	done
 
 	if ! grep -l "^Endpoint" $tmpfile 1>&2; then
-		rm -f $tmpfile $pidfile
+#		rm -f $tmpfile $pidfile
 		return 1
 	fi
 
-	rm -f $tmpfile
+#	rm -f $tmpfile
 	if ! mc_config $address; then
 		rm $pidfile
 		return 1
