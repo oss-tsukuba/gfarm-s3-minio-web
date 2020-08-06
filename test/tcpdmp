@@ -1,0 +1,6 @@
+#! /bin/sh
+sudo tcpdump -n -XX -i br-4278f8d53f52 port 443
+#sudo tcpdump -n -XX -i br-80674fb6d31c port 80
+#sudo tcpdump -n -XX -i br-4833aa8cc51f port 80
+#sudo tcpdump -n -XX -i br-1455457de5f6 port 80
+#sudo tcpdump -n -XX -i br-5a2e5b764f7e port 80
