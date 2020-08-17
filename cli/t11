@@ -18,14 +18,25 @@ test0() {
 	aws s3 ls        s3://myb
 	aws s3 ls        s3://myb/
 	aws s3 mb        s3://mybucket
-	aws s3 cp k/foo  s3://mybucket/myobject
+	aws s3 cp k/foo  s3://mybucket/foo
+	aws s3 cp k/64M  s3://mybucket/64M
+	aws s3 cp k/32M  s3://mybucket/32M
+	aws s3 cp k/7M   s3://mybucket/7M
+	aws s3 cp k/07M  s3://mybucket/07M
 	aws s3 ls        s3://mybucket
-	aws s3 cp        s3://mybucket/myobject k/bar
-	openssl sha1 -r k/foo k/bar
-	aws s3 cp k/32M  s3://mybucket/myobject32
-	aws s3 ls        s3://mybucket
-	aws s3 cp        s3://mybucket/myobject32 k/baz
+
+	aws s3 cp        s3://mybucket/foo k/baz
+	openssl sha1 -r k/foo k/baz
+	aws s3 cp        s3://mybucket/64M k/baz
+	openssl sha1 -r k/64M k/baz
+	aws s3 cp        s3://mybucket/32M k/baz
 	openssl sha1 -r k/32M k/baz
+	aws s3 cp        s3://mybucket/7M k/baz
+	openssl sha1 -r k/7M k/baz
+	aws s3 cp        s3://mybucket/07M k/baz
+	openssl sha1 -r k/07M k/baz
+
+	rm k/baz
 }
 
 testA() {

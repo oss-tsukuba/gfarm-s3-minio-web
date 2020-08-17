@@ -119,6 +119,10 @@ add_to_portmap() {
 	update_portmap filter_add_to_portmap "$@"
 }
 
+del_from_portmap() {
+	update_portmap filter_del_from_portmap "$@"
+}
+
 #################################################
 ### gfarm-s3-configtest
 #################################################
@@ -149,6 +153,14 @@ filter_add_to_portmap() {
 			f[portmap_field_port] = port
 			f[portmap_field_pid] = pid
 			printf("%s:%s:%s\n", f[1], f[2], f[3]) }'
+}
+
+filter_del_from_portmap() {
+	awk \
+		-v local_username="$1" \
+		-v portmap_field_local_username="$PORTMAP_FIELD_LOCAL_USERNAME" \
+		-F : \
+		'$portmap_field_local_username != local_username { print }'
 }
 
 filter_list_occupied_port_by_a_user() {
@@ -323,7 +335,7 @@ configtest_all() {
 }
 
 update_usermap() {
-	local tmpfile=$(mktemp "$GFARMS3_LOCAL_USER_MAP.XXXXXX") || return 1
+	local tmpfile=$(mktemp "$GFARM_S3_TMP/update_usermap.XXXXXX") || return 1
 	(flock 3
 		if ! "$@" "$GFARMS3_LOCAL_USER_MAP" "$tmpfile"; then
 			echo edit failed 1>&2
@@ -344,12 +356,19 @@ update_usermap() {
 			return 1
 		fi
 
-		for user in $(users_subject_to_be_stopped "$GFARMS3_LOCAL_USER_MAP" "$tmpfile" "$GFARMS3_USER_PORT_MAP"); do
+		local users=$(users_subject_to_be_stopped "$GFARMS3_LOCAL_USER_MAP" "$tmpfile" "$GFARMS3_USER_PORT_MAP")
+		for user in $users; do
 			echo "STOP [$user]'s MinIO" 1>&2
 			if ! stop_per_user_server "$user"; then
 				echo "STOP FAILED" 1>&2
 			fi
+
+			need_update_revproxy=1
+			del_from_portmap "$user"
 		done
+		if [ -n "$users" ]; then
+			update_reverse_proxy
+		fi
 
 		cp -fp $GFARMS3_LOCAL_USER_MAP $GFARMS3_LOCAL_USER_MAP.bak
 		chmod 600 $GFARMS3_LOCAL_USER_MAP.bak
@@ -496,10 +515,15 @@ spawn_per_user_server() {	# local_username
 	fi
 	local local_username=$(get_local_username "$usermap_entry")
 	local access_key=$(get_access_key "$usermap_entry")
+	## assert $user == $local_username
 	if ! local port=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --start --access_key "$access_key" --gfarm_shared_dir "$gfarm_shared_dir"); then
 		retrun 1
 	fi
 	local status=0
+
+#	local secret_key_file=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --show-secret-key-file)
+#	local secret_key_dir=$(dirname $secret_key_file)
+
 	if [ -n "$port" ]; then
 		echo "MinIO started" 1>&2
 		## No need to check `port' confliction,
@@ -525,6 +549,7 @@ stop_per_user_server() {	# local_username
 		return 1
 	fi
 	local local_username=$(get_local_username "$usermap_entry")
+	## assert $user == $local_username
 	local access_key=$(get_access_key "$usermap_entry")
 	local status=0
 	if ! local port=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --stop --access_key "$access_key"); then
@@ -532,9 +557,9 @@ stop_per_user_server() {	# local_username
 		status=1
 		## FALLTHRU
 	fi
-	if ! update_reverse_proxy; then
-		status=1
-	fi
+#	if ! update_reverse_proxy; then
+#		status=1
+#	fi
 	return $status
 }
 
@@ -546,8 +571,33 @@ get_per_user_status() {	# local_username
 		return 1
 	fi
 	local local_username=$(get_local_username "$usermap_entry")
+	## assert $user == $local_username
 	local access_key=$(get_access_key "$usermap_entry")
 	mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --status --access_key "$access_key"
+}
+
+get_per_user_secret_key() {
+	local user="$1"
+	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
+	if [ -z "$usermap_entry" ]; then
+		echo "user not found: $user" 1>&2
+		return 1
+	fi
+	local local_username=$(get_local_username "$usermap_entry")
+	## assert $user == $local_username
+	mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --show-secret-key
+}
+
+regenerate_secret_key() {
+	local user="$1"
+	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
+	if [ -z "$usermap_entry" ]; then
+		echo "user not found: $user" 1>&2
+		return 1
+	fi
+	local local_username=$(get_local_username "$usermap_entry")
+	## assert $user == $local_username
+	mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --regenerate-secret-key
 }
 
 certificate_timeleft_grid_proxy_info() {
@@ -630,8 +680,18 @@ update_reverse_proxy() {
 ### gfarm-s3-server
 #################################################
 
+mymc_init() {
+	MC_CONFIG_DIR=$(mktemp -d $GFARM_S3_TMP/mc.XXXXXX) || return 1
+}
+
+mymc_finish() {
+	if [ -z "$MC_CONFIG_DIR" ]; then return 1; fi
+	rm -rf "$MC_CONFIG_DIR"
+}
+
 mymc() {
-	$MC_PATH ${GFARMS3_MC_CONFIG_DIR:+--config-dir "$GFARMS3_MC_CONFIG_DIR"} "$@"
+	if [ -z "$MC_CONFIG_DIR" ]; then return 1; fi
+	$MC_PATH --config-dir "$MC_CONFIG_DIR" "$@"
 }
 
 mc_config() {
@@ -669,11 +729,13 @@ try_start_a_server() {
 	local gfarm_shared_dir="$1"
 	local port="$2"
 	local address=127.0.0.1:"$port"
+	if ! mymc_init; then return 1; fi
 	if mc_config $address; then
 		## MinIO is already running
 		## success with empty stdout
 		return 0
 	fi
+	mymc_finish
 	local tmpfile=$(mktemp $GFARM_S3_TMP/minio-log.XXXXXX) || return 1
 	local pidfile=$(mktemp $GFARM_S3_TMP/minio-pid.XXXXXX) || (rm -f $tmpfile; return 1)
 	(HOME="$GFARMS3_METADIR" $MINIO_PATH gateway gfarm \
@@ -692,16 +754,24 @@ try_start_a_server() {
 		sleep 1
 	done
 
+	if grep -l "^Invocation Failed" $tmpfile 1>&2; then
+		rm -f $tmpfile $pidfile
+		return 1	## temporary error (minio has quit)
+	fi
+
 	if ! grep -l "^Endpoint" $tmpfile 1>&2; then
-#		rm -f $tmpfile $pidfile
-		return 1
+		rm -f $tmpfile $pidfile
+		return 2	## fatal error (minio still running)
 	fi
 
 #	rm -f $tmpfile
+	if ! mymc_init; then return 1; fi
 	if ! mc_config $address; then
+		mymc_finish
 		rm $pidfile
-		return 1
+		return 2	## fatal error (minio still running)
 	fi
+	mymc_finish
 	cat $pidfile
 	rm $pidfile
 }
@@ -719,11 +789,14 @@ stop_server() {
 try_stop_a_server() {
 	local port="$1"
 	local address=127.0.0.1:"$port"
+	if ! mymc_init; then return 1; fi
 	if mc_config $address; then
 		if mc_stop; then
+			mymc_finish
 			return 0
 		fi
 	fi
+	mymc_finish
 	for i in $(seq 1 1 $GFARM_S3_KILL_COUNT); do
 		sleep 1
 		if ! kill -0 $pid; then                                                  
@@ -747,5 +820,7 @@ status_server() {
 get_server_status() {
 	local port="$1"
 	local address=127.0.0.1:"$port"
+	if ! mymc_init; then return 1; fi
 	mc_config $address 1>&2
+	mymc_finish
 }

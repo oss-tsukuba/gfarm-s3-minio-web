@@ -33,6 +33,9 @@ USAGE="\
 usage: $0 [--start] {common options} [--global_username global] --gfarm_shared_dir gfarm_shared_dir
        $0 --stop    {common options}
        $0 --status  {common options}
+       $0 --show-secret-key
+       $0 --show-secret-key-file
+       $0 --regenerate-secret-key
 common options:
           [--access_key access_key]
           [--secret_key secret_key]
@@ -55,6 +58,9 @@ while [ $# -gt 0 ]; do
 	--start) action="START";;
 	--stop) action="STOP";;
 	--status) action="STATUS";;
+	--show-secret-key) action="SECRET_SHOW";;
+	--show-secret-key-file) action="SECRET_SHOW_FILENAME";;
+	--regenerate-secret-key) action="SECRET_REGENERATE";;
 	--port) uport="$2"; shift;;
 	--gfarm_shared_dir) gfarm_shared_dir="$2"; shift;;
 	*) break;;
@@ -99,12 +105,29 @@ export MINIO_GFARMS3_CACHEDIR_SIZE_MB="$GFARMS3_CACHE_SIZE_MB"
 export GFARMS3_PARTFILE_DIGEST="$GFARMS3_PARTFILE_DIGEST"
 
 export MINIO_ACCESS_KEY="$access_key"
+if [ ! -f "$GFARMS3_SECRET_KEY" ]; then regenerate_secret; fi
 export MINIO_SECRET_KEY=${secret_key:-$(<"$GFARMS3_SECRET_KEY")}
 
 export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
+
+show_secret_key() {
+	cat "$GFARMS3_SECRET_KEY"
+}
+
+show_secret_key_file() {
+	echo "$GFARMS3_SECRET_KEY"
+}
+
+regenerate_secret() {
+	mkdir -p $(dirname "$GFARMS3_SECRET_KEY")
+	generate_secret_key > "$GFARMS3_SECRET_KEY"
+}
 
 case $action in
 START) start_server "$gfarm_shared_dir";;
 STOP) stop_server;;
 STATUS) status_server;;
+SECRET_SHOW) show_secret_key;;
+SECRET_SHOW_FILENAME) show_secret_key_file;;
+SECRET_REGENERATE) regenerate_secret;;
 esac

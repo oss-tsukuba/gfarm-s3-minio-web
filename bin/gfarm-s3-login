@@ -9,7 +9,7 @@ set -o xtrace
 . /usr/local/etc/gfarm-s3.conf
 . $GFARM_S3_BIN/gfarm-s3-subr
 
-USAGE="usage: $0 start|stop|restart|status global-username password [gfarm_shared_dir]"
+USAGE="usage: $0 start|stop|restart|status|keygen global-username password [gfarm_shared_dir]"
 
 if [ $# != 3 -a $# != 4 ]; then
 	echo "$USAGE" 1>&2
@@ -25,7 +25,7 @@ if [ $# == 4 ]; then
 fi
 
 case $action in
-start|stop|restart|status) ;;
+start|stop|restart|status|keygen) ;;
 *) echo $USAGE 1>&2; exit 1;;
 esac
 
@@ -71,6 +71,8 @@ restart)
 	spawn_per_user_server "$local_username" "$gfarm_shared_dir";;
 status)
 	get_per_user_status "$local_username";;
+keygen)
+	regenerate_secret_key "$local_username";;
 esac
 
 exit_status=$?
@@ -89,5 +91,6 @@ cat <<EOF
   "global-username": "$(get_global_username "$usermap_entry")",
   "local-username": "$(get_local_username "$usermap_entry")",
   "access-key": "$(get_access_key "$usermap_entry")"
+  "secret-key": "$(get_per_user_secret_key "$local_username")"
 }
 EOF
