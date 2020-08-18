@@ -1,4 +1,0 @@
-#! /bin/sh
-export PKG_CONFIG_PATH=/usr/local/share/pkgconfig
-pkg-config --libs gfarm
-pkg-config --cflags gfarm

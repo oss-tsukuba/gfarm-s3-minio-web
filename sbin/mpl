@@ -4,7 +4,7 @@ set -o xtrace
 
 export GLOBUS_GSSAPI_NAME_COMPATIBILITY=HYBRID
 
-. $HOME/work/gfarm-s3-minio-web/sbin/keys
+. $HOME/work/gfarm-s3-minio-web/sbin/etc/keys
 
 cd $HOME
 echo $KEY | myproxy-logon -S -s portal.hpci.nii.ac.jp -l $HPCIID -t 168

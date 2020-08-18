@@ -27,7 +27,7 @@ check_n_create_dir() {
 	fi
 }
 
-check_n_create_file() {
+check_n_create_empty_file() {
 	if [ ! -e "$1" ]; then
 		echo touch "$1"
 		sudo touch "$1"
@@ -65,7 +65,8 @@ check_n_install gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP
 
 check_n_install sudoers /etc/sudoers.d/gfarm-s3
 
-check_n_create_file $GFARMS3_USER_PORT_MAP $WEBUI_USER
+check_n_create_dir $(dirname $GFARMS3_USER_PORT_MAP ) $WEBUI_USER
+check_n_create_empty_file $GFARMS3_USER_PORT_MAP $WEBUI_USER
 
 check_n_install gfarm.conf /etc/rsyslog.d/gfarm.conf
 
@@ -78,10 +79,10 @@ sudo groupadd gfarms3
 sudo usermod -a -G gfarms3 $USER1
 
 check_n_create_dir $(dirname $GFARMS3_APACHE_REWRITE_CONF) $WEBUI_USER
-check_n_create_file $GFARMS3_APACHE_REWRITE_CONF $WEBUI_USER
+check_n_create_empty_file $GFARMS3_APACHE_REWRITE_CONF $WEBUI_USER
 
 check_n_create_dir $APACHE_DOCUMENTROOT
-check_n_create_file $APACHE_DOCUMENTROOT/index.html
+check_n_create_empty_file $APACHE_DOCUMENTROOT/index.html
 
 check_n_install apache-gfarm-s3.conf $GFARMS3_APACHE_REWRITE_MASTER_CONF
 

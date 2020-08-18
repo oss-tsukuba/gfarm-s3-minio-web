@@ -1,0 +1,14 @@
+<h1>gfarm-s3</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'launch' %}" method="post">
+{% csrf_token %}
+
+<ul>
+   <li> <input type="text" name="id" id="id"> </li>
+   <li> <input type="text" name="passwd" id="passwd"> </li>
+</ul>
+
+<input type="submit" value="Launch">
+</form>
