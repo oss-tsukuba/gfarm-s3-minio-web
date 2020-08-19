@@ -10,15 +10,14 @@ class TestStringMethods(unittest.TestCase):
         return "ok\n"
 
     def setUp(self):
-        pass
+        runminio()
 
     def test_upper(self):
         res = self.aws(["s3", "ls", "s3://"])
         self.assertTrue(res.strip("\n").endswith("ok"))
 
 def main():
-    runminio()
+    unittest.main()
 
 if __name__ == "__main__":
-    #unittest.main()
     main()

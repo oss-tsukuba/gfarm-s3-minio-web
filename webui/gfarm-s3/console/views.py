@@ -1,11 +1,11 @@
-import os
-import sys
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .models import Status
 from django.utils import timezone
+import os
 from subprocess import Popen, PIPE
+import sys
 
 def index(request):
     return render(request, 'console/index.html', {})

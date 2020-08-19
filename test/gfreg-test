@@ -1,0 +1,28 @@
+#! /bin/sh
+
+export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
+
+sendfile=$HOME/work/tmp/s/64M
+
+mygsissh() {
+	gsissh -p 2222 gfp01.hpci.itc.u-tokyo.ac.jp "$@"
+}
+
+ckcln() {
+	ls /gfarm/hp120273/user1/tmp/64Mnew
+	rm /gfarm/hp120273/user1/tmp/64Mnew
+}
+
+
+time cat $sendfile | mygsissh dd of=64Mnew
+mygsissh ls 64Mnew
+mygsissh rm 64Mnew
+
+time gfreg $sendfile /home/hp120273/hpci005858/tmp/64Mnew
+ckcln
+
+time gfreg -w $sendfile /home/hp120273/hpci005858/tmp/64Mnew
+ckcln
+
+time cp $sendfile /gfarm/hp120273/user1/tmp/64Mnew
+ckcln
