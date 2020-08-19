@@ -1,5 +1,6 @@
 #! /bin/sh
 
+sudo yum install -y gsi-openssh-clients
 export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
 
 sendfile=$HOME/work/tmp/s/64M
@@ -8,21 +9,29 @@ mygsissh() {
 	gsissh -p 2222 gfp01.hpci.itc.u-tokyo.ac.jp "$@"
 }
 
+ckclngsi() {
+	#mygsissh ls 64Mnew
+	mygsissh rm 64Mnew
+}
+
 ckcln() {
-	ls /gfarm/hp120273/user1/tmp/64Mnew
+	#ls /gfarm/hp120273/user1/tmp/64Mnew
 	rm /gfarm/hp120273/user1/tmp/64Mnew
 }
 
 
-time cat $sendfile | mygsissh dd of=64Mnew
-mygsissh ls 64Mnew
-mygsissh rm 64Mnew
+echo @@@ gsissh
+time cat $sendfile | mygsissh dd of=64Mnew 2>/dev/null
+ckclngsi
 
+echo @@@ gfreg
 time gfreg $sendfile /home/hp120273/hpci005858/tmp/64Mnew
 ckcln
 
+echo @@@ gfreg -w
 time gfreg -w $sendfile /home/hp120273/hpci005858/tmp/64Mnew
 ckcln
 
+echo @@@ gfarm2fs
 time cp $sendfile /gfarm/hp120273/user1/tmp/64Mnew
 ckcln
