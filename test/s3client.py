@@ -65,16 +65,16 @@ def up_down_n_cmp(s3, basename, senddir, bucket, recvdir):
     now = time.time()
     print("@@@ {} ({}) upload end {}".format(myformat(now), now - start, basename))
 
-#    now = time.time()
-#    start = now
-#    print("@@@ {} download start {}".format(myformat(start), basename))
-#    with open(recvfile, "wb") as f:
-#        s3.download_fileobj(f, bucket, basename)
-#    now = time.time()
-#    print("@@@ {} ({}) download end {}".format(myformat(now), now - start, basename))
-#
-#    e = filecmp.cmp(sendfile, recvfile, shallow = False)
-#    print("cmpare files: {}".format(e))
+    now = time.time()
+    start = now
+    print("@@@ {} download start {}".format(myformat(start), basename))
+    with open(recvfile, "wb") as f:
+        s3.download_fileobj(f, bucket, basename)
+    now = time.time()
+    print("@@@ {} ({}) download end {}".format(myformat(now), now - start, basename))
+
+    e = filecmp.cmp(sendfile, recvfile, shallow = False)
+    print("compare files: {}".format(e))
 
 def print_buckets(buckets):
     print("Existing buckets:")
@@ -98,13 +98,21 @@ def main():
 #        f.write(os.urandom(1024))
 #    up_down_n_cmp(s3, "test.jpg", "new", "/tmp")
 
-#    with open("7M", "wb") as f:
-#        f.write(os.urandom(7 * 1024 * 1024))
-#    up_down_n_cmp(s3, "7M", "new", "/tmp")
 
-#    with open("32M", "wb") as f:
-#        f.write(os.urandom(32 * 1024 * 1024))
-#    up_down_n_cmp(s3, "32M", "new", "/tmp")
+    basename = "7M"
+    original_file = os.path.join(original_dir, basename)
+    if not os.path.isfile(original_file):
+        with open(original_file, "wb") as f:
+            f.write(os.urandom(7 * 1024 * 1024))
+    up_down_n_cmp(s3, basename, original_dir, destination_bucket, download_dir)
+
+
+    basename = "32M"
+    original_file = os.path.join(original_dir, basename)
+    if not os.path.isfile(original_file):
+        with open(original_file, "wb") as f:
+            f.write(os.urandom(32 * 1024 * 1024))
+    up_down_n_cmp(s3, basename, original_dir, destination_bucket, download_dir)
 
 
     basename = "64M"
