@@ -53,42 +53,53 @@ class Mys3client(object):
             return False
         return True
 
-def up_down_n_cmp(s3, basename, senddir, bucket, recvdir):
+def up_down_n_cmp(s3, basename, senddir, bucket, recvdir, flag):
     sendfile = os.path.join(senddir, basename)
     recvfile = os.path.join(recvdir, basename)
 
-    now = time.time()
-    start = now
-    print("@@@ {} upload start {}".format(myformat(start), basename))
-    with open(sendfile, "rb") as f:
-        s3.upload_fileobj(f, bucket, basename)
-    now = time.time()
-    print("@@@ {} ({}) upload end {}".format(myformat(now), now - start, basename))
+    if (flag & 4) != 0:
+        now = time.time()
+        start = now
+        print("@@@ {} upload start {}".format(myformat(start), basename))
+        with open(sendfile, "rb") as f:
+            s3.upload_fileobj(f, bucket, basename)
+        now = time.time()
+        print("@@@ {} ({}) upload end {}".format(myformat(now), now - start, basename))
 
-    now = time.time()
-    start = now
-    print("@@@ {} download start {}".format(myformat(start), basename))
-    with open(recvfile, "wb") as f:
-        s3.download_fileobj(f, bucket, basename)
-    now = time.time()
-    print("@@@ {} ({}) download end {}".format(myformat(now), now - start, basename))
+    if (flag & 2) != 0:
+        now = time.time()
+        start = now
+        print("@@@ {} download start {}".format(myformat(start), basename))
+        with open(recvfile, "wb") as f:
+            s3.download_fileobj(f, bucket, basename)
+        now = time.time()
+        print("@@@ {} ({}) download end {}".format(myformat(now), now - start, basename))
 
-    e = filecmp.cmp(sendfile, recvfile, shallow = False)
-    print("compare files: {}".format(e))
+    if (flag & 1) != 0:
+        e = filecmp.cmp(sendfile, recvfile, shallow = False)
+        print("compare files: {}".format(e))
 
 def print_buckets(buckets):
     print("Existing buckets:")
     for bucket in buckets:
         print("{}".format(bucket["Name"]))
 
+def createFileM(path, sz, force = False):
+    if not force and os.path.isfile(path):
+        return
+    print("createFileM({}, {})".format(path, sz))
+    with open(path, "wb") as f:
+       for m in range(sz):
+           f.write(os.urandom(1 * 1024 * 1024))
+
 def main():
     s3 = Mys3client()
 
-    original_dir = os.path.expanduser("~/work/tmp/s")
+    source_dir = os.path.expanduser("~/work/tmp/s")
     download_dir = os.path.expanduser("~/work/tmp/r")
-    destination_bucket = "new"
+    bucket_name = "new"
 
-    e = s3.create_bucket(destination_bucket)
+    e = s3.create_bucket(bucket_name)
     print("create bucket: e = {}".format(e))
 
 #    buckets = s3.list_buckets()
@@ -98,30 +109,23 @@ def main():
 #        f.write(os.urandom(1024))
 #    up_down_n_cmp(s3, "test.jpg", "new", "/tmp")
 
+    flist = [("7M", 7), ("32M", 32), ("64M", 64)]
 
-    basename = "7M"
-    original_file = os.path.join(original_dir, basename)
-    if not os.path.isfile(original_file):
-        with open(original_file, "wb") as f:
-            f.write(os.urandom(7 * 1024 * 1024))
-    up_down_n_cmp(s3, basename, original_dir, destination_bucket, download_dir)
+    for basename, sz in flist:
+        source_file = os.path.join(source_dir, basename)
+        createFileM(source_file, sz, True)
 
+    for basename, sz in flist:
+        source_file = os.path.join(source_dir, basename)
+        up_down_n_cmp(s3, basename, source_dir, bucket_name, download_dir, 4)
 
-    basename = "32M"
-    original_file = os.path.join(original_dir, basename)
-    if not os.path.isfile(original_file):
-        with open(original_file, "wb") as f:
-            f.write(os.urandom(32 * 1024 * 1024))
-    up_down_n_cmp(s3, basename, original_dir, destination_bucket, download_dir)
+    for basename, sz in flist:
+        source_file = os.path.join(source_dir, basename)
+        up_down_n_cmp(s3, basename, source_dir, bucket_name, download_dir, 2)
 
-
-    basename = "64M"
-    original_file = os.path.join(original_dir, basename)
-    if not os.path.isfile(original_file):
-        with open(original_file, "wb") as f:
-            f.write(os.urandom(32 * 1024 * 1024))
-            f.write(os.urandom(32 * 1024 * 1024))
-    up_down_n_cmp(s3, basename, original_dir, destination_bucket, download_dir)
+    for basename, sz in flist:
+        source_file = os.path.join(source_dir, basename)
+        up_down_n_cmp(s3, basename, source_dir, bucket_name, download_dir, 1)
 
     return
 

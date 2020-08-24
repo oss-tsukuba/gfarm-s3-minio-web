@@ -12,7 +12,7 @@ urlpatterns = [
     # ex: /console/launch/
     path('launch/', views.launch, name = 'launch'),
 
-    # ex: /console/5/result/
-    path('<int:status_id>/result/', views.result, name = 'result'),
+    # ex: /console/result/
+    path('result/', views.result, name = 'result'),
 
 ]

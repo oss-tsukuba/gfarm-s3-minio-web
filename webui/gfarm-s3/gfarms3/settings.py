@@ -114,8 +114,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+## Mon Aug 24 09:37:36 JST 2020 nis
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.file'

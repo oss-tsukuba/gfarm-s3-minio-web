@@ -1,0 +1,9 @@
+
+WSGIScriptAlias /d /home/user1/work/gfarm-s3-minio-web/webui/gfarm-s3/gfarms3/wsgi.py
+WSGIPythonPath /usr/local/lib/python3.6/site-packages:/home/user1/work/gfarm-s3-minio-web/webui/gfarm-s3
+
+<Directory /home/user1/work/gfarm-s3-minio-web/webui/gfarm-s3/gfarms3>
+	<Files wsgi.py>
+		Require all granted
+	</Files>
+</Directory>

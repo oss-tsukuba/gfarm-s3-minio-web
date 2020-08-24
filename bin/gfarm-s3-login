@@ -86,11 +86,11 @@ fi
 cat <<EOF
 {
   "status": "$status",
-  "authenticated-method": "$authenticated_method",
-  "expiration-date": $expiration_date,
-  "global-username": "$(get_global_username "$usermap_entry")",
-  "local-username": "$(get_local_username "$usermap_entry")",
-  "access-key": "$(get_access_key "$usermap_entry")"
-  "secret-key": "$(get_per_user_secret_key "$local_username")"
+  "authenticated_method": "$authenticated_method",
+  "expiration_date": $expiration_date,
+  "global_username": "$(get_global_username "$usermap_entry")",
+  "local_username": "$(get_local_username "$usermap_entry")",
+  "access_key": "$(get_access_key "$usermap_entry")",
+  "secret_key": "$(get_per_user_secret_key "$local_username")"
 }
 EOF

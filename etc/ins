@@ -16,6 +16,13 @@ check_n_install() {
 	fi
 }
 
+check_n_install_sucmp() {
+	if ! sudo cmp "$1" "$2"; then
+		echo cp "$1" "$2"
+		sudo cp "$1" "$2"
+	fi
+}
+
 check_n_create_dir() {
 	if [ ! -d "$1" ]; then
 		echo mkdir -p "$1"
@@ -63,7 +70,7 @@ check_n_install secret_key $GFARMS3_SECRET_KEY
 
 check_n_install gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP
 
-check_n_install sudoers /etc/sudoers.d/gfarm-s3
+check_n_install_sucmp sudoers /etc/sudoers.d/gfarm-s3
 
 check_n_create_dir $(dirname $GFARMS3_USER_PORT_MAP ) $WEBUI_USER
 check_n_create_empty_file $GFARMS3_USER_PORT_MAP $WEBUI_USER
@@ -75,7 +82,9 @@ check_n_install gfarm.pc $PKGCONFIG_D/gfarm.pc
 
 sudo chown $WEBUI_USER /usr/local/etc/gfarm_s3_local_user_map
 
-sudo groupadd gfarms3
+if ! grep -q '^gfarms3:' /etc/group; then
+	sudo groupadd gfarms3
+fi
 sudo usermod -a -G gfarms3 $USER1
 
 check_n_create_dir $(dirname $GFARMS3_APACHE_REWRITE_CONF) $WEBUI_USER
@@ -89,3 +98,6 @@ check_n_install apache-gfarm-s3.conf $GFARMS3_APACHE_REWRITE_MASTER_CONF
 sudo systemctl enable httpd
 sudo systemctl start httpd
 sudo chmod og+rX /var/log/httpd
+
+(mod_wsgi-express module-config; cat apache-gfarm-s3-wsgi.conf.in) > apache-gfarm-s3-wsgi.conf
+check_n_install apache-gfarm-s3-wsgi.conf $GFARMS3_APACHE_REWRITE_WSGI_CONF

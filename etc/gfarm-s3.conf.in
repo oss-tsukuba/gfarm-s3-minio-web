@@ -28,6 +28,7 @@ GRID_PROXY_INFO=/usr/bin/grid-proxy-info
 GFARM_S3_ACCESS_KEY_MIN_LEN=8
 
 GFARMS3_APACHE_REWRITE_MASTER_CONF=/etc/httpd/conf.d/gfarm-s3.conf
+GFARMS3_APACHE_REWRITE_WSGI_CONF=/etc/httpd/conf.d/gfarm-s3-wsgi.conf
 GFARMS3_APACHE_REWRITE_CONF=$GFARM_S3_VAR/rewrite.conf
 APACHECTL=/usr/sbin/apachectl
 
