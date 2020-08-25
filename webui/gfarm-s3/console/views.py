@@ -6,6 +6,7 @@ import json
 import os
 from subprocess import Popen, PIPE
 import sys
+import time
 
 def debug_print(s):
     with open("/tmp/views.log", "a") as f:
@@ -23,9 +24,8 @@ def launch(request):
     passwd = request.POST["passwd"]
     action = request.POST["action"]
     debug_print("username = {}\npasswd = {}\naction = {}\n".format(username, passwd, action))
-    result_s = cmd(username, passwd, action)
-    debug_print("result_s = {}\n".format(result_s))
-    result = json.loads(result_s)
+    result = cmd(username, passwd, action)
+    debug_print("result = {}\n".format(result))
     request.session["result"] = result 
     return HttpResponseRedirect(reverse("result"))
 
@@ -36,11 +36,7 @@ def result(request):
 
 def cmd(username, passwd, action):
     GFARM_S3_BIN = "/home/user1/work/gfarm-s3-minio-web/bin"
-    #action = "stop"
-    #action = "start"
-    #action = "restart"
-    #action = "show"
-    #action = "genkey"
+    #action = "stop" | "start" | "restart" | "show" | "genkey"
     gfarm_s3_login = os.path.join(GFARM_S3_BIN, "gfarm-s3-login")
     cmd = [gfarm_s3_login, action, username, passwd]
     env = {
@@ -58,10 +54,13 @@ def cmd(username, passwd, action):
         ret = p.wait()
     except:
         debug_print("ERROR 1\nSTDERR = {}\n".format(stderr.decode()))
-        return json.dumps({"status": "ERROR 1"})
+        return {"status": "ERROR 1"}
     if ret == 0:
         debug_print("SUCCESS\nSTDERR = {}\n".format(stderr.decode()))
-        return stdout.decode().strip()
+        result = json.loads(stdout.decode().strip())
+        if "expiration_date" in result.keys():
+            result["expiration_date"] = time.ctime(result["expiration_date"])
+        return result
     else:
         debug_print("ERROR 2\nSTDERR = {}\n".format(stderr.decode()))
-        return json.dumps({"status": "ERROR 2"})
+        return {"status": "ERROR 2"}
