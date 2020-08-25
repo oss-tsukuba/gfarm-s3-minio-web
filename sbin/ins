@@ -1,15 +1,15 @@
 #! /bin/sh
 sudo yum update -y
-sudo yum install -y tcpdump
 sudo yum install -y myproxy
 sudo yum install -y httpd
 sudo yum install -y httpd-devel
 sudo yum install -y mod_ssl
-#sudo yum install -y mod_wsgi
 sudo yum install -y uuid
 sudo yum install -y python3-devel
 sudo yum install -y python3-pip
+sudo yum install -y tcpdump
 sudo yum install -y inotify-tools
 sudo python3 -m pip install boto3
 sudo python3 -m pip install 'Django<2.2'
 sudo python3 -m pip install mod_wsgi
+sudo apachectl restart
