@@ -6,6 +6,7 @@ PREFIX=/usr/local
 USER1=user1
 WEBUI_USER=user2
 HTTPD_USER=apache
+VERSION=2.7.16
 
 PKGCONFIG_D=/usr/local/share/pkgconfig
 APACHE_DOCUMENTROOT=/usr/local/share/www
@@ -63,6 +64,9 @@ sudo chown $HTTPD_USER $GFARMS3_USER_PORT_MAP
 install_if_differ gfarm.conf /etc/rsyslog.d/gfarm.conf
 
 create_directory_unless_exists $PKGCONFIG_D
+gen_conf gfarm.pc \
+	-e 's@PREFIX@'"$PREFIX"'' \
+	-e 's@VERSION@'"$VERSION"''
 install_if_differ gfarm.pc $PKGCONFIG_D/gfarm.pc
 
 if ! grep -q '^gfarms3:' /etc/group; then
