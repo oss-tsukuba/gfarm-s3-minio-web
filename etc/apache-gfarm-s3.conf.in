@@ -1,9 +1,9 @@
 ServerName 192.168.224.22
-<VirtualHost *:80>
-#<VirtualHost *:443>
-#	SSLEngine on
-#	SSLCertificateFile /home/user1/work/s3g/etc/server.crt
-#	SSLCertificateKeyFile /home/user1/work/s3g/etc/server.key
+#<VirtualHost *:80>
+<VirtualHost *:443>
+	SSLEngine on
+	SSLCertificateFile /home/user1/work/gfarm-s3-minio-web/etc/server.crt
+	SSLCertificateKeyFile /home/user1/work/gfarm-s3-minio-web/etc/server.key
 
 	DocumentRoot "@DOCUMENTROOT@"
 	ServerAdmin root@localhost
