@@ -25,5 +25,8 @@ ServerName 192.168.224.22
 		AllowOverride All
 		Require all granted 
 	</Directory>
+#
+#RewriteCond %{REQUEST_URI} ^.*/K4Xc$
+#RewriteRule "^(.*)/K4Xc$" "http://127.0.0.1:9001$1" [P]
 
 </VirtualHost>
