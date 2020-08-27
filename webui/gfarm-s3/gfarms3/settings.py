@@ -105,6 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ja-jp'
 
 TIME_ZONE = 'Japan'
 
@@ -122,3 +123,9 @@ STATIC_URL = '/static/'
 ## Mon Aug 24 09:37:36 JST 2020 nis
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+
+
+#LANGUAGES = (
+#    ('en-us', _('English')),
+#    ('ja-jp', _('Japan')),
+#)

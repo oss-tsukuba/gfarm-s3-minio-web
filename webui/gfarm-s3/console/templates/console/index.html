@@ -1,9 +1,10 @@
 {% extends "console/base.html" %}
+{% load i18n %}
 {% block content1 %}
 <h1>Gfarm-S3</h1>
 <table class="table table-striped">
 <thead class="thead-light">
 </thead><tbody>
-<tr><td><a href="{% url 'application' %}">application</a></td></tr>
+<tr><td><a href="{% url 'application' %}">{% trans 'AppLink' %}</a></td></tr>
 </tbody></table>
 {% endblock %}

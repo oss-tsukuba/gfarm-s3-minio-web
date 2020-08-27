@@ -6,7 +6,10 @@ export GLOBUS_GSSAPI_NAME_COMPATIBILITY=HYBRID
 
 . $HOME/work/gfarm-s3-minio-web/sbin/etc/keys
 
+s=portal-c.hpci.nii.ac.jp
+s=portal.hpci.nii.ac.jp
+
 cd $HOME
-echo $KEY | myproxy-logon -S -s portal.hpci.nii.ac.jp -l $HPCIID -t 168
+echo $KEY | myproxy-logon -S -s $s -l $HPCIID -t 168
 # 代理証明書ダウンロードパスワードを指定
 # /tmp の下に grid-proxy-init と同様の代理証明書が作成される。

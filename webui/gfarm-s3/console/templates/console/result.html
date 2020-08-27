@@ -1,15 +1,19 @@
 {% extends "console/base.html" %}
+{% load i18n %}
 {% block content1 %}
+<div {% if status != "success" %} class="bg-danger" {% endif %} >
 <h1>Result</h1>
+<div class="table-responsive">
 <table class="table table-striped">
 <thead class="thead-light">
 </thead><tbody>
 <tr><th scope="row">Status</th><td>{{ status }}</td></tr>
+<tr><th scope="row">Reason</th><td>{{ reason }}</td></tr>
 <tr><th scope="row">Authentication Method</th><td>{{ authenticated_method }}</td></tr>
 <tr><th scope="row">Expiration Date</th><td>{{ expiration_date }}</td></tr>
 <tr><th scope="row">Global Username</th><td>{{ global_username }}</td></tr>
 <tr><th scope="row">Local Username</th><td>{{ local_username }}</td></tr>
 <tr><th scope="row">Access Key</th><td>{{ access_key }}</td></tr>
 <tr><th scope="row">Secret Key</th><td>{{ secret_key }}</td></tr>
-</tbody></table>
+</tbody></table></div></div>
 {% endblock %}

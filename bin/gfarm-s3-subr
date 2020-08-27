@@ -482,7 +482,7 @@ challenge_auth() {
 		mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 1>&2
 		if [ $? = 0 ]; then
 			echo SUCCESS $GRID_PROXY_INIT 1>&2
-				echo grid-proxy-init
+			echo grid-proxy-init
 			return 0
 		else
 			echo FAIL $GRID_PROXY_INIT 1>&2
@@ -602,7 +602,10 @@ regenerate_secret_key() {
 
 certificate_timeleft_grid_proxy_info() {
 	local expiration_date=-1
-	local timeleft=$(mysudo "$local_username" $GRID_PROXY_INFO -timeleft)
+	local timeleft
+	if ! timeleft=$(mysudo "$local_username" $GRID_PROXY_INFO -timeleft); then
+		return 1
+	fi
 	if [ x"$timeleft" != x"-1" ]; then
 		local current_time=$(date +%s)
 		expiration_date=$((timeleft + current_time))
@@ -611,7 +614,10 @@ certificate_timeleft_grid_proxy_info() {
 }
 
 certificate_timeleft_gfkey() {
-	local v=$(gfkey -e)
+	local v
+	if ! v=$(gfkey -e); then
+		return 1
+	fi
 	date --date="${v#expiration time is }" +%s
 }
 

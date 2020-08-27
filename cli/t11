@@ -5,6 +5,8 @@ export AWS_PROFILE=user1
 ENDPOINT_URL=http://192.168.224.22
 ENDPOINT_URL=https://192.168.224.22
 
+export PYTHONWARNINGS="ignore:Unverified HTTPS request"
+
 DEBUG=--debug
 DEBUG=
 

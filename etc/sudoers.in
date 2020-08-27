@@ -1,12 +1,15 @@
-@WEBUI_USER@ ALL=(ALL,!root) NOPASSWD: /home/user1/work/gfarm-s3-minio-web/bin/gfarm-s3-server
-@WEBUI_USER@ ALL=(ALL,!root) NOPASSWD: /usr/bin/grid-proxy-info
-@WEBUI_USER@ ALL=(ALL,!root) NOPASSWD: /usr/bin/grid-proxy-init
-@WEBUI_USER@ ALL=(ALL,!root) NOPASSWD: /usr/bin/myproxy-logon
-@WEBUI_USER@ ALL=(ALL,!root) NOPASSWD: /usr/local/bin/gfkey
+### Runas_Alias GFARMS3 = ALL, !root
+Runas_Alias GFARMS3 = %gfarms3
 
-@HTTPD_USER@ ALL=(ALL,!root) NOPASSWD: /home/user1/work/gfarm-s3-minio-web/bin/gfarm-s3-server
-@HTTPD_USER@ ALL=(ALL,!root) NOPASSWD: /usr/bin/grid-proxy-info
-@HTTPD_USER@ ALL=(ALL,!root) NOPASSWD: /usr/bin/grid-proxy-init
-@HTTPD_USER@ ALL=(ALL,!root) NOPASSWD: /usr/bin/myproxy-logon
-@HTTPD_USER@ ALL=(ALL,!root) NOPASSWD: /usr/local/bin/gfkey
+@WEBUI_USER@ ALL=(GFARMS3) NOPASSWD: /home/user1/work/gfarm-s3-minio-web/bin/gfarm-s3-server
+@WEBUI_USER@ ALL=(GFARMS3) NOPASSWD: /usr/bin/grid-proxy-info
+@WEBUI_USER@ ALL=(GFARMS3) NOPASSWD: /usr/bin/grid-proxy-init
+@WEBUI_USER@ ALL=(GFARMS3) NOPASSWD: /usr/bin/myproxy-logon
+@WEBUI_USER@ ALL=(GFARMS3) NOPASSWD: /usr/local/bin/gfkey
+
+@HTTPD_USER@ ALL=(GFARMS3) NOPASSWD: /home/user1/work/gfarm-s3-minio-web/bin/gfarm-s3-server
+@HTTPD_USER@ ALL=(GFARMS3) NOPASSWD: /usr/bin/grid-proxy-info
+@HTTPD_USER@ ALL=(GFARMS3) NOPASSWD: /usr/bin/grid-proxy-init
+@HTTPD_USER@ ALL=(GFARMS3) NOPASSWD: /usr/bin/myproxy-logon
+@HTTPD_USER@ ALL=(GFARMS3) NOPASSWD: /usr/local/bin/gfkey
 @HTTPD_USER@ ALL=(root) NOPASSWD: /usr/sbin/apachectl
