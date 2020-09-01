@@ -1,0 +1,21 @@
+#! /bin/sh
+PREFIX=/usr/local
+GFARMS3_LOCAL_USER_MAP=$PREFIX/etc/gfarm_s3_local_user_map
+HTTPD_USER=apache
+cp gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP
+chown $HTTPD_USER $GFARMS3_LOCAL_USER_MAP
+users=$(cat $GFARMS3_LOCAL_USER_MAP | grep -v '^#' | awk -F : '{print $2}')
+for u in $users; do
+	usermod -a -G gfarms3 $u
+done
+chmod og+rX /var/log/httpd
+
+SERVER_CRT=/etc/httpd/conf/ssl.key/server.crt
+SERVER_KEY=/etc/httpd/conf/ssl.crt/server.key
+mkdir -p $(dirname $SERVER_CRT)
+mkdir -p $(dirname $SERVER_KEY)
+cp server.crt $SERVER_CRT
+cp server.key $SERVER_KEY
+
+systemctl stop httpd
+systemctl start httpd

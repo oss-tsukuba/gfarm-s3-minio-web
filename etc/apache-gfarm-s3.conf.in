@@ -1,16 +1,13 @@
 ServerName 192.168.224.22
-#<VirtualHost *:80>
 <VirtualHost *:443>
 	SSLEngine on
-	SSLCertificateFile /home/user1/work/gfarm-s3-minio-web/etc/server.crt
-	SSLCertificateKeyFile /home/user1/work/gfarm-s3-minio-web/etc/server.key
+	SSLCertificateFile @SERVER_CRT@
+	SSLCertificateKeyFile @SERVER_KEY@
 
 	DocumentRoot "@DOCUMENTROOT@"
 	ServerAdmin root@localhost
 	CustomLog logs/access_log common
 	ErrorLog logs/error_log
-#	LogLevel debug rewrite:trace8
-#	LogLevel debug trace8
 
 	RewriteEngine on
 
@@ -25,8 +22,5 @@ ServerName 192.168.224.22
 		AllowOverride All
 		Require all granted 
 	</Directory>
-#
-#RewriteCond %{REQUEST_URI} ^.*/K4Xc$
-#RewriteRule "^(.*)/K4Xc$" "http://127.0.0.1:9001$1" [P]
 
 </VirtualHost>

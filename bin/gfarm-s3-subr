@@ -530,10 +530,10 @@ spawn_per_user_server() {	# local_username
 		## as a port # that returned by gfarm-s3-server is
 		## actually allocated for current user.
 		if ! add_to_portmap "$local_username" "${port%:*}" "${port#*:}"; then
-			status=1
+			status=3
 		fi
 		if ! update_reverse_proxy; then
-			status=1
+			status=2
 		fi
 	else
 		echo "MinIO is already running" 1>&2
@@ -772,20 +772,27 @@ try_start_a_server() {
 	done
 
 	if grep -l "^Invocation Failed" $tmpfile 1>&2; then
+### debug
+#sed 's/^/|/' < $tmpfile 1>&2
 		rm -f $tmpfile $pidfile
 		return 1	## temporary error (minio has quit)
 	fi
 
 	if ! grep -l "^Endpoint" $tmpfile 1>&2; then
+		kill -KILL $(< $pidfile)
+### debug
+#sed 's/^/|/' < $tmpfile 1>&2
 		rm -f $tmpfile $pidfile
 		return 2	## fatal error (minio still running)
 	fi
 
 ### debug
-#	rm -f $tmpfile
+#tail -f $tmpfile | sed 's/^/|/' 1>&2 &
+	rm -f $tmpfile
 	if ! mymc_init; then return 1; fi
 	if ! mc_config $address; then
 		mymc_finish
+		kill -KILL $(< $pidfile)
 		rm $pidfile
 		return 2	## fatal error (minio still running)
 	fi

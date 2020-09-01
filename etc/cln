@@ -1,2 +1,0 @@
-#! /bin/sh
-rm -f apache-gfarm-s3-wsgi.conf apache-gfarm-s3.conf gfarm-s3.conf gfarm.pc sudoers httpd.conf
