@@ -1,0 +1,20 @@
+ServerName 192.168.224.22
+
+<VirtualHost *:443>
+	SSLEngine on
+	SSLCertificateFile /etc/httpd/conf/ssl.key/server.crt
+	SSLCertificateKeyFile /etc/httpd/conf/ssl.crt/server.key
+
+	DocumentRoot @DocumentRoot@
+	ServerAdmin root@localhost
+	CustomLog logs/access_log common
+	ErrorLog logs/error_log
+
+	<Directory "@DocumentRoot@">
+		AllowOverride FileInfo AuthConfig Limit Indexes
+		Options MultiViews Indexes SymLinksIfOwnerMatch Includes
+		AllowOverride All
+		Require all granted 
+	</Directory>
+
+</VirtualHost>

@@ -28,7 +28,7 @@ gunicorn.service: gunicorn.service.in
 	cp $^ $@
 
 clean:
-	rm -f gfarm-s3.conf sudoers apache-gfarm-s3.conf
+	rm -f gfarm-s3.conf sudoers apache-gfarm-s3.conf gunicorn.service
 
 install:
 	$(INSTALL) -c gfarm-s3.conf $(GFARMS3_CONF)
