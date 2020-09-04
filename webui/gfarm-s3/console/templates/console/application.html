@@ -1,39 +1,84 @@
 {% extends "console/base.html" %}
 {% load i18n %}
 {% block content1 %}
-<h1>gfarm-s3</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+<h1>Gfarm-S3</h1>
+{% if error_message %}<div class="alert alert-danger" role="alert">{{ error_message }}</div>{% endif %}
+
+<ul class="nav nav-tabs">
+   <li class="nav-item">
+      <a href="#action1" class="nav-link active" data-toggle="tab">my-proxy</a>
+   </li>
+   <li class="nav-item">
+      <a href="#action2" class="nav-link" data-toggle="tab">Grid Proxy</a>
+   </li>
+   <li class="nav-item">
+      <a href="#action3" class="nav-link" data-toggle="tab">Gfkey</a>
+   </li>
+</ul>
+
+<div class="tab-content">
+   <div id="action1" class="tab-pane active"> 
+      {% trans 'passwordInstruction' %}
+   </div>  <!-- action1 -->
+   <div id="action2" class="tab-pane">
+      {% trans 'passwordInstruction' %}
+   </div>  <!-- action2 -->
+   <div id="action3" class="tab-pane"> 
+      {% trans 'passwordInstruction' %}
+   </div>  <!-- action3 -->
+</div>  <!-- tab content -->
+
 <form action="{% url 'launch' %}" method="post">
 {% csrf_token %}
+
 <div class="form-group">
-<label for="exampleInputEmail1">{% trans 'GlobalUsername' %}</label>
-<input type="text" class="form-control" name="username" placeholder="Enter Global username">
-</div>
+    <label for="exampleInputEmail1">{% trans 'GlobalUsername' %}</label>
+    <input type="text" class="form-control" name="username" placeholder="Enter Global username" required autofocus>
+</div> <!-- form-group -->
+
 <div class="form-group">
-<label for="exampleInputPassword1">{% trans 'Password' %}</label>
-<input type="password" class="form-control" name="passwd" placeholder="Password">
-</div>
+    <label for="exampleInputPassword1">{% trans 'Password' %}</label>
+    <input type="password" class="form-control" name="passwd" placeholder="Password" required>
+</div> <!-- form-group -->
 
-<div class="form-check">
-<input class="form-check-input" type="radio" name="action" id="radioStartGfarmS3" value="start" checked>
-<label class="form-check-label" for="radioStartGfarmS3">{% trans 'StartGfarmS3' %}</label>
-</div>
+<button type="submit" class="btn btn-primary" value="Launch">Sign in</button>
 
-<div class="form-check">
-<input class="form-check-input" type="radio" name="action" id="radioStopGfarmS3" value="stop">
-<label class="form-check-label" for="radioStopGfarmS3">Stop Gfarm-S3</label>
-</div>
+<p>
+    <a class="btn btn-outline-dark" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">Advanced Options</a>
+</p>
 
-<div class="form-check">
-<input class="form-check-input" type="radio" name="action" id="radioShowStatus" value="status">
-<label class="form-check-label" for="radioShowStatus">Show Status</label>
-</div>
+<div class="collapse multi-collapse" id="multiCollapseExample1">
+    <div class="card card-body">
 
-<div class="form-check">
-<input class="form-check-input" type="radio" name="action" id="radioGenKey" value="genkey">
-<label class="form-check-label" for="radioGenKey">Generate Secret Key</label>
-</div>
+	<div class="btn-group btn-group-toggle" data-toggle="buttons">
+	  <label class="btn btn-secondary active">
+	    <input type="radio" name="action" id="radioStartGfarmS3" value="start" checked>
+	       {% trans 'StartGfarmS3' %}
+	  </label>
+	  <label class="btn btn-secondary">
+	    <input type="radio" name="action" id="radioStopGfarmS3" value="stop">
+	      Stop Gfarm-S3
+	  </label>
+	  <label class="btn btn-secondary">
+	    <input type="radio" name="action" id="radioShowStatus" value="status">
+	      Show Current Status"
+	  </label>
+	  <label class="btn btn-secondary">
+	    <input type="radio" name="action" id="radioGenKey" value="genkey">
+	      Show S3 Secret Key
+	  </label>
+	</div> <!-- btn-group -->
 
-<button type="submit" class="btn btn-primary" value="Launch">Submit</button>
+<!--
+<div class="form-check"> <input class="form-check-input" type="radio" name="action" id="radioStartGfarmS3" value="start" checked> <label class="form-check-label" for="radioStartGfarmS3">{% trans 'StartGfarmS3' %}</label> </div>
+<div class="form-check"> <input class="form-check-input" type="radio" name="action" id="radioStopGfarmS3" value="stop"> <label class="form-check-label" for="radioStopGfarmS3">Stop Gfarm-S3</label> </div>
+<div class="form-check"> <input class="form-check-input" type="radio" name="action" id="radioShowStatus" value="status"> <label class="form-check-label" for="radioShowStatus">Show Status</label> </div>
+<div class="form-check"> <input class="form-check-input" type="radio" name="action" id="radioGenKey" value="genkey"> <label class="form-check-label" for="radioGenKey">Generate Secret Key</label> </div>
+-->
+
+    </div> <!-- card body -->
+</div> <!-- collapse -->
+
 </form>
+
 {% endblock %}

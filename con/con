@@ -1,13 +1,21 @@
 #! /bin/sh
+
 PREFIX=/usr/local
 GFARMS3_LOCAL_USER_MAP=$PREFIX/etc/gfarm_s3_local_user_map
-HTTPD_USER=apache
-cp gfarm_s3_local_user_map $GFARMS3_LOCAL_USER_MAP
-chown $HTTPD_USER $GFARMS3_LOCAL_USER_MAP
+WSGI_USER=user2
+HTTPD_CONF_D=/etc/httpd/conf.d
+HTTPD_DocumentRoot=/usr/local/share/www
+
+cp gfarm_s3_local_user_map.example $GFARMS3_LOCAL_USER_MAP
+chown $WSGI_USER $GFARMS3_LOCAL_USER_MAP
 users=$(cat $GFARMS3_LOCAL_USER_MAP | grep -v '^#' | awk -F : '{print $2}')
-for u in $users; do
-	usermod -a -G gfarms3 $u
-done
+for u in $users; do usermod -a -G gfarms3 $u; done
+
+sed -e "s|@DocumentRoot@|$HTTPD_DocumentRoot|" < myserver.conf.in > /tmp/myserver.conf
+cp /tmp/myserver.conf $HTTPD_CONF_D
+mkdir -p $HTTPD_DocumentRoot
+echo "gfarm -- $(date)" > $HTTPD_DocumentRoot/index.html
+
 chmod og+rX /var/log/httpd
 
 SERVER_CRT=/etc/httpd/conf/ssl.key/server.crt
@@ -17,5 +25,6 @@ mkdir -p $(dirname $SERVER_KEY)
 cp server.crt $SERVER_CRT
 cp server.key $SERVER_KEY
 
+systemctl enable httpd
 systemctl stop httpd
 systemctl start httpd

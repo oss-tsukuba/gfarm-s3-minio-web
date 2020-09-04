@@ -1,26 +1,7 @@
-ServerName 192.168.224.22
-<VirtualHost *:443>
-	SSLEngine on
-	SSLCertificateFile @SERVER_CRT@
-	SSLCertificateKeyFile @SERVER_KEY@
+RewriteEngine on
 
-	DocumentRoot "@DOCUMENTROOT@"
-	ServerAdmin root@localhost
-	CustomLog logs/access_log common
-	ErrorLog logs/error_log
+ProxyPass /d http://127.0.0.1:@WSGI_PORT@/d
+ProxyPreserveHost on
+ProxyAddHeaders off
 
-	RewriteEngine on
-
-	Include @GFARMS3_APACHE_REWRITE_CONF@
-
-	ProxyPreserveHost on
-	ProxyAddHeaders off
-
-	<Directory "@DOCUMENTROOT@">
-		AllowOverride FileInfo AuthConfig Limit Indexes
-		Options MultiViews Indexes SymLinksIfOwnerMatch Includes
-		AllowOverride All
-		Require all granted 
-	</Directory>
-
-</VirtualHost>
+Include @GFARMS3_APACHE_REWRITE_CONF@

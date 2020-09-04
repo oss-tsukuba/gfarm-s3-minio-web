@@ -1,0 +1,20 @@
+[Unit]
+Description = gunicorn daemon
+#Requires = gunicorn.socket
+After = network.target
+
+[Service]
+#Type = notify
+User = user2
+#Group = user2
+#RuntimeDirectory = gunicorn
+WorkingDirectory = /
+#ExecStart = /usr/local/bin/gunicorn gfarms3.wsgi:application
+ExecStart = /usr/local/bin/gunicorn -w 2 -b 0.0.0.0:8000 --chdir /home/user1/work/gfarm-s3-minio-web/webui/gfarm-s3 gfarms3.wsgi:application
+#ExecReload = /bin/kill -s HUP $MAINPID
+#KillMode = mixed
+#TimeoutStopSec = 5
+PrivateTmp = true
+
+[Install]
+WantedBy = multi-user.target

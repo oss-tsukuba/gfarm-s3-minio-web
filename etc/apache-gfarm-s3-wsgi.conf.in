@@ -1,9 +1,0 @@
-
-WSGIScriptAlias /d @WEBUI_ROOT@/gfarm-s3/gfarms3/wsgi.py
-WSGIPythonPath @PYTHON_SITE_PACKAGES@:@WEBUI_ROOT@/gfarm-s3
-
-<Directory @WEBUI_ROOT@/gfarm-s3/gfarms3>
-	<Files wsgi.py>
-		Require all granted
-	</Files>
-</Directory>

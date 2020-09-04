@@ -1,24 +1,13 @@
 #! /bin/sh
 
 PREFIX=/usr/local
-HTTPD_USER=apache
-
-SERVER_CRT=/etc/httpd/conf/ssl.key/server.crt
-SERVER_KEY=/etc/httpd/conf/ssl.crt/server.key
-
+WSGI_USER=user2
+WSGI_PORT=8000
 GFARMS3_BIN=$PREFIX/bin
 GFARMS3_APACHE_REWRITE_CONF=$PREFIX/var/gfarm-s3/rewrite.conf
-APACHE_DOCUMENTROOT=$PREFIX/share/www
-WEBUI_ROOT=/home/user1/work/gfarm-s3-minio-web/webui
 
-PYTHON_SITE_PACKAGES=/usr/local/lib/python3.6/site-packages
-
-sed -e 's@PREFIX@'"$PREFIX"'' \
-	-e 's@HTTPD_USER@'"$HTTPD_USER"'' \
-	-e 's@GFARMS3_APACHE_REWRITE_CONF@'"$GFARMS3_APACHE_REWRITE_CONF"'' \
-	-e 's@DOCUMENTROOT@'"$APACHE_DOCUMENTROOT"'' \
-	-e 's@GFARMS3_BIN@'"$GFARMS3_BIN"'' \
-	-e 's@WEBUI_ROOT@'"$WEBUI_ROOT"'' \
-	-e 's@PYTHON_SITE_PACKAGES@'"$PYTHON_SITE_PACKAGES"'' \
-	-e 's@SERVER_CRT@'"$SERVER_CRT"'' \
-	-e 's@SERVER_KEY@'"$SERVER_KEY"''
+sed -e 's|@PREFIX@|'"$PREFIX"'|' \
+	-e 's|@WSGI_USER@|'"$WSGI_USER"'|' \
+	-e 's|@GFARMS3_APACHE_REWRITE_CONF@|'"$GFARMS3_APACHE_REWRITE_CONF"'|' \
+	-e 's|@GFARMS3_BIN@|'"$GFARMS3_BIN"'|' \
+	-e 's|@WSGI_PORT@|'"$WSGI_PORT"'|'

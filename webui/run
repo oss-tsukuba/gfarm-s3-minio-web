@@ -1,3 +1,2 @@
 #! /bin/sh
-cd gfarm-s3
-python3 manage.py runserver
+(cd gfarm-s3 && gunicorn gfarms3.wsgi:application)

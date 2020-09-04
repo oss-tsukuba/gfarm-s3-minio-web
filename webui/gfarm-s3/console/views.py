@@ -22,8 +22,8 @@ def application(request):
 #      redirect(request, "console/session-menu.html", {})
 ### session-menu.html page has "logout" button (that delets `session')
 ### , "getfacl" button
-   
-    return render(request, "console/application.html", {})
+
+    return render(request, "console/application.html", {"error_message": "入力に誤りがあります"})
 
 def launch(request):
     logger.debug("{}\n".format(request.POST))

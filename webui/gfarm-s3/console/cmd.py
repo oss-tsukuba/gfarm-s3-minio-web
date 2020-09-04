@@ -37,7 +37,7 @@ def cmd(username, passwd, action):
         logger.debug("SUCCESS\nSTDERR = {}\n".format(stderr.decode()))
         result = json.loads(stdout.decode().strip())
         if "expiration_date" in result.keys():
-            result["expiration_date"] = time.ctime(result["expiration_date"])
+            result["expiration_date_calendar_datetime"] = time.ctime(result["expiration_date"])
         return result
     else:
         logger.debug("ERROR 2\nSTDERR = {}\n".format(stderr.decode()))
