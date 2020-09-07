@@ -1,4 +1,4 @@
-PREFIX=/usr/local
+PREFIX=@prefix@
 
 SYS_HTTPD_CONF=/etc/httpd/conf/httpd.conf
 SYS_HTTPD_CONF_D=/etc/httpd/conf.d
@@ -13,10 +13,10 @@ GFARM_S3_VAR=$(PREFIX)/var/gfarm-s3
 INSTALL=install -c -m 555
 MKDIR=mkdir
 
-all: gfarm-s3.conf sudoers apache-gfarm-s3.conf gunicorn.service
+all: sudoers apache-gfarm-s3.conf gunicorn.service
 
-gfarm-s3.conf: gfarm-s3.conf.in
-	../makes/build-conf < $^ > $@
+#gfarm-s3.conf: gfarm-s3.conf.in
+#	../makes/build-conf < $^ > $@
 
 sudoers: sudoers.in
 	../makes/build-conf < $^ > $@
@@ -28,7 +28,7 @@ gunicorn.service: gunicorn.service.in
 	cp $^ $@
 
 clean:
-	rm -f gfarm-s3.conf sudoers apache-gfarm-s3.conf gunicorn.service
+	rm -f sudoers apache-gfarm-s3.conf gunicorn.service
 
 install:
 	$(INSTALL) -c gfarm-s3.conf $(GFARMS3_CONF)

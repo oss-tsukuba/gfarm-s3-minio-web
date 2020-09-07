@@ -1,6 +1,6 @@
 #! /bin/sh
 
-PREFIX=/usr/local
+PREFIX=@prefix@
 WSGI_USER=user2
 WSGI_PORT=8000
 GFARMS3_BIN=$PREFIX/bin

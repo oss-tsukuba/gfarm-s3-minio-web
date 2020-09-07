@@ -40,3 +40,9 @@ def result(request):
     #status = get_object_or_404(Status, pk = status_id)
     result = request.session["result"]
     return render(request, "console/result.html", result)
+
+def list(request):
+    return render(request, "console/list.html", {})
+
+def aclfile(request):
+    return render(request, "console/aclfile.html", {})

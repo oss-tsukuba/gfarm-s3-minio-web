@@ -1,4 +1,4 @@
-PREFIX=/usr/local
+PREFIX=@prefix@
 
 BINDIR=$(PREFIX)/bin
 INSTALL=install -c -m 555

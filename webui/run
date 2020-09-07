@@ -1,2 +1,7 @@
 #! /bin/sh
-(cd gfarm-s3 && gunicorn gfarms3.wsgi:application)
+
+gunicorn \
+	-w 2 \
+	-b 0.0.0.0:8000 \
+	--chdir gfarm-s3 \
+	gfarms3.wsgi:application
