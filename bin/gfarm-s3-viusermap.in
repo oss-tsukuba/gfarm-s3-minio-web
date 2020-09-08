@@ -1,0 +1,27 @@
+#! /bin/sh
+
+export LANG=C
+export LC_CTYPE=C
+export LC_COLLATE=C
+
+#set -o xtrace
+
+. @sysconfdir@/gfarm-s3.conf
+. $GFARM_S3_BIN/gfarm-s3-subr
+
+viusermap() {
+	local edit_tmp=$(mktemp $GFARM_S3_TMP/viusermap.XXXXXX) || exit 1
+	if [ ! -f "$1" ]; then
+		echo "$1: no such file" 1>&2
+		return 1
+	fi
+	cat "$1" > $edit_tmp
+	if ! ${EDITOR:-vi} $edit_tmp </dev/tty >/dev/tty 2>/dev/tty; then
+		rm $edit_tmp
+		return 1
+	fi
+	cat $edit_tmp > "$2"
+	rm $edit_tmp
+}
+
+update_usermap viusermap

@@ -1,0 +1,108 @@
+#! /bin/sh
+
+export LANG=C
+export LC_CTYPE=C
+export LC_COLLATE=C
+
+set -o xtrace
+
+. @sysconfdir@/gfarm-s3.conf
+. $GFARM_S3_BIN/gfarm-s3-subr
+
+USAGE="usage: $0 start|stop|restart|status|keygen global-username password [gfarm_shared_dir]"
+
+if [ $# != 3 -a $# != 4 ]; then
+	echo "$USAGE" 1>&2
+	exit 1
+fi
+
+action="$1"
+global_username="$2"
+user_password="$3"
+
+if [ $# == 4 ]; then
+	gfarm_shared_dir_arg="$4"
+fi
+
+case $action in
+start|stop|restart|status|keygen) ;;
+*) echo $USAGE 1>&2; exit 1;;
+esac
+
+usermap_entry=$(lookup_usermap_by_global_username "$global_username" "$GFARMS3_LOCAL_USER_MAP")
+if [ -z "$usermap_entry" ]; then
+	echo "user not found: $global_username"
+	exit 1
+fi
+local_username=$(get_local_username "$usermap_entry")
+
+status=failure
+if ! authenticated_method=$(challenge_auth "$global_username" "$user_password" "$local_username"); then
+cat <<-EOF
+	{
+		"status": "$status",
+		"reason": "no authentication method succeeded"
+	}
+EOF
+	exit 1
+fi
+
+if ! case $authenticated_method in
+myproxy-logon|grid-proxy-init)
+	expiration_date=$(certificate_timeleft_grid_proxy_info);;
+gfkey)
+	expiration_date=$(certificate_timeleft_gfkey);;
+*)
+	expiration_date=-1; false;;
+esac; then
+cat <<-EOF
+	{
+		"status": "$status",
+		"reason": "no valid certificate"
+	}
+EOF
+	exit 1
+fi
+
+if [ -z "$gfarm_shared_dir_arg" ]; then
+	gfarm_shared_dir="$GFARMS3_GFARM_SHARED_DIR/$global_username"
+else
+	gfarm_shared_dir="$gfarm_shared_dir_arg"
+fi
+
+case $action in
+start)
+	spawn_per_user_server "$local_username" "$gfarm_shared_dir";;
+stop)
+	stop_per_user_server "$local_username";;
+restart)
+	stop_per_user_server "$local_username" &&
+	spawn_per_user_server "$local_username" "$gfarm_shared_dir";;
+status)
+	get_per_user_status "$local_username";;
+keygen)
+	regenerate_secret_key "$local_username";;
+esac
+
+exit_status=$?
+
+if [ $exit_status = 0 ]; then
+	status=success
+	reason="none"
+else
+	status=failure
+	reason="$action exit: code = $exit_status"
+fi
+
+cat <<-EOF
+	{
+		"status": "$status",
+		"reason": "$reason",
+		"authenticated_method": "$authenticated_method",
+		"expiration_date": $expiration_date,
+		"global_username": "$(get_global_username "$usermap_entry")",
+		"local_username": "$(get_local_username "$usermap_entry")",
+		"access_key": "$(get_access_key "$usermap_entry")",
+		"secret_key": "$(get_per_user_secret_key "$local_username")"
+	}
+EOF
