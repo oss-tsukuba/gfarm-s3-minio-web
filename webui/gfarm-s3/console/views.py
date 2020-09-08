@@ -5,6 +5,9 @@ from django.utils import timezone
 import logging
 from . import cmd
 
+### XXX debug
+import sys
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
@@ -27,6 +30,10 @@ def application(request):
 
 def launch(request):
     logger.debug("{}\n".format(request.POST))
+
+### XXX debug
+    sys.stderr.write("POST = {}\n".format(request.POST))
+
     username = request.POST["username"]
     passwd = request.POST["passwd"]
     action = request.POST["action"]

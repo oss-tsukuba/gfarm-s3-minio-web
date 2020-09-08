@@ -2,8 +2,8 @@ ServerName 192.168.224.22
 
 <VirtualHost *:443>
 	SSLEngine on
-	SSLCertificateFile /etc/httpd/conf/ssl.key/server.crt
-	SSLCertificateKeyFile /etc/httpd/conf/ssl.crt/server.key
+	SSLCertificateFile @SERVER_CRT@
+	SSLCertificateKeyFile @SERVER_KEY@
 
 	DocumentRoot @DocumentRoot@
 	ServerAdmin root@localhost

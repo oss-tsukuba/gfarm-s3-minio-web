@@ -25,7 +25,7 @@ apache-gfarm-s3.conf: apache-gfarm-s3.conf.in
 	../makes/build-conf < $^ > $@
 
 gunicorn.service: gunicorn.service.in
-	cp $^ $@
+	../makes/build-conf < $^ > $@
 
 clean:
 	rm -f sudoers apache-gfarm-s3.conf gunicorn.service
@@ -49,10 +49,7 @@ install:
 	touch $(GFARMS3_APACHE_REWRITE_CONF)
 	chown $(WSGI_USER) $(GFARMS3_APACHE_REWRITE_CONF)
 
+	cp gunicorn.service /etc/systemd/system/gunicorn.service
+
 	@echo please add apache-gfarm-s3.conf content to your httpd.conf
-
-	cp gunicorn.service /etc/systemd/system/
-
-	@echo sudo systemctl enable --now gunicorn.service
-	@echo "sudo journalctl -b|cat"
-	@echo sudo systemd-analyze verify /etc/systemd/system/gunicorn.service
+	@echo systemctl enable --now gunicorn.service

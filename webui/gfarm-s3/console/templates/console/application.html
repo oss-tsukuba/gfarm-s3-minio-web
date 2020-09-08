@@ -33,18 +33,18 @@
 
 <div class="form-group">
     <label for="exampleInputEmail1">{% trans 'GlobalUsername' %}</label>
-    <input type="text" class="form-control" name="username" placeholder="Enter Global username" required autofocus>
+    <input type="text" class="form-control" name="username" placeholder="{% trans 'UsernamePlacehodler' %}" required autofocus>
 </div> <!-- form-group -->
 
 <div class="form-group">
     <label for="exampleInputPassword1">{% trans 'Password' %}</label>
-    <input type="password" class="form-control" name="passwd" placeholder="Password" required>
+    <input type="password" class="form-control" name="passwd" placeholder="{% trans 'PasswordPlaceholder' %}" required>
 </div> <!-- form-group -->
 
-<button type="submit" class="btn btn-primary" value="Launch">Sign in</button>
+<button type="submit" class="btn btn-primary" value="Launch">{% trans 'GoButton' %}</button>
 
 <p>
-    <a class="btn btn-outline-dark" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">Advanced Options</a>
+    <a class="btn btn-outline-dark" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">{% trans 'AdvancedOptions' %}</a>
 </p>
 
 <div class="collapse multi-collapse" id="multiCollapseExample1">
@@ -57,15 +57,15 @@
 	  </label>
 	  <label class="btn btn-secondary">
 	    <input type="radio" name="action" id="radioStopGfarmS3" value="stop">
-	      Stop Gfarm-S3
+	      {% trans 'StopGfarmS3' %}
 	  </label>
 	  <label class="btn btn-secondary">
 	    <input type="radio" name="action" id="radioShowStatus" value="status">
-	      Show Current Status"
+              {% trans 'ShowCurrentStatus' %}
 	  </label>
 	  <label class="btn btn-secondary">
 	    <input type="radio" name="action" id="radioGenKey" value="genkey">
-	      Show S3 Secret Key
+              {% trans 'ShowS3SecretKey' %}
 	  </label>
 	</div> <!-- btn-group -->
 

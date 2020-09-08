@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-04 13:15+0900\n"
+"POT-Creation-Date: 2020-09-08 11:08+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,21 +18,50 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: templates/console/application.html:24 templates/console/application.html:28
+#: templates/console/application.html:21 templates/console/application.html:24
+#: templates/console/application.html:27
 msgid "passwordInstruction"
-msgstr ""
+msgstr "パスワードについて"
 
-#: templates/console/application.html:37
+#: templates/console/application.html:35
 msgid "GlobalUsername"
 msgstr "ユーザ名(global)"
 
-#: templates/console/application.html:41
+#: templates/console/application.html:36
+msgid "UsernamePlacehodler"
+msgstr "グローバル ユーザ名"
+
+#: templates/console/application.html:40
 msgid "Password"
 msgstr "パスワード"
 
+#: templates/console/application.html:41
+msgid "PasswordPlaceholder"
+msgstr "パスワード"
+
+#: templates/console/application.html:44
+msgid "GoButton"
+msgstr "起動"
+
 #: templates/console/application.html:47
+msgid "AdvancedOptions"
+msgstr "オプション"
+
+#: templates/console/application.html:56 templates/console/application.html:73
 msgid "StartGfarmS3"
 msgstr "Gfarm-S3 を起動"
+
+#: templates/console/application.html:60
+msgid "StopGfarmS3"
+msgstr "Gfarm-S3 を停止"
+
+#: templates/console/application.html:64
+msgid "ShowCurrentStatus"
+msgstr "現在の状態を表示"
+
+#: templates/console/application.html:68
+msgid "ShowS3SecretKey"
+msgstr "S3のシークレットキーを表示"
 
 #: templates/console/index.html:8
 msgid "AppLink"

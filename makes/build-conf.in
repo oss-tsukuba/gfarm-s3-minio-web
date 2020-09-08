@@ -3,11 +3,15 @@
 PREFIX=@prefix@
 WSGI_USER=user2
 WSGI_PORT=8000
+WEBUI_BINDIR=/home/user1/work/gfarm-s3-minio-web/webui/gfarm-s3
 GFARMS3_BIN=$PREFIX/bin
 GFARMS3_APACHE_REWRITE_CONF=$PREFIX/var/gfarm-s3/rewrite.conf
+GUNICORN=/usr/local/bin/gunicorn
 
 sed -e 's|@PREFIX@|'"$PREFIX"'|' \
 	-e 's|@WSGI_USER@|'"$WSGI_USER"'|' \
 	-e 's|@GFARMS3_APACHE_REWRITE_CONF@|'"$GFARMS3_APACHE_REWRITE_CONF"'|' \
 	-e 's|@GFARMS3_BIN@|'"$GFARMS3_BIN"'|' \
-	-e 's|@WSGI_PORT@|'"$WSGI_PORT"'|'
+	-e 's|@WSGI_PORT@|'"$WSGI_PORT"'|' \
+	-e 's|@WEBUI_BINDIR@|'"$WEBUI_BINDIR"'|' \
+	-e 's|@GUNICORN@|'"$GUNICORN"'|'
