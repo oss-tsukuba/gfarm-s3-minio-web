@@ -1,20 +1,18 @@
 srcdir=/home/user1/work/gfarm-s3-minio-web
-GOPATH=$(srcdir)/minio/tmp/go
+GOPATH=$(srcdir)/minio/work/go
 GOBIN=$(GOPATH)/bin
+BUILDDIR=$(srcdir)/minio/work/build
 
 GFARM_S3_PREFIX=@prefix@
 MINIO_PATH=$(GFARM_S3_PREFIX)/bin/minio
 MC_PATH=$(GFARM_S3_PREFIX)/bin/mc
 
-BUILDDIR=$(srcdir)/minio/tmp/build
-
 all::
-	./build
+	./build.sh
 
 install::
-
 	install -c -m 555 $(GOBIN)/mc "$(MC_PATH)"
 	install -c -m 555 $(GOBIN)/minio "$(MINIO_PATH)"
 
 clean::
-	rm -rf $(BUILDDIR) $(GOPATH)
+	rm -rf $(BUILDDIR)

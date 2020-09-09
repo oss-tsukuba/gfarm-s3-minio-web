@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-08 11:08+0900\n"
+"POT-Creation-Date: 2020-09-09 12:51+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,51 +18,60 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: templates/console/application.html:21 templates/console/application.html:24
-#: templates/console/application.html:27
+#: templates/console/application.html:5
+msgid "errorMessage"
+msgstr "error!"
+
+#: templates/console/application.html:23 templates/console/application.html:26
+#: templates/console/application.html:29
 msgid "passwordInstruction"
 msgstr "password instruction"
 
-#: templates/console/application.html:35
+#: templates/console/application.html:37
 msgid "GlobalUsername"
 msgstr "Global username"
 
-#: templates/console/application.html:36
+#: templates/console/application.html:38
 msgid "UsernamePlacehodler"
 msgstr "Enter Global Username"
 
-#: templates/console/application.html:40
+#: templates/console/application.html:42
 msgid "Password"
 msgstr "Password"
 
-#: templates/console/application.html:41
+#: templates/console/application.html:43
 msgid "PasswordPlaceholder"
 msgstr "Enter Password"
 
-#: templates/console/application.html:44
+#: templates/console/application.html:46
 msgid "GoButton"
-msgstr "Energize"
+msgstr "Sign In"
 
-#: templates/console/application.html:47
+#: templates/console/application.html:50
 msgid "AdvancedOptions"
 msgstr "Advanced Options"
 
-#: templates/console/application.html:56 templates/console/application.html:73
+#: templates/console/application.html:59 templates/console/application.html:75
+#: templates/console/result.html:24
 msgid "StartGfarmS3"
 msgstr "Start Gfarm-S3"
 
-#: templates/console/application.html:60
+#: templates/console/application.html:63 templates/console/result.html:28
 msgid "StopGfarmS3"
 msgstr "Stop Gfarm-S3"
 
-#: templates/console/application.html:64
+#: templates/console/application.html:67 templates/console/result.html:32
 msgid "ShowCurrentStatus"
 msgstr "Show Current Status"
 
-#: templates/console/application.html:68
+#: templates/console/application.html:71 templates/console/result.html:36
 msgid "ShowS3SecretKey"
 msgstr "Show S3 Secret-Key"
 
 #: templates/console/index.html:8
 msgid "AppLink"
 msgstr "applnk"
+
+#: templates/console/result.html:40
+msgid "BucketACL"
+msgstr "Bucket ACL"

@@ -21,20 +21,11 @@ def cmd(username, passwd, action):
     #action = "stop" | "start" | "restart" | "show" | "genkey"
     gfarm_s3_login = os.path.join(GFARM_S3_BIN, "gfarm-s3-login")
     cmd = [gfarm_s3_login, action, username, passwd]
-    env = {
-        #"GLOBUS_GSSAPI_NAME_COMPATIBILITY": "HYBRID",
-        #"HOME": os.environ["HOME"],
-	#"HOME": "/home/user2",
-        #"PATH": os.environ["PATH"],
-        #"TZ": os.environ["TZ"],
-        #"USER": os.environ["USER"],
-        #"USER": "user2",
-    }
 
 ### XXX debug
     sys.stderr.write("CMD = {}\n".format(cmd))
     try:
-        p = Popen(cmd, stdout = PIPE, stderr = PIPE, env = env)
+        p = Popen(cmd, stdout = PIPE, stderr = PIPE, env = {})
     except:
         logger.debug("ERROR 1\n")
         return {"status": "ERROR 1", "reason": "Popen failed"}
@@ -52,3 +43,78 @@ def cmd(username, passwd, action):
     if "expiration_date" in result.keys():
         result["expiration_date_calendar_datetime"] = time.ctime(result["expiration_date"])
     return result
+
+def get_group_list(username):
+    cmd = ["sudo", "-u", username, "/usr/local/bin/gfgroup"]
+
+### XXX debug
+    sys.stderr.write("CMD = {}\n".format(cmd))
+
+    p = Popen(cmd, stdout = PIPE, stderr = PIPE, env = {})
+
+    stdout, stderr = p.communicate()
+
+    p.wait()
+
+    sys.stderr.write("*SYS*STDOUT = {}\n".format(stdout))
+    logger.debug("+LOG+STDOUT = {}\n".format(stdout))
+
+    return stdout.decode().split('\n')
+    #return ["a", "b", "c"]
+
+def get_user_list(username):
+    cmd = ["sudo", "-u", username, "/usr/local/bin/gfuser"]
+
+### XXX debug
+    sys.stderr.write("CMD = {}\n".format(cmd))
+
+    p = Popen(cmd, stdout = PIPE, stderr = PIPE, env = {})
+
+    stdout, stderr = p.communicate()
+
+    p.wait()
+
+    sys.stderr.write("*SYS*STDOUT = {}\n".format(stdout))
+    logger.debug("+LOG+STDOUT = {}\n".format(stdout))
+
+    return stdout.decode().split('\n')
+    #return ["a", "b", "c"]
+
+def get_bucket_list(username):
+    s3rootdir = "/home/hp120273/hpci005858/tmp/gfarms3/hpci005858"
+    cmd = ["sudo", "-u", username, "/usr/local/bin/gfls", s3rootdir]
+
+### XXX debug
+    sys.stderr.write("CMD = {}\n".format(cmd))
+
+    p = Popen(cmd, stdout = PIPE, stderr = PIPE, env = {})
+
+    stdout, stderr = p.communicate()
+
+    p.wait()
+
+    sys.stderr.write("*SYS*STDOUT = {}\n".format(stdout))
+    logger.debug("+LOG+STDOUT = {}\n".format(stdout))
+
+    return stdout.decode().split('\n')
+    #return ["a", "b", "c"]
+
+def get_bucket_acl(username, bucket):
+    s3rootdir = "/home/hp120273/hpci005858/tmp/gfarms3/hpci005858"
+    bucketpath = os.path.join(s3rootdir, bucket)
+    cmd = ["sudo", "-u", username, "/usr/local/bin/gfgetfacl", bucketpath]
+
+### XXX debug
+    sys.stderr.write("CMD = {}\n".format(cmd))
+
+    p = Popen(cmd, stdout = PIPE, stderr = PIPE, env = {})
+
+    stdout, stderr = p.communicate()
+
+    p.wait()
+
+    sys.stderr.write("*SYS*STDOUT = {}\n".format(stdout))
+    logger.debug("+LOG+STDOUT = {}\n".format(stdout))
+
+    return stdout.decode().split('\n')
+    #return ["a", "b", "c"]

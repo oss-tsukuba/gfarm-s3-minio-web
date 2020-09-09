@@ -1,0 +1,28 @@
+#! /bin/sh
+if [ $(id -u) != 0 ]; then
+	echo "Insufficient privileges to install prerequisites."
+	exit 1
+fi
+yum update -y
+yum install -y httpd
+yum install -y mod_ssl
+yum install -y uuid
+yum install -y myproxy
+yum install -y python3-devel
+yum install -y python3-pip
+#yum install -y httpd-devel
+python3 -m pip install 'Django<2.2'
+python3 -m pip install gunicorn
+## debug
+python3 -m pip install boto3
+#python3 -m pip install mod_wsgi
+#yum install -y epel-release
+#yum install -y golang ## not suitable (ver1.3 is too old)
+
+
+#vi /etc/nginx/nginx.conf
+#yum install nginx
+#systemctl enable nginx.service
+#systemctl restart nginx.service
+#systemctl stop nginx.service
+#chmod o+rx /var/log/nginx

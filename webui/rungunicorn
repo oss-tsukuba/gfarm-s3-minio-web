@@ -1,0 +1,16 @@
+#! /bin/sh
+
+#gunicorn \
+#	-w 2 \
+#	-b 0.0.0.0:8000 \
+#	--chdir gfarm-s3 \
+#	gfarms3.wsgi:application
+
+cd /
+/usr/local/bin/gunicorn \
+	--error-logfile /tmp/gunicorn.err \
+	--log-file /tmp/gunicorn.log \
+	-w 2 \
+	-b 0.0.0.0:8000 \
+	--chdir /home/user1/work/gfarm-s3-minio-web/webui/gfarm-s3 \
+	gfarms3.wsgi:application

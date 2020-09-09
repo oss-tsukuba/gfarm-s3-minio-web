@@ -1,5 +1,10 @@
 #! /bin/sh
 
+## --with-globus=/usr
+## --with-myproxy=/usr
+## --with-gfarm=/usr/local
+## --with-apache=/usr
+
 PREFIX=@prefix@
 WSGI_USER=user2
 WSGI_PORT=8000
@@ -7,6 +12,10 @@ WEBUI_BINDIR=/home/user1/work/gfarm-s3-minio-web/webui/gfarm-s3
 GFARMS3_BIN=$PREFIX/bin
 GFARMS3_APACHE_REWRITE_CONF=$PREFIX/var/gfarm-s3/rewrite.conf
 GUNICORN=/usr/local/bin/gunicorn
+globus_bin=/usr/bin
+myproxy_bin=/usr/bin
+gfarm_bin=/usr/local/bin
+apache_sbin=/usr/sbin
 
 sed -e 's|@PREFIX@|'"$PREFIX"'|' \
 	-e 's|@WSGI_USER@|'"$WSGI_USER"'|' \
@@ -14,4 +23,8 @@ sed -e 's|@PREFIX@|'"$PREFIX"'|' \
 	-e 's|@GFARMS3_BIN@|'"$GFARMS3_BIN"'|' \
 	-e 's|@WSGI_PORT@|'"$WSGI_PORT"'|' \
 	-e 's|@WEBUI_BINDIR@|'"$WEBUI_BINDIR"'|' \
-	-e 's|@GUNICORN@|'"$GUNICORN"'|'
+	-e 's|@GUNICORN@|'"$GUNICORN"'|' \
+	-e 's|@globus_bin@|'"$globus_bin"'|' \
+	-e 's|@myproxy_bin@|'"$myproxy_bin"'|' \
+	-e 's|@gfarm_bin@|'"$gfarm_bin"'|' \
+	-e 's|@apache_sbin@|'"$apache_sbin"'|'

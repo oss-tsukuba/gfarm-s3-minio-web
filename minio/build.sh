@@ -4,20 +4,13 @@
 ##--with-gfarm=/usr/local
 ##--prefix=/usr/local
 
-srcdir=/home/user1/work/gfarm-s3-minio-web
-GOPATH=$srcdir/minio/tmp/go
-go_archive=go1.15.linux-amd64.tar.gz
-go_url=https://dl.google.com/go/$go_archive
-if [ ! -e $GOPATH ]; then
-	mkdir -p $(dirname $GOPATH)
-	(cd $(dirname $GOPATH) && curl $go_url | tar xfzp -)
-fi
-
-srcdir=/home/user1/work/gfarm-s3-minio-web
-
 with_gfarm=/usr/local
 prefix=/usr/local
-BUILDDIR=$srcdir/minio/tmp/build
+
+srcdir=/home/user1/work/gfarm-s3-minio-web
+export GOPATH=$srcdir/minio/work/go
+export GOBIN=$GOPATH/bin
+BUILDDIR=$srcdir/minio/work/build
 
 . /usr/local/etc/gfarm-s3.conf
 
@@ -31,10 +24,6 @@ minio_git=git@github.com:oss-tsukuba/gfarm-s3-minio.git
 [ -d $BUILDDIR/gfarm-s3-minio ] || (cd $BUILDDIR && git clone $minio_git &&
 	cd gfarm-s3-minio && git checkout gatewaygfarm)
 
-export GOPATH=$srcdir/minio/tmp/go
-export GOBIN=$GOPATH/bin
-PATH=/usr/local/go/bin:$PATH
-
 (cd $BUILDDIR/mc && $GOPATH/bin/go install)
 
 if [ x"$with_gfarm" = x"/usr" ]; then with_gfarm=; fi
@@ -45,6 +34,3 @@ if [ -n "$with_gfarm" ]; then
 	export PKG_CONFIG_PATH="$with_gfarm/lib/pkgconfig"
 	(cd $BUILDDIR/gfarm-s3-minio && $GOPATH/bin/go install)
 fi
-
-#file $GOBIN/mc
-#file $GOBIN/minio

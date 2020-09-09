@@ -9,4 +9,6 @@ urlpatterns = [
     path('result/', views.result, name = 'result'),
     path('list/', views.list, name = 'list'),
     path('aclfile/', views.aclfile, name = 'aclfile'),
+    path('chgkey/', views.aclfile, name = 'chgkey'),
+    path('stop/', views.aclfile, name = 'stop'),
 ]

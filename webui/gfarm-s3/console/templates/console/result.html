@@ -2,18 +2,64 @@
 {% load i18n %}
 {% block content1 %}
 <div {% if status != "success" %} class="bg-danger" {% endif %} >
-<h1>Result</h1>
+<h1>Gfarm-S3 started</h1>
 <div class="table-responsive">
 <table class="table table-striped">
 <thead class="thead-light">
 </thead><tbody>
+<!--
 <tr><th scope="row">Status</th><td>{{ status }}</td></tr>
 <tr><th scope="row">Reason</th><td>{{ reason }}</td></tr>
+-->
 <tr><th scope="row">Authentication Method</th><td>{{ authenticated_method }}</td></tr>
 <tr><th scope="row">Expiration Date</th><td>{{ expiration_date_calendar_datetime }}</td></tr>
 <tr><th scope="row">Global Username</th><td>{{ global_username }}</td></tr>
+<!--
 <tr><th scope="row">Local Username</th><td>{{ local_username }}</td></tr>
+-->
 <tr><th scope="row">Access Key</th><td>{{ access_key }}</td></tr>
 <tr><th scope="row">Secret Key</th><td>{{ secret_key }}</td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+
+<form action="{% url 'chgkey' %}" method="post">
+{% csrf_token %}
+<button type="submit" class="btn btn-primary" value="Launch">{% trans 'chgKey' %}</button>
+</form>
+
+<form action="{% url 'stop' %}" method="post">
+{% csrf_token %}
+<button type="submit" class="btn btn-primary" value="Launch">{% trans 'StopGfarmS3' %}</button>
+</form>
+
+<form action="{% url 'list' %}" method="post">
+{% csrf_token %}
+<button type="submit" class="btn btn-primary" value="Launch">{% trans 'BucketACL' %}</button>
+</form>
+
+<!--
+	<div class="btn-group btn-group-toggle" data-toggle="buttons">
+	  <label class="btn btn-outline-primary active">
+	    <input type="radio" name="action" id="radioStartGfarmS3" value="start" checked>
+	       {% trans 'StartGfarmS3' %}
+	  </label>
+	  <label class="btn btn-outline-primary">
+	    <input type="radio" name="action" id="radioStopGfarmS3" value="stop">
+	      {% trans 'StopGfarmS3' %}
+	  </label>
+	  <label class="btn btn-outline-primary">
+	    <input type="radio" name="action" id="radioShowStatus" value="status">
+              {% trans 'ShowCurrentStatus' %}
+	  </label>
+	  <label class="btn btn-outline-primary">
+	    <input type="radio" name="action" id="radioGenKey" value="genkey">
+              {% trans 'ShowS3SecretKey' %}
+	  </label>
+	  <label class="btn btn-outline-primary">
+	    <input type="radio" name="action" id="radioGenKey" value="bucketacl">
+              {% trans 'BucketACL' %}
+	  </label>
+	</div>
+-->
+
+</div>
 {% endblock %}

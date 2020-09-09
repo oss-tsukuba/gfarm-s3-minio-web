@@ -761,9 +761,9 @@ try_start_a_server() {
 		$GFARMS3_GFARM_SHARED_VIRTUAL_NAME & \
 	 echo "$port:$!" 1>&3; \
 	 wait; \
-	 echo "Invocation Failed") <&- >$tmpfile 2>&1 3>$pidfile &
+	 echo "Minio Exited") <&- >$tmpfile 2>&1 3>$pidfile &
 	for i in $(seq 1 1 60); do
-		if egrep -l "^(Endpoint|Invocation Failed)" $tmpfile 1>&2; then
+		if egrep -l "^(Endpoint|Minio Exited)" $tmpfile 1>&2; then
 			## MinIO started, and wrote greeting message to stdout
 			## or MinIO exited (for some reason)
 			break
@@ -771,24 +771,23 @@ try_start_a_server() {
 		sleep 1
 	done
 
-	if grep -l "^Invocation Failed" $tmpfile 1>&2; then
+	if grep -l "^Minio Exited" $tmpfile 1>&2; then
 ### debug
-#sed 's/^/|/' < $tmpfile 1>&2
-		rm -f $tmpfile $pidfile
+#		rm -f $tmpfile
+		rm -f $pidfile
 		return 1	## temporary error (minio has quit)
 	fi
 
 	if ! grep -l "^Endpoint" $tmpfile 1>&2; then
 		kill -KILL $(< $pidfile)
 ### debug
-#sed 's/^/|/' < $tmpfile 1>&2
-		rm -f $tmpfile $pidfile
+#		rm -f $tmpfile
+		rm -f $pidfile
 		return 2	## fatal error (minio still running)
 	fi
 
 ### debug
-#tail -f $tmpfile | sed 's/^/|/' 1>&2 &
-	rm -f $tmpfile
+#	rm -f $tmpfile
 	if ! mymc_init; then return 1; fi
 	if ! mc_config $address; then
 		mymc_finish

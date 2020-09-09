@@ -8,6 +8,19 @@ MC_PROFILE="mcuser"
 
 set -o xtrace
 
+show_secret_key() {
+	cat "$GFARMS3_SECRET_KEY"
+}
+
+show_secret_key_file() {
+	echo "$GFARMS3_SECRET_KEY"
+}
+
+regenerate_secret() {
+	mkdir -p $(dirname "$GFARMS3_SECRET_KEY")
+	generate_secret_key > "$GFARMS3_SECRET_KEY"
+}
+
 variables_overridable="MINIO_PATH \
 	GFARMS3_GFARM_SHARED_DIR \
 	GFARMS3_GFARM_SHARED_VIRTUAL_NAME \
@@ -108,20 +121,10 @@ export MINIO_ACCESS_KEY="$access_key"
 if [ ! -f "$GFARMS3_SECRET_KEY" ]; then regenerate_secret; fi
 export MINIO_SECRET_KEY=${secret_key:-$(<"$GFARMS3_SECRET_KEY")}
 
+if [ -z "$MINIO_ACCESS_KEY" ]; then exit 1; fi
+if [ -z "$MINIO_SECRET_KEY" ]; then exit 1; fi
+
 export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
-
-show_secret_key() {
-	cat "$GFARMS3_SECRET_KEY"
-}
-
-show_secret_key_file() {
-	echo "$GFARMS3_SECRET_KEY"
-}
-
-regenerate_secret() {
-	mkdir -p $(dirname "$GFARMS3_SECRET_KEY")
-	generate_secret_key > "$GFARMS3_SECRET_KEY"
-}
 
 case $action in
 START) start_server "$gfarm_shared_dir";;

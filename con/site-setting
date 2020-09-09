@@ -10,7 +10,7 @@ HTTPD_DocumentRoot=/usr/local/share/www
 SERVER_CRT=/etc/httpd/conf/ssl.key/server.crt
 SERVER_KEY=/etc/httpd/conf/ssl.crt/server.key
 
-sed < myserver.conf.in > $HTTPD_CONF_D/myserver.conf \
+sed < etc/myserver.conf.in > $HTTPD_CONF_D/myserver.conf \
 	-e "s@DocumentRoot@$HTTPD_DocumentRoot"  \
 	-e "s@SERVER_CRT@$SERVER_CRT" \
 	-e "s@SERVER_KEY@$SERVER_KEY"
@@ -19,8 +19,8 @@ mkdir -p $HTTPD_DocumentRoot
 mkdir -p $(dirname $SERVER_CRT)
 mkdir -p $(dirname $SERVER_KEY)
 echo "gfarm -- $(date)" > $HTTPD_DocumentRoot/index.html
-cp server.crt $SERVER_CRT
-cp server.key $SERVER_KEY
+cp etc/server.crt $SERVER_CRT
+cp etc/server.key $SERVER_KEY
 
 chmod og+rX /var/log/httpd
 
