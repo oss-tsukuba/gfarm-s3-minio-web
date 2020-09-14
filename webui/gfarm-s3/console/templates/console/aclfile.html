@@ -1,135 +1,36 @@
 {% extends "console/base.html" %}
 {% load i18n %}
 {% block content1 %}
-<h1>Gfarm-S3</h1>
-<form action="{% url 'launch' %}" method="post">
+
+<h1><em>mybucket</em></h1>
+
+<form action="{% url 'aclfile' %}" method="post">
 {% csrf_token %}
+
 <div class="form-group">
 
-<p><em>mybucket</em> </p>
+<card>
+<pre>
+{% for o in metainfo %}{{ o }}
+{% endfor %}{% for o in bucket_acl %}{{ o }}
+{% endfor %}</pre>
+</card>
 
-<table class="table">
-<tbody>
-{% for o in metainfo %}
-    <tr><td>{{ o }}</a></td><td>
-{% endfor %}
-</tbody>
-</table>
+<ul id="acl_list" class="list-group"></ul>
 
-<table class="table">
-<tbody>
-{% for o in bucket_acl %}
-    <tr>
-<td>{{ o }}</td><td>
-<div class="btn-group btn-group-toggle" data-toggle="buttons">
-  <label class="btn btn-outline-primary active">
-    <input type="radio" name="options" id="option1" autocomplete="off" checked> read+write
-  </label>
-  <label class="btn btn-outline-primary">
-    <input type="radio" name="options" id="option2" autocomplete="off"> read only
-  </label>
-  <label class="btn btn-outline-primary">
-    <input type="radio" name="options" id="option3" autocomplete="off"> none
-  </label>
-</div></td>
-<td><button type="button" class="btn btn-outline-danger">Delete</button></td>
-  </tr>
-{% endfor %}
-</tbody></table>
-<p><button type="submit" class="btn btn-primary" value="Launch">apply</button>
-   <button type="submit" class="btn btn-outline-danger" value="Launch">cancel</button>
-   <button type="submit" class="btn btn-outline-danger" value="Launch">revert</button></p>
+<button type="button" id="add_entry" class="form-control">add entry</button>
 
-
-<div class="accordion" id="accordionExample">
-
-
-  <div class="card">
-    <div class="card-header" id="headingOne">
-      <h5 class="mb-0">
-        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-          All Groups
-        </button>
-      </h5>
-    </div>
-
-    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
-      <div class="card-body">
-
-
-<table class="table">
-<tbody>
-{% for o in groups %}
-    <tr><td>{{ o }}</td><td>
-<div class="btn-group btn-group-toggle" data-toggle="buttons">
-  <label class="btn btn-outline-primary active">
-    <input type="radio" name="options" id="option1" autocomplete="off"> read+write
-  </label>
-  <label class="btn btn-outline-primary">
-    <input type="radio" name="options" id="option2" autocomplete="off"> read only
-  </label>
-  <label class="btn btn-outline-primary">
-    <input type="radio" name="options" id="option3" autocomplete="off" checked> none
-  </label>
-</div>
-  </td></tr>
-{% endfor %}
-</tbody>
-</table>
-<p><button type="submit" class="btn btn-primary" value="Launch">apply</button>
-   <button type="submit" class="btn btn-outline-danger" value="Launch">cancel</button>
-   <button type="submit" class="btn btn-outline-danger" value="Launch">revert</button></p>
-
-
-      </div>
-    </div>
-  </div>
-
-
-  <div class="card">
-    <div class="card-header" id="headingTwo">
-      <h5 class="mb-0">
-        <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-          All Users
-        </button>
-      </h5>
-    </div>
-    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
-      <div class="card-body">
-
-
-
-<table class="table">
-<tbody>
-{% for o in users %}
-    <tr><td>{{ o }}</td><td>
-<div class="btn-group btn-group-toggle" data-toggle="buttons">
-  <label class="btn btn-outline-primary active">
-    <input type="radio" name="options" id="option1" autocomplete="off"> read+write
-  </label>
-  <label class="btn btn-outline-primary">
-    <input type="radio" name="options" id="option2" autocomplete="off"> read only
-  </label>
-  <label class="btn btn-outline-primary">
-    <input type="radio" name="options" id="option3" autocomplete="off" checked> none
-  </label>
-</div>
-  </td></tr>
-{% endfor %}
-</tbody>
-</table>
-<p><button type="submit" class="btn btn-primary" value="Launch">apply</button>
-   <button type="submit" class="btn btn-outline-danger" value="Launch">cancel</button>
-   <button type="submit" class="btn btn-outline-danger" value="Launch">revert</button></p>
-
-
-      </div>
-    </div>
-  </div>
-</div>
-
+<button type="submit" class="btn btn-primary form-control" value="apply-settings">apply</button>
 
 </div>
+
 </form>
+
+<script>
+var data_groups_and_users = [
+{ id: 0, text: "" },
+{% for e in groups_users %}{ id: "{{ e.id }}", text: "{{ e.text }}" },{% endfor %}
+];
+</script>
 
 {% endblock %}

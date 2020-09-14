@@ -5,9 +5,6 @@ from django.utils import timezone
 import logging
 from . import cmd
 
-### XXX debug
-import sys
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
@@ -31,75 +28,64 @@ def need_login(session):
     return session["status"] != "success"
 
 def index(request):
-### XXX debug
-    sys.stderr.write("@@@ session = {}\n".format(request.session))
+    logger.debug("@@@ session = {}\n".format(request.session))
     for key, value in request.session.items():
-        sys.stderr.write("@@@ {} => {}".format(key, value))
+        logger.debug("@@@ {} => {}".format(key, value))
     return render(request, "console/index.html", {})
 
-def application(request):
-#    if request.session["result"] is no None:
-#        request.session["result"].["status"] == "success" ....
-#      redirect(request, "console/session-menu.html", {})
-### session-menu.html page has "logout" button (that delets `session')
-### , "getfacl" button
+def login(request):
+    if request.method == 'GET':
+        isLoginFailed = is_login_failed(request.session)
+        return render(request, "console/login.html", {"isLoginFailed": isLoginFailed})
+    elif request.method == 'POST':
 
-    isLoginFailed = is_login_failed(request.session)
-    return render(request, "console/application.html", {"isLoginFailed": isLoginFailed})
-
-def launch(request):
-    logger.debug("{}\n".format(request.POST))
-
-### XXX debug
-    sys.stderr.write("POST = {}\n".format(request.POST))
-    sys.stderr.write("@@@ session = {}\n".format(request.session))
-
-    username = request.POST["username"]
-    passwd = request.POST["passwd"]
-    #action = request.POST["action"]
-    logger.debug("username = {}\npasswd = {}\n".format(username, passwd))
-    cmd_result = cmd.cmd(username, passwd, "start")
-    if cmd_result is None or cmd_result["status"] != "success":
-        request.session["status"] = "error"
-        return HttpResponseRedirect(reverse("application"))
-    logger.debug("cmd_result = {}\n".format(cmd_result))
-    request.session["cmd_result"] = cmd_result 
-    request.session["status"] = "success" 
-    request.session["username"] = username
-    return HttpResponseRedirect(reverse("result"))
+        logger.debug("request.method = {}".format(request.method))
+    
+        logger.debug("request.POST = {}".format(request.POST))
+    
+        username = request.POST["username"]
+        passwd = request.POST["passwd"]
+        logger.debug("username = {} --- passwd = {}".format(username, passwd))
+        cmd_result = cmd.cmd(username, passwd, "start")
+        if cmd_result is None or cmd_result["status"] != "success":
+            request.session["status"] = "error"
+            return HttpResponseRedirect(reverse("login"))
+        logger.debug("cmd_result = {}".format(cmd_result))
+        request.session["cmd_result"] = cmd_result 
+        request.session["status"] = "success" 
+        request.session["username"] = username
+        return HttpResponseRedirect(reverse("result"))
 
 def result(request):
-    #status = get_object_or_404(Status, pk = status_id)
     if need_login(request.session):
-        return HttpResponseRedirect(reverse("application"))
+        return HttpResponseRedirect(reverse("login"))
     cmd_result = request.session["cmd_result"]
     return render(request, "console/result.html", cmd_result)
 
 def list(request):
     if need_login(request.session):
-        return HttpResponseRedirect(reverse("application"))
+        return HttpResponseRedirect(reverse("login"))
     username = "user1"
     bucketlist = cmd.get_bucket_list(username)
     return render(request, "console/list.html", {"bucketlist": bucketlist})
 
 def aclfile(request):
     if need_login(request.session):
-        return HttpResponseRedirect(reverse("application"))
+        return HttpResponseRedirect(reverse("login"))
+    if request.method == 'GET':
+        pass
+    elif request.method == 'POST':
+        logger.debug("request.POST = {}".format(request.POST))
+        for key, value in request.POST.items():
+            logger.debug("{} = {}".format(key, value))
+
+
+
     username = "user1"
     bucket_acl = cmd.get_bucket_acl(username, "mybucket")
     metainfo = [e for e in bucket_acl if e.startswith("#")]
     bucket_acl = [e for e in bucket_acl if not e.startswith("#") and e != ""]
-
-    users = cmd.get_user_list(username)
-    users = [e for e in users if e != ""]
-    users = users[:4]
-
-    groups = cmd.get_group_list(username)
-    groups = [e for e in groups if e != ""]
-    groups = groups[:4]
-
-### XXX debug
-    sys.stderr.write("USERS = {}\n".format(users))
-    sys.stderr.write("GROUPS = {}\n".format(groups))
-
-    return render(request, "console/aclfile.html", {"bucket_acl": bucket_acl, "metainfo": metainfo, "users": users, "groups": groups})
+    (groups, users) = cmd.get_users_groups_list(username)
+    #logger.debug("groups = {}".format(groups))
+    #logger.debug("users = {}".format(users))
+    return render(request, "console/aclfile.html", {"bucket_acl": bucket_acl, "metainfo": metainfo, "groups_users": groups + users})

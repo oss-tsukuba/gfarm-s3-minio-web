@@ -1,0 +1,10 @@
+#! /bin/sh -e
+
+tmpfile=$(mktemp /tmp/myvi.XXXXXX) || exit 1
+
+(cat "$1"
+cat etc/gfarm_s3_local_user_map.example)  >$tmpfile
+
+mv $tmpfile "$1"
+
+exit 0

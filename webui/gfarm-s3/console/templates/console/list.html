@@ -1,19 +1,13 @@
 {% extends "console/base.html" %}
 {% load i18n %}
 {% block content1 %}
-<h1>Gfarm-S3</h1>
-<table class="table table-striped">
-<thead class="thead-light">
-</thead><tbody>
-<!--
-<tr><td><a href="{% url 'aclfile' %}">mybucket</a></td></tr>
-<tr><td><a href="{% url 'aclfile' %}">bucket1</a></td></tr>
-<tr><td><a href="{% url 'aclfile' %}">images</a></td></tr>
--->
 
+<h1>Gfarm-S3 bucket list</h1>
+
+<ul class="list-group">
 {% for o in bucketlist %}
-    <tr><td><a href="{% url 'aclfile' %}">{{ o }}</a></td></tr>
+<li class="list-group-item"><a href="{% url 'aclfile' %}">{{ o }}</a></li>
 {% endfor %}
+</ul>
 
-</tbody></table>
 {% endblock %}

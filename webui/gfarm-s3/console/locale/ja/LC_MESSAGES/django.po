@@ -25,7 +25,7 @@ msgstr "エラー"
 #: templates/console/application.html:23 templates/console/application.html:26
 #: templates/console/application.html:29
 msgid "passwordInstruction"
-msgstr "パスワードについて"
+msgstr "パスワードについて: ここに、パスワードの説明が入ります"
 
 #: templates/console/application.html:37
 msgid "GlobalUsername"
@@ -45,7 +45,7 @@ msgstr "パスワード"
 
 #: templates/console/application.html:46
 msgid "GoButton"
-msgstr "ログイン"
+msgstr "起動"
 
 #: templates/console/application.html:50
 msgid "AdvancedOptions"
@@ -74,4 +74,4 @@ msgstr "起動"
 
 #: templates/console/result.html:40
 msgid "BucketACL"
-msgstr "Bucket ACL"
+msgstr "Bucketの共有"

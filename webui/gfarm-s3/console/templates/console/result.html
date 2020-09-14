@@ -1,65 +1,36 @@
 {% extends "console/base.html" %}
 {% load i18n %}
 {% block content1 %}
-<div {% if status != "success" %} class="bg-danger" {% endif %} >
-<h1>Gfarm-S3 started</h1>
-<div class="table-responsive">
-<table class="table table-striped">
-<thead class="thead-light">
-</thead><tbody>
+
+<h1>Gfarm-S3 Status</h1>
+
+<ul class="list-group">
+<li  class="list-group-item">Authentication Method: {{ authenticated_method }}</li>
+<li  class="list-group-item">Expiration Date: {{ expiration_date_calendar_datetime }}</li>
+<li  class="list-group-item">Global Username: {{ global_username }}</li>
 <!--
-<tr><th scope="row">Status</th><td>{{ status }}</td></tr>
-<tr><th scope="row">Reason</th><td>{{ reason }}</td></tr>
+<li  class="list-group-item">Access Key: {{ access_key }}</li>
+<li  class="list-group-item">Secret Key: {{ secret_key }}</li>
 -->
-<tr><th scope="row">Authentication Method</th><td>{{ authenticated_method }}</td></tr>
-<tr><th scope="row">Expiration Date</th><td>{{ expiration_date_calendar_datetime }}</td></tr>
-<tr><th scope="row">Global Username</th><td>{{ global_username }}</td></tr>
-<!--
-<tr><th scope="row">Local Username</th><td>{{ local_username }}</td></tr>
--->
-<tr><th scope="row">Access Key</th><td>{{ access_key }}</td></tr>
-<tr><th scope="row">Secret Key</th><td>{{ secret_key }}</td></tr>
-</tbody></table></div>
+<li  class="list-group-item">Access Key: <input onClick="this.select();" value="{{ access_key }}"  class="form-control border-0" /></li>
+<li  class="list-group-item">Secret Key: <input onClick="this.select();" value="{{ secret_key }}"  class="form-control border-0" /></li>
+</ul>
 
 <form action="{% url 'chgkey' %}" method="post">
 {% csrf_token %}
-<button type="submit" class="btn btn-primary" value="Launch">{% trans 'chgKey' %}</button>
+<button type="submit" class="btn btn-primary form-control" value="Launch">{% trans 'chgKey' %}</button>
 </form>
 
 <form action="{% url 'stop' %}" method="post">
 {% csrf_token %}
-<button type="submit" class="btn btn-primary" value="Launch">{% trans 'StopGfarmS3' %}</button>
+<button type="submit" class="btn btn-primary form-control" value="Launch">{% trans 'StopGfarmS3' %}</button>
 </form>
 
 <form action="{% url 'list' %}" method="post">
 {% csrf_token %}
-<button type="submit" class="btn btn-primary" value="Launch">{% trans 'BucketACL' %}</button>
+<button type="submit" class="btn btn-primary form-control" value="Launch">{% trans 'BucketACL' %}</button>
 </form>
 
-<!--
-	<div class="btn-group btn-group-toggle" data-toggle="buttons">
-	  <label class="btn btn-outline-primary active">
-	    <input type="radio" name="action" id="radioStartGfarmS3" value="start" checked>
-	       {% trans 'StartGfarmS3' %}
-	  </label>
-	  <label class="btn btn-outline-primary">
-	    <input type="radio" name="action" id="radioStopGfarmS3" value="stop">
-	      {% trans 'StopGfarmS3' %}
-	  </label>
-	  <label class="btn btn-outline-primary">
-	    <input type="radio" name="action" id="radioShowStatus" value="status">
-              {% trans 'ShowCurrentStatus' %}
-	  </label>
-	  <label class="btn btn-outline-primary">
-	    <input type="radio" name="action" id="radioGenKey" value="genkey">
-              {% trans 'ShowS3SecretKey' %}
-	  </label>
-	  <label class="btn btn-outline-primary">
-	    <input type="radio" name="action" id="radioGenKey" value="bucketacl">
-              {% trans 'BucketACL' %}
-	  </label>
-	</div>
--->
-
 </div>
+
 {% endblock %}

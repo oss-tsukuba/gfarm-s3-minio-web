@@ -74,4 +74,4 @@ msgstr "applnk"
 
 #: templates/console/result.html:40
 msgid "BucketACL"
-msgstr "Bucket ACL"
+msgstr "Share Buckets"
