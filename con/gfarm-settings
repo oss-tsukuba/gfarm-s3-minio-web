@@ -10,6 +10,7 @@ PREFIX=/usr/local
 . $PREFIX/etc/gfarm-s3.conf
 
 EDITOR=./xvi $PREFIX/bin/gfarm-s3-viusermap
+sudo /usr/local/bin/gfarm-s3-useradd hpci001971 user3
 
 users=$(cat $GFARMS3_LOCAL_USER_MAP | grep -v '^#' | awk -F : '{print $2}')
 for u in $users; do usermod -a -G gfarms3 $u; done
