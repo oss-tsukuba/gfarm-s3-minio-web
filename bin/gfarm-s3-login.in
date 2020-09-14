@@ -13,9 +13,31 @@ set -o xtrace
 . @sysconfdir@/gfarm-s3.conf
 . $GFARM_S3_BIN/gfarm-s3-subr
 
-USAGE="usage: $0 start|stop|restart|status|keygen global-username password [gfarm_shared_dir]"
 
-if [ $# != 3 -a $# != 4 ]; then
+USAGE="\
+usage: $0 [options...] action global-username password
+options ::= --gfarm_shared_dir gfarm_shared_dir |
+            --authenticated authenticated_method_name |
+            --bucket bucket
+action ::= start|stop|restart|status|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl|keygen
+"
+
+authenticated=""
+gfarm_shared_dir_arg=""
+bucket=""
+
+while [ $# -gt 0 ]; do
+	opt="$1"
+	case "$opt" in
+	--authenticated) authenticated="$2"; shift;;
+	--gfarm_shared_dir) gfarm_shared_dir_arg="$2"; shift;;
+	--bucket) bucket="$2"; shift;;
+	*) break;;
+	esac
+	shift;
+done
+
+if [ $# != 3 ]; then
 	echo "$USAGE" 1>&2
 	exit 1
 fi
@@ -24,12 +46,8 @@ action="$1"
 global_username="$2"
 user_password="$3"
 
-if [ $# == 4 ]; then
-	gfarm_shared_dir_arg="$4"
-fi
-
-case $action in
-start|stop|restart|status|keygen) ;;
+case "$action" in
+start|stop|restart|status|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl|keygen) ;;
 *) echo $USAGE 1>&2; exit 1;;
 esac
 
@@ -41,7 +59,9 @@ fi
 local_username=$(get_local_username "$usermap_entry")
 
 status=failure
-if ! authenticated_method=$(challenge_auth "$global_username" "$user_password" "$local_username"); then
+if [ -n "$authenticated" ]; then
+	authenticated_method="$authenticated"
+elif ! authenticated_method=$(challenge_auth "$global_username" "$user_password" "$local_username"); then
 cat <<-EOF
 	{
 		"status": "$status",
@@ -56,6 +76,8 @@ myproxy-logon|grid-proxy-init)
 	expiration_date=$(certificate_timeleft_grid_proxy_info);;
 gfkey)
 	expiration_date=$(certificate_timeleft_gfkey);;
+unspecified)
+	expiration_date=-1; true;;
 *)
 	expiration_date=-1; false;;
 esac; then
@@ -68,13 +90,13 @@ EOF
 	exit 1
 fi
 
-if [ -z "$gfarm_shared_dir_arg" ]; then
-	gfarm_shared_dir="$GFARMS3_GFARM_SHARED_DIR/$global_username"
-else
+if [ -n "$gfarm_shared_dir_arg" ]; then
 	gfarm_shared_dir="$gfarm_shared_dir_arg"
+else
+	gfarm_shared_dir="$GFARMS3_GFARM_SHARED_DIR/$global_username"
 fi
 
-case $action in
+case "$action" in
 start)
 	spawn_per_user_server "$local_username" "$gfarm_shared_dir";;
 stop)
@@ -84,6 +106,18 @@ restart)
 	spawn_per_user_server "$local_username" "$gfarm_shared_dir";;
 status)
 	get_per_user_status "$local_username";;
+info)
+	true;;
+gfuser)
+	mysudo "$local_username" $GFUSER -l; exit $?;;
+gfgroup)
+	mysudo "$local_username" $GFGROUP; exit $?;;
+gfls)
+	mysudo "$local_username" $GFLS "$gfarm_shared_dir/$bucket"; exit $?;;
+gfgetfacl)
+	mysudo "$local_username" $GFGETFACL "$gfarm_shared_dir/$bucket"; exit $?;;
+gfsetfacl)
+	mysudo "$local_username" $GFSETFACL -b -M - "$gfarm_shared_dir/$bucket"; exit $?;;
 keygen)
 	regenerate_secret_key "$local_username";;
 esac

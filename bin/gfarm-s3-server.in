@@ -6,7 +6,7 @@ export LC_COLLATE=C
 
 MC_PROFILE="mcuser"
 
-set -o xtrace
+#set -o xtrace
 
 show_secret_key() {
 	cat "$GFARMS3_SECRET_KEY"

@@ -6,7 +6,7 @@
 
 <ul class="list-group">
 {% for o in bucketlist %}
-<li class="list-group-item"><a href="{% url 'aclfile' %}">{{ o }}</a></li>
+<li class="list-group-item"><a href="{% url 'aclfile' %}?bucket={{ o }}">{{ o }}</a></li>
 {% endfor %}
 </ul>
 

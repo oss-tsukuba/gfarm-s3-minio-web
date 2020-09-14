@@ -2,17 +2,18 @@
 {% load i18n %}
 {% block content1 %}
 
-<h1><em>mybucket</em></h1>
+<h1>{{ bucket }}</h1>
 
-<form action="{% url 'aclfile' %}" method="post">
+<form action="{% url 'aclfile' %}?bucket={{ bucket }}" method="post">
 {% csrf_token %}
 
 <div class="form-group">
 
 <card>
 <pre>
-{% for o in metainfo %}{{ o }}
-{% endfor %}{% for o in bucket_acl %}{{ o }}
+{% for o in acl_0 %}{{ o }}
+{% endfor %}{% for o in acl_1 %}{{ o }}
+{% endfor %}{% for o in acl_2 %}{{ o }}
 {% endfor %}</pre>
 </card>
 
@@ -24,12 +25,18 @@
 
 </div>
 
+<input type="hidden" name="bucket" value="{{ bucket }}">
+<input type="hidden" name="acl_1_string" value="{{ acl_1_string }}">
+
 </form>
 
 <script>
 var data_groups_and_users = [
 { id: 0, text: "" },
 {% for e in groups_users %}{ id: "{{ e.id }}", text: "{{ e.text }}" },{% endfor %}
+];
+var acl_2_split = [
+{% for e in acl_2_split %}{ id: "{{ e.id }}", perm: "{{ e.perm }}" },{% endfor %}
 ];
 </script>
 

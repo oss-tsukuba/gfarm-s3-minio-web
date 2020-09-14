@@ -27,6 +27,11 @@ PROXY_LIFETIME=168
 GFKEY=/usr/local/bin/gfkey
 GRID_PROXY_INFO=/usr/bin/grid-proxy-info
 GFARM_S3_ACCESS_KEY_MIN_LEN=8
+GFUSER=/usr/local/bin/gfuser
+GFGROUP=/usr/local/bin/gfgroup
+GFLS=/usr/local/bin/gfls
+GFGETFACL=/usr/local/bin/gfgetfacl
+GFSETFACL=/usr/local/bin/gfsetfacl
 
 GFARMS3_APACHE_REWRITE_CONF=$GFARM_S3_VAR/rewrite.conf
 APACHECTL=/usr/sbin/apachectl
