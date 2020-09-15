@@ -2,7 +2,7 @@ PREFIX=@prefix@
 
 SYS_HTTPD_CONF=/etc/httpd/conf/httpd.conf
 SYS_HTTPD_CONF_D=/etc/httpd/conf.d
-WSGI_USER=user2
+WSGI_USER=wsgi
 
 GFARMS3_CONF=$(PREFIX)/etc/gfarm-s3.conf
 GFARMS3_LOCAL_USER_MAP=$(PREFIX)/etc/gfarm_s3_local_user_map

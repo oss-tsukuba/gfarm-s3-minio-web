@@ -6,7 +6,8 @@
 ## --with-apache=/usr
 
 PREFIX=@prefix@
-WSGI_USER=user2
+WSGI_USER=wsgi
+WSGI_GROUP=wsgi
 WSGI_PORT=8000
 WEBUI_BINDIR=/home/user1/work/gfarm-s3-minio-web/webui/gfarm-s3
 GFARMS3_BIN=$PREFIX/bin
@@ -19,6 +20,7 @@ apache_sbin=/usr/sbin
 
 sed -e 's|@PREFIX@|'"$PREFIX"'|' \
 	-e 's|@WSGI_USER@|'"$WSGI_USER"'|' \
+	-e 's|@WSGI_GROUP@|'"$WSGI_GROUP"'|' \
 	-e 's|@GFARMS3_APACHE_REWRITE_CONF@|'"$GFARMS3_APACHE_REWRITE_CONF"'|' \
 	-e 's|@GFARMS3_BIN@|'"$GFARMS3_BIN"'|' \
 	-e 's|@WSGI_PORT@|'"$WSGI_PORT"'|' \

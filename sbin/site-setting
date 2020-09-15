@@ -27,3 +27,15 @@ chmod og+rX /var/log/httpd
 systemctl enable httpd
 systemctl stop httpd
 systemctl start httpd
+
+useradd wsgi
+
+mkdir -p /home/wsgi/.ssh
+chmod 700 /home/wsgi/.ssh
+cat /home/user1/.ssh/authorized_keys >> /home/wsgi/.ssh/authorized_keys 
+chown -R wsgi:wsgi /home/wsgi/.ssh
+mkdir -p /home/wsgi/bin
+mkdir -p /home/wsgi/libexec
+cp -p /home/user1/bin/ksh /home/wsgi/bin
+cp -p /home/user1/libexec/kshl /home/wsgi/libexec
+touch /home/wsgi/.hushlogin
