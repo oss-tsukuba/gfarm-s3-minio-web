@@ -14,8 +14,9 @@ class Mys3client(object):
     def gfarms3_client(self):
         return boto3.client("s3",
             aws_access_key_id = "K4XcKzocrUhrnCAKrx2Z",
-            aws_secret_access_key = "39e+URNfFv/CCgs4bYcBMusR7ngMLOxEf6cpXWpB",
-            endpoint_url = "http://127.0.0.1:9001")
+            #aws_secret_access_key = "39e+URNfFv/CCgs4bYcBMusR7ngMLOxEf6cpXWpB",
+            aws_secret_access_key = "TmXnYAhtjbtA3RHjK1Beu/6rvRJlmPVnOKThaZP0/+nT9XOo",
+            endpoint_url = "http://127.0.0.1:9000")
     
     def create_bucket(self, bucket_name):
         try:

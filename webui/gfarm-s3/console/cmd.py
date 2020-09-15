@@ -48,7 +48,8 @@ def cmd(action, username, passwd, authenticated = None):
     if ret != 0:
         logger.debug("ERROR 3 --- RETVAL = {} --- STDERR = {}".format(ret, stderr.decode()))
         return {"status": "ERROR 3", "reason": stderr.decode()}
-    logger.debug("SUCCESS --- STDERR = {}".format(stderr.decode()))
+    #logger.debug("SUCCESS --- STDERR = {}".format(stderr.decode()))
+    logger.debug("STDOUT = {}".format(stdout))
     result = json.loads(stdout.decode().strip())
     if "expiration_date" in result.keys():
         result["expiration_date_calendar_datetime"] = time.ctime(result["expiration_date"])
@@ -95,8 +96,8 @@ def set_bucket_acl(username, bucket, postdata):
     acl_1_string = postdata["acl_1_string"]
     acl_2_edited = "\n".join(v)
 
-    logger.debug("acl_1_string: {}".format(acl_1_string))
-    logger.debug("acl_2_edited: {}".format(acl_2_edited))
+    #logger.debug("acl_1_string: {}".format(acl_1_string))
+    #logger.debug("acl_2_edited: {}".format(acl_2_edited))
 
     acl_new = acl_1_string + acl_2_edited 
 

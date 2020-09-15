@@ -13,7 +13,7 @@
 <pre>
 {% for o in acl_0 %}{{ o }}
 {% endfor %}{% for o in acl_1 %}{{ o }}
-{% endfor %}{% for o in acl_2 %}# {{ o }}
+{% endfor %}{% for o in acl_2 %}#DEBUG INFO# {{ o }}
 {% endfor %}</pre>
 </card>
 
@@ -28,6 +28,27 @@
 <input type="hidden" name="bucket" value="{{ bucket }}">
 <input type="hidden" name="acl_1_string" value="{{ acl_1_string }}">
 
+</form>
+
+<!--
+<ul class="list-group">
+<li class="list-group-item"><a href="{% url 'result' %}">back to status page</a></li>
+<li class="list-group-item"><a href="{% url 'list' %}">back to bucket list</a></li>
+</ul>
+-->
+
+<form action="{% url 'list' %}" method="post">
+{% csrf_token %}
+<div class="form-group">
+<button type="submit" class="btn btn-primary form-control" value="Launch">{% trans 'backToBucketList' %}</button>
+</div>
+</form>
+
+<form action="{% url 'result' %}" method="post">
+{% csrf_token %}
+<div class="form-group">
+<button type="submit" class="btn btn-primary form-control" value="Launch">{% trans 'backToStatusPage' %}</button>
+</div>
 </form>
 
 <script>

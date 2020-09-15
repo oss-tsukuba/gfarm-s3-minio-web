@@ -10,4 +10,17 @@
 {% endfor %}
 </ul>
 
+<!--
+<ul class="list-group">
+<li class="list-group-item"><a href="{% url 'result' %}">back to status page</a></li>
+</ul>
+-->
+
+<form action="{% url 'result' %}" method="post">
+{% csrf_token %}
+<div class="form-group">
+<button type="submit" class="btn btn-primary form-control" value="Launch">{% trans 'backToStatusPage' %}</button>
+</div>
+</form>
+
 {% endblock %}

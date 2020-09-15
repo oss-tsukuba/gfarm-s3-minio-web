@@ -563,7 +563,7 @@ stop_per_user_server() {	# local_username
 	return $status
 }
 
-get_per_user_status() {	# local_username
+get_s3_server_status() {	# local_username
 	local user="$1"
 	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
 	if [ -z "$usermap_entry" ]; then
@@ -574,6 +574,20 @@ get_per_user_status() {	# local_username
 	## assert $user == $local_username
 	local access_key=$(get_access_key "$usermap_entry")
 	mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --status --access_key "$access_key"
+}
+
+get_s3_server_status_quick() {	# local_username
+	local user="$1"
+	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
+	if [ -z "$usermap_entry" ]; then
+		echo "user not found: $user" 1>&2
+		return 1
+	fi
+	local local_username=$(get_local_username "$usermap_entry")
+	## assert $user == $local_username
+	local access_key=$(get_access_key "$usermap_entry")
+	status_server_quick "$user"
+	mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --status-quick --access_key "$access_key"
 }
 
 get_per_user_secret_key() {
@@ -603,6 +617,7 @@ regenerate_secret_key() {
 certificate_timeleft_grid_proxy_info() {
 	local expiration_date=-1
 	local timeleft
+	local local_username="$1"
 	if ! timeleft=$(mysudo "$local_username" $GRID_PROXY_INFO -timeleft); then
 		return 1
 	fi
@@ -615,10 +630,34 @@ certificate_timeleft_grid_proxy_info() {
 
 certificate_timeleft_gfkey() {
 	local v
-	if ! v=$(gfkey -e); then
+	local local_username="$1"
+	if ! v=$(mysudo "$local_username" $GFKEY -e); then
 		return 1
 	fi
 	date --date="${v#expiration time is }" +%s
+}
+
+get_expiration_date() {
+	local local_username="$1"
+	local authenticated_method="$2"
+	case $authenticated_method in
+	myproxy-logon|grid-proxy-init)
+		echo $(certificate_timeleft_grid_proxy_info "$local_username");;
+	gfkey)
+		echo $(certificate_timeleft_gfkey "$local_username");;
+	*)
+		echo -1;;
+	esac
+}
+
+gfarm_shared_dir_path() {
+	local gfarm_shared_dir="$1"
+	local global_username="$2"
+	if [ -n "$gfarm_shared_dir" ]; then
+		echo "$gfarm_shared_dir"
+	else
+		echo "$GFARMS3_GFARM_SHARED_DIR/$global_username"
+	fi
 }
 
 #################################################
@@ -841,10 +880,28 @@ status_server() {
 	get_server_status "$port"
 }
 
+#### this function is called form gfarm-s3-login by first hand
+status_server_quick() {
+	local local_username="$1"
+	local port_pid=$(lookup_portmap "$local_username" "")
+	local port="${port_pid%:*}"
+	local pid="${port_pid#*:}"
+	if [ -z "$port" ]; then
+		echo "400 S3 server is not recoreded as running"
+		return
+	fi
+	if ! ps -p $pid >/dev/null; then
+		echo "401 S3 server process is not running"
+		return
+	fi
+	echo "200 S3 sever is running at $port, pid is $pid"
+}
+
 get_server_status() {
 	local port="$1"
 	local address=127.0.0.1:"$port"
 	if ! mymc_init; then return 1; fi
 	mc_config $address 1>&2
+	echo $?
 	mymc_finish
 }

@@ -17,6 +17,10 @@ scripts= \
 	gfarm-s3-viusermap
 
 all:
+	./adhoc
+
+clean:
+	./adcln
 
 install:
 	for i in $(scripts); do $(INSTALL) $$i $(BINDIR); done

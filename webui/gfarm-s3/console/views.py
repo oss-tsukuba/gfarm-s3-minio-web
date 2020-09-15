@@ -29,9 +29,6 @@ def need_login(session):
     return session["global_username"] == ""
 
 def index(request):
-    logger.debug("@@@ session = {}\n".format(request.session))
-    for key, value in request.session.items():
-        logger.debug("@@@ {} => {}".format(key, value))
     return render(request, "console/index.html", {})
 
 def login(request):
@@ -39,22 +36,50 @@ def login(request):
         isLoginFailed = is_login_failed(request.session)
         return render(request, "console/login.html", {"isLoginFailed": isLoginFailed})
     elif request.method == 'POST':
-
-        logger.debug("request.method = {}".format(request.method))
- 
-        logger.debug("request.POST = {}".format(request.POST))
- 
         username = request.POST["username"]
         passwd = request.POST["passwd"]
-        logger.debug("username = {} --- passwd = {}".format(username, passwd))
+        ### challenge authenticateion and start MinIO
         cmd_result = cmd.cmd("start", username, passwd)
         if cmd_result is None or cmd_result["status"] != "success":
             request.session["global_username"] = ""
             return HttpResponseRedirect(reverse("login"))
-        logger.debug("cmd_result = {}".format(cmd_result))
         request.session["global_username"] = username
         request.session["authenticated_method"] = cmd_result["authenticated_method"]
         return HttpResponseRedirect(reverse("result"))
+
+def logout(request):
+    request.session.flush()
+    return HttpResponseRedirect(reverse("login"))
+    return render(request, "console/login.html", {})
+
+def starts3(request):
+    if need_login(request.session):
+        return HttpResponseRedirect(reverse("login"))
+    username = request.session["global_username"]
+    authenticated = request.session["authenticated_method"]
+    ### start MinIO, without authenticateion
+    cmd.cmd("start", username, "", authenticated = authenticated)
+    ### ignore cmd.cmd return value
+    return HttpResponseRedirect(reverse("result"))
+
+def stops3(request):
+    if need_login(request.session):
+        return HttpResponseRedirect(reverse("login"))
+    username = request.session["global_username"]
+    authenticated = request.session["authenticated_method"]
+    cmd.cmd("stop", username, "", authenticated = authenticated)
+    ### ignore cmd.cmd return value
+    return HttpResponseRedirect(reverse("result"))
+
+def chgkey(request):
+    if need_login(request.session):
+        return HttpResponseRedirect(reverse("login"))
+    username = request.session["global_username"]
+    authenticated = request.session["authenticated_method"]
+    cmd.cmd("stop", username, "", authenticated = authenticated)
+    cmd.cmd("keygen", username, "", authenticated = authenticated)
+    ### ignore cmd.cmd return value
+    return HttpResponseRedirect(reverse("result"))
 
 def result(request):
     if need_login(request.session):
@@ -62,9 +87,6 @@ def result(request):
     username = request.session["global_username"]
     authenticated = request.session["authenticated_method"]
     cmd_result = cmd.cmd("info", username, "", authenticated = authenticated)
-    #cmd_result = request.session["cmd_result"]
-    #cmd_result = {}
-    logger.debug("cmd_result = {}".format(cmd_result))
     return render(request, "console/result.html", cmd_result)
 
 def list(request):
@@ -94,15 +116,8 @@ def aclfile(request):
     username = request.session["global_username"]
 
     if request.method == 'GET':
-        logger.debug("request.GET = {}".format(request.GET))
-        for key, value in request.GET.items():
-            logger.debug("{} = {}".format(key, value))
         bucket = request.GET["bucket"]
     elif request.method == 'POST':
-#        logger.debug("request.POST = {}".format(request.POST))
-#        for key, value in request.POST.items():
-#            logger.debug("{} = {}".format(key, value))
-#
         bucket = request.POST["bucket"]
         cmd.set_bucket_acl(username, bucket, request.POST)
 
@@ -113,11 +128,6 @@ def aclfile(request):
     acl_2 = [e for e in bucket_acl_split if is_modifiable(e)]
     acl_2_split = [edict(e) for e in acl_2]
     (groups, users) = cmd.get_groups_users_list(username)
-    #logger.debug("groups = {}".format(groups))
-    #logger.debug("users = {}".format(users))
-    logger.debug("acl_0 = {}".format(acl_0))
-    logger.debug("acl_1 = {}".format(acl_1))
-    logger.debug("acl_2 = {}".format(acl_2))
     dict = {"bucket": bucket,
             "acl_0": acl_0,
             "acl_1": acl_1,

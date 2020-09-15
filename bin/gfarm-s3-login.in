@@ -19,18 +19,18 @@ usage: $0 [options...] action global-username password
 options ::= --gfarm_shared_dir gfarm_shared_dir |
             --authenticated authenticated_method_name |
             --bucket bucket
-action ::= start|stop|restart|status|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl|keygen
+action ::= start|stop|restart|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl
 "
 
 authenticated=""
-gfarm_shared_dir_arg=""
+gfarm_shared_dir=""
 bucket=""
 
 while [ $# -gt 0 ]; do
 	opt="$1"
 	case "$opt" in
 	--authenticated) authenticated="$2"; shift;;
-	--gfarm_shared_dir) gfarm_shared_dir_arg="$2"; shift;;
+	--gfarm_shared_dir) gfarm_shared_dir="$2"; shift;;
 	--bucket) bucket="$2"; shift;;
 	*) break;;
 	esac
@@ -47,7 +47,7 @@ global_username="$2"
 user_password="$3"
 
 case "$action" in
-start|stop|restart|status|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl|keygen) ;;
+start|stop|restart|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl) ;;
 *) echo $USAGE 1>&2; exit 1;;
 esac
 
@@ -71,30 +71,7 @@ EOF
 	exit 1
 fi
 
-if ! case $authenticated_method in
-myproxy-logon|grid-proxy-init)
-	expiration_date=$(certificate_timeleft_grid_proxy_info);;
-gfkey)
-	expiration_date=$(certificate_timeleft_gfkey);;
-unspecified)
-	expiration_date=-1; true;;
-*)
-	expiration_date=-1; false;;
-esac; then
-cat <<-EOF
-	{
-		"status": "$status",
-		"reason": "no valid certificate"
-	}
-EOF
-	exit 1
-fi
-
-if [ -n "$gfarm_shared_dir_arg" ]; then
-	gfarm_shared_dir="$gfarm_shared_dir_arg"
-else
-	gfarm_shared_dir="$GFARMS3_GFARM_SHARED_DIR/$global_username"
-fi
+gfarm_shared_dir=$(gfarm_shared_dir_path "$gfarm_shared_dir" "$global_username")
 
 case "$action" in
 start)
@@ -105,7 +82,9 @@ restart)
 	stop_per_user_server "$local_username" &&
 	spawn_per_user_server "$local_username" "$gfarm_shared_dir";;
 status)
-	get_per_user_status "$local_username";;
+	get_s3_server_status "$local_username";;
+keygen)
+	regenerate_secret_key "$local_username";;
 info)
 	true;;
 gfuser)
@@ -118,8 +97,6 @@ gfgetfacl)
 	mysudo "$local_username" $GFGETFACL "$gfarm_shared_dir/$bucket"; exit $?;;
 gfsetfacl)
 	mysudo "$local_username" $GFSETFACL -b -M - "$gfarm_shared_dir/$bucket"; exit $?;;
-keygen)
-	regenerate_secret_key "$local_username";;
 esac
 
 exit_status=$?
@@ -137,8 +114,9 @@ cat <<-EOF
 		"status": "$status",
 		"reason": "$reason",
 		"authenticated_method": "$authenticated_method",
-		"expiration_date": $expiration_date,
+		"expiration_date": $(get_expiration_date "$local_username" "$authenticated_method"),
 		"global_username": "$(get_global_username "$usermap_entry")",
+		"s3server_status": "$(get_s3_server_status_quick "$local_username")",
 		"local_username": "$(get_local_username "$usermap_entry")",
 		"access_key": "$(get_access_key "$usermap_entry")",
 		"secret_key": "$(get_per_user_secret_key "$local_username")"
