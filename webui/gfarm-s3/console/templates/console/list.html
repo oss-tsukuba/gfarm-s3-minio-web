@@ -4,11 +4,11 @@
 
 <h1>Gfarm-S3 bucket list</h1>
 
-<ul class="list-group">
+<!--<ul class="list-group">-->
 {% for o in bucketlist %}
-<li class="list-group-item"><a href="{% url 'aclfile' %}?bucket={{ o }}">{{ o }}</a></li>
+<di class="form-control border-0"><a href="{% url 'aclfile' %}?bucket={{ o }}">{{ o }}</a></di>
 {% endfor %}
-</ul>
+<!--</ul>-->
 
 <!--
 <ul class="list-group">

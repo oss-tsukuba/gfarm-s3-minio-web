@@ -24,9 +24,8 @@ $(function() {
 		seq += 1;
 	}
 
-
 	function new_entry(id, select_name, opt_name, del_button_id, checked_perm) {
-		return '<div class="d-flex form-control" id = "' + id + '">' +
+		return '<div class="d-flex form-control border-0" id = "' + id + '">' +
 			'<select class="select2_users flex-fill" name="' + select_name + '"></select> :' +
 			'<div class="btn-group btn-group-toggle" data-toggle="buttons">' +
 				f_button(opt_name, "RW", "rwx", checked_perm == "rwx") +

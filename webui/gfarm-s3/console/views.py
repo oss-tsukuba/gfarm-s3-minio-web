@@ -87,6 +87,8 @@ def result(request):
     username = request.session["global_username"]
     authenticated = request.session["authenticated_method"]
     cmd_result = cmd.cmd("info", username, "", authenticated = authenticated)
+    if not "s3server_status" in cmd_result or not cmd_result["s3server_status"].startswith("200"):
+        cmd_result["warning"] = True
     return render(request, "console/result.html", cmd_result)
 
 def list(request):
