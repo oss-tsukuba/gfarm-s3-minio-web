@@ -7,7 +7,6 @@ scripts= \
 	gfarm-s3-configtest \
 	gfarm-s3-diff-local-usermap \
 	gfarm-s3-generate-usermap-hpci \
-	gfarm-s3-getfacl \
 	gfarm-s3-login \
 	gfarm-s3-server \
 	gfarm-s3-sharedsecret-password \
@@ -17,10 +16,8 @@ scripts= \
 	gfarm-s3-viusermap
 
 all:
-	./adhoc
 
 clean:
-	./adcln
 
 install:
 	for i in $(scripts); do $(INSTALL) $$i $(BINDIR); done

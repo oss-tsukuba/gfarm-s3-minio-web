@@ -35,6 +35,7 @@ for var in $variables_overridable; do
 	eval SAVED_$var=\$$var
 done
 
+prefix=@prefix@
 . @sysconfdir@/gfarm-s3.conf
 . $GFARM_S3_BIN/gfarm-s3-subr
 

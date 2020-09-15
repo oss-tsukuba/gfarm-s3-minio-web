@@ -10,6 +10,7 @@ export LC_COLLATE=C
 
 set -o xtrace
 
+prefix=@prefix@
 . @sysconfdir@/gfarm-s3.conf
 . $GFARM_S3_BIN/gfarm-s3-subr
 
