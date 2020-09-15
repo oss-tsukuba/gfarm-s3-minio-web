@@ -15,17 +15,14 @@ MKDIR=mkdir
 
 all: sudoers apache-gfarm-s3.conf gunicorn.service
 
-#gfarm-s3.conf: gfarm-s3.conf.in
-#	../makes/build-conf < $^ > $@
-
 sudoers: sudoers.in
-	../makes/build-conf < $^ > $@
+	sh ../makes/build-conf < $^ > $@
 
 apache-gfarm-s3.conf: apache-gfarm-s3.conf.in
-	../makes/build-conf < $^ > $@
+	sh ../makes/build-conf < $^ > $@
 
 gunicorn.service: gunicorn.service.in
-	../makes/build-conf < $^ > $@
+	sh ../makes/build-conf < $^ > $@
 
 clean:
 	rm -f sudoers apache-gfarm-s3.conf gunicorn.service

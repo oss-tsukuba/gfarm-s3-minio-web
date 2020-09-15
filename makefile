@@ -6,7 +6,7 @@
 
 all:
 	(cd etc && make)
-	(cd minio && make)
+	(cd minio && make install-go && make)
 
 #install-go:
 #	$(MKDIR) -p $$(dirname $(GOPATH))

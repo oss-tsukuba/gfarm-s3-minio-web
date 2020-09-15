@@ -19,5 +19,7 @@ all:
 
 clean:
 
+distclean:
+
 install:
 	for i in $(scripts); do $(INSTALL) $$i $(BINDIR); done
