@@ -633,6 +633,14 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+with_wsgi_port
+with_wsgi_group
+with_wsgi_user
+with_gunicorn
+with_apache
+with_myproxy
+with_globus
+with_gfarm
 CPP
 OTOOL64
 OTOOL
@@ -759,6 +767,13 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 with_gfarm
+with_globus
+with_myproxy
+with_apache
+with_gunicorn
+with_wsgi_user
+with_wsgi_group
+with_wsgi_port
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1410,6 +1425,20 @@ Optional Packages:
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
   --with-gfarm=GFARM_ROOT Gfarm root directory [[/usr]]
+  --with-globus=GLOBUS_ROOT
+                          Globus root directory [[/usr]]
+  --with-myproxy=MYPROXY_ROOT
+                          Myproxy root directory [[/usr]]
+  --with-apache=APACHE_ROOT
+                          Apache root directory [[/usr]]
+  --with-gunicorn=GUNICORN_ROOT
+                          gunicorn root directory [[/usr]]
+  --with-wsgi-user=WSGI_USER
+                          wsgi username [[wsgi]]
+  --with-wsgi-group=WSGI_GROUP
+                          wsgi groupname [[wsgi]]
+  --with-wsgi-port=WSGI_PORT
+                          wsgi port [[8000]]
 
 Some influential environment variables:
   CC          C compiler command
@@ -12134,6 +12163,119 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gfarm" >&5
 $as_echo "$with_gfarm" >&6; }
 
+
+### --with-globus=GLOBUS_ROOT
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Globus Toolkit" >&5
+$as_echo_n "checking for Globus Toolkit... " >&6; }
+
+# Check whether --with-globus was given.
+if test "${with_globus+set}" = set; then :
+  withval=$with_globus;
+fi
+
+case x$with_globus in
+  x|xyes|xno) with_globus=/usr ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_globus" >&5
+$as_echo "$with_globus" >&6; }
+
+
+### --with-myproxy=MYPROXY_ROOT
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for MyProxy Credential Management Service" >&5
+$as_echo_n "checking for MyProxy Credential Management Service... " >&6; }
+
+# Check whether --with-myproxy was given.
+if test "${with_myproxy+set}" = set; then :
+  withval=$with_myproxy;
+fi
+
+case x$with_myproxy in
+  x|xyes|xno) with_myproxy=/usr ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_myproxy" >&5
+$as_echo "$with_myproxy" >&6; }
+
+
+### --with-apache=APACHE_ROOT
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Apache HTTP Server" >&5
+$as_echo_n "checking for Apache HTTP Server... " >&6; }
+
+# Check whether --with-apache was given.
+if test "${with_apache+set}" = set; then :
+  withval=$with_apache;
+fi
+
+case x$with_apache in
+  x|xyes|xno) with_apache=/usr ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_apache" >&5
+$as_echo "$with_apache" >&6; }
+
+
+### --with-gunicorn=GUNICORN_ROOT
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Gunicorn - Python WSGI HTTP Server for UNIX" >&5
+$as_echo_n "checking for Gunicorn - Python WSGI HTTP Server for UNIX... " >&6; }
+
+# Check whether --with-gunicorn was given.
+if test "${with_gunicorn+set}" = set; then :
+  withval=$with_gunicorn;
+fi
+
+case x$with_gunicorn in
+  x|xyes|xno) with_gunicorn=/usr ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gunicorn" >&5
+$as_echo "$with_gunicorn" >&6; }
+
+
+### --with-wsgi-user=WSGI_USER
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for WSGI user" >&5
+$as_echo_n "checking for WSGI user... " >&6; }
+
+# Check whether --with-wsgi-user was given.
+if test "${with_wsgi_user+set}" = set; then :
+  withval=$with_wsgi_user;
+fi
+
+case x$with_wsgi_user in
+  x|xyes|xno) with_wsgi_user=wsgi ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_wsgi_user" >&5
+$as_echo "$with_wsgi_user" >&6; }
+
+
+### --with-wsgi-group=WSGI_GROUP
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for WSGI group" >&5
+$as_echo_n "checking for WSGI group... " >&6; }
+
+# Check whether --with-wsgi-group was given.
+if test "${with_wsgi_group+set}" = set; then :
+  withval=$with_wsgi_group;
+fi
+
+case x$with_wsgi_group in
+  x|xyes|xno) with_wsgi_group=wsgi ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_wsgi_group" >&5
+$as_echo "$with_wsgi_group" >&6; }
+
+
+### --with-wsgi-port=WSGI_PORT
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for WSGI port" >&5
+$as_echo_n "checking for WSGI port... " >&6; }
+
+# Check whether --with-wsgi-port was given.
+if test "${with_wsgi_port+set}" = set; then :
+  withval=$with_wsgi_port;
+fi
+
+case x$with_wsgi_port in
+  x|xyes|xno) with_wsgi_port=8000 ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_wsgi_port" >&5
+$as_echo "$with_wsgi_port" >&6; }
+
+
 # Checks for libraries.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gfarm_initialize in -lgfarm" >&5
 $as_echo_n "checking for gfarm_initialize in -lgfarm... " >&6; }
@@ -12230,7 +12372,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files etc/gfarm-s3.conf etc/makefile makes/build-conf bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile minio/makefile"
+ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gunicorn.service etc/makefile etc/sudoers minio/makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -13256,9 +13398,7 @@ do
   case $ac_config_target in
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
-    "etc/gfarm-s3.conf") CONFIG_FILES="$CONFIG_FILES etc/gfarm-s3.conf" ;;
-    "etc/makefile") CONFIG_FILES="$CONFIG_FILES etc/makefile" ;;
-    "makes/build-conf") CONFIG_FILES="$CONFIG_FILES makes/build-conf" ;;
+    "makefile") CONFIG_FILES="$CONFIG_FILES makefile" ;;
     "bin/gfarm-s3-configtest") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-configtest" ;;
     "bin/gfarm-s3-diff-local-usermap") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-diff-local-usermap" ;;
     "bin/gfarm-s3-login") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-login" ;;
@@ -13268,6 +13408,11 @@ do
     "bin/gfarm-s3-useradd") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-useradd" ;;
     "bin/gfarm-s3-viusermap") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-viusermap" ;;
     "bin/makefile") CONFIG_FILES="$CONFIG_FILES bin/makefile" ;;
+    "etc/apache-gfarm-s3.conf") CONFIG_FILES="$CONFIG_FILES etc/apache-gfarm-s3.conf" ;;
+    "etc/gfarm-s3.conf") CONFIG_FILES="$CONFIG_FILES etc/gfarm-s3.conf" ;;
+    "etc/gunicorn.service") CONFIG_FILES="$CONFIG_FILES etc/gunicorn.service" ;;
+    "etc/makefile") CONFIG_FILES="$CONFIG_FILES etc/makefile" ;;
+    "etc/sudoers") CONFIG_FILES="$CONFIG_FILES etc/sudoers" ;;
     "minio/makefile") CONFIG_FILES="$CONFIG_FILES minio/makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

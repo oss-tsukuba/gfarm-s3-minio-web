@@ -39,3 +39,9 @@ mkdir -p /home/wsgi/libexec
 cp -p /home/user1/bin/ksh /home/wsgi/bin
 cp -p /home/user1/libexec/kshl /home/wsgi/libexec
 touch /home/wsgi/.hushlogin
+
+#vi /etc/nginx/nginx.conf
+#systemctl enable nginx.service
+#systemctl restart nginx.service
+#systemctl stop nginx.service
+#chmod o+rx /var/log/nginx

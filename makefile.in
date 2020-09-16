@@ -3,6 +3,13 @@
 #go_archive=go1.15.linux-amd64.tar.gz
 #go_url=https://dl.google.com/go/$(go_archive)
 #MKDIR=mkdir
+prefix=@prefix@
+
+with_globus=@with_globus@
+with_myproxy=@with_myproxy@
+with_gfarm=@with_gfarm@
+with_apache=@with_apache@
+with_wsgi_user=@with_wsgi_user@
 
 all:
 	(cd etc && make)

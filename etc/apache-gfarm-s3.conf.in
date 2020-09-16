@@ -1,7 +1,7 @@
 RewriteEngine on
 
-ProxyPass /d http://127.0.0.1:@WSGI_PORT@/d
+ProxyPass /d http://127.0.0.1:@with_wsgi_port@/d
 ProxyPreserveHost on
 ProxyAddHeaders off
 
-Include @GFARMS3_APACHE_REWRITE_CONF@
+Include @prefix@/var/gfarm-s3/rewrite.conf

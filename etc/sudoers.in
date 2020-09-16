@@ -1,14 +1,14 @@
 ### Runas_Alias GFARMS3 = ALL, !root
 Runas_Alias GFARMS3 = %gfarms3
 
-@WSGI_USER@ ALL=(GFARMS3) NOPASSWD: @GFARMS3_BIN@/gfarm-s3-server
-@WSGI_USER@ ALL=(GFARMS3) NOPASSWD: @globus_bin@/grid-proxy-info
-@WSGI_USER@ ALL=(GFARMS3) NOPASSWD: @globus_bin@/grid-proxy-init
-@WSGI_USER@ ALL=(GFARMS3) NOPASSWD: @myproxy_bin@/myproxy-logon
-@WSGI_USER@ ALL=(GFARMS3) NOPASSWD: @gfarm_bin@/gfkey
-@WSGI_USER@ ALL=(GFARMS3) NOPASSWD: @gfarm_bin@/gfuser
-@WSGI_USER@ ALL=(GFARMS3) NOPASSWD: @gfarm_bin@/gfgroup
-@WSGI_USER@ ALL=(GFARMS3) NOPASSWD: @gfarm_bin@/gfls
-@WSGI_USER@ ALL=(GFARMS3) NOPASSWD: @gfarm_bin@/gfgetfacl
-@WSGI_USER@ ALL=(GFARMS3) NOPASSWD: @gfarm_bin@/gfsetfacl
-@WSGI_USER@ ALL=(root) NOPASSWD: @apache_sbin@/apachectl
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @prefix@/bin/gfarm-s3-server
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_globus@/bin/grid-proxy-info
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_globus@/bin/grid-proxy-init
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_myproxy@/bin/myproxy-logon
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfkey
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfuser
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfgroup
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfls
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfgetfacl
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfsetfacl
+@with_wsgi_user@ ALL=(root) NOPASSWD: @with_apache@/sbin/apachectl

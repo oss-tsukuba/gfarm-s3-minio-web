@@ -148,11 +148,11 @@ def get_user_list(username):
 def get_groups_users_list(username):
     groups = get_group_list(username)
     groups.sort()
-    groups = [{"id": "group:" + e, "text": e} for e in groups]
+    groups = [{"id": "group:" + e, "text": "group:" + e} for e in groups]
 
     users = get_user_list(username)
     users.sort()
-    users = [{"id": "user:" + user_id(e), "text": pretty_name(e)} for e in users]
+    users = [{"id": "user:" + user_id(e), "text": "user:" + pretty_name(e)} for e in users]
 
     return (groups, users)
 

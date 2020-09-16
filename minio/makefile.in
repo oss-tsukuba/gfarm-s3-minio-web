@@ -1,4 +1,4 @@
-prefix=@prefix@
+PREFIX=@prefix@
 WITH_GFARM=/usr/local
 SRCDIR=/home/user1/work/gfarm-s3-minio-web
 GOPATH=$(SRCDIR)/minio/work/go
@@ -9,9 +9,9 @@ BUILDDIR=$(SRCDIR)/minio/work/build
 GO_ARCHIVE=go1.15.linux-amd64.tar.gz
 GO_URL=https://dl.google.com/go/$(GO_ARCHIVE)
 
-GFARM_S3_PREFIX=@prefix@
-MINIO_PATH=$(GFARM_S3_PREFIX)/bin/minio
-MC_PATH=$(GFARM_S3_PREFIX)/bin/mc
+#GFARM_S3_PREFIX=@prefix@
+MINIO_PATH=$(PREFIX)/bin/minio
+MC_PATH=$(PREFIX)/bin/mc
 
 mc_git=https://github.com/minio/mc.git
 minio_git=git@github.com:oss-tsukuba/gfarm-s3-minio.git
@@ -32,7 +32,6 @@ all::
 	###export GOBIN=$GOPATH/bin
 
 	#. /usr/local/etc/gfarm-s3.conf
-
 
 	[ -d $(BUILDDIR) ] || $(MKDIR) -p $(BUILDDIR)
 	[ -d $(BUILDDIR)/mc ] || (cd $(BUILDDIR) && git clone $(mc_git))

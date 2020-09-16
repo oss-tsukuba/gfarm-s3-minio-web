@@ -107,9 +107,34 @@ def is_unmodifiable(s):
 def is_modifiable(s):
     return not is_metainfo(s) and "::" not in s and not s.startswith("default:")
 
-def edict(e):
+def is_active(perm, expect):
+    if perm == expect:
+        return " active"
+    return ""
+
+def is_checked(perm, expect):
+    if perm == expect:
+        return " checked"
+    return ""
+
+def edict(e, gu):
     r = e.split(":")
-    return {"id": r[0] + ":" + r[1], "perm": r[2]}
+
+    id = r[0] + ":" + r[1]
+    perm = r[2]
+
+    text = [x for x in gu if x["id"] == id][0]["text"]
+
+    a0 = is_active(perm, "rwx")
+    a1 = is_active(perm, "r-x")
+    a2 = is_active(perm, "---")
+    c0 = is_checked(perm, "rwx")
+    c1 = is_checked(perm, "r-x")
+    c2 = is_checked(perm, "---")
+
+    return {"id": id, "text": text,
+            "a0": a0, "a1": a1, "a2": a2,
+            "c0": c0, "c1": c1, "c2": c2}
 
 def aclfile(request):
     if need_login(request.session):
@@ -128,13 +153,13 @@ def aclfile(request):
     acl_0 = [e for e in bucket_acl_split if is_metainfo(e)]
     acl_1 = [e for e in bucket_acl_split if is_unmodifiable(e)]
     acl_2 = [e for e in bucket_acl_split if is_modifiable(e)]
-    acl_2_split = [edict(e) for e in acl_2]
     (groups, users) = cmd.get_groups_users_list(username)
     dict = {"bucket": bucket,
             "acl_0": acl_0,
             "acl_1": acl_1,
             "acl_2": acl_2,
-            "acl_2_split": acl_2_split,
+            "acl_2_preset": [edict(e, groups + users) for e in acl_2],
             "groups_users": groups + users,
-            "acl_1_string": "\n".join(acl_1)}
+            "acl_1_string": "\n".join(acl_1),
+            "seq": len(acl_2)}
     return render(request, "console/aclfile.html", dict)

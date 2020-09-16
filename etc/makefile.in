@@ -13,19 +13,20 @@ GFARM_S3_VAR=$(PREFIX)/var/gfarm-s3
 INSTALL=install -c -m 555
 MKDIR=mkdir
 
-all: sudoers apache-gfarm-s3.conf gunicorn.service
+all: 
+#	sudoers apache-gfarm-s3.conf gunicorn.service
 
-sudoers: sudoers.in
-	sh ../makes/build-conf < $^ > $@
-
-apache-gfarm-s3.conf: apache-gfarm-s3.conf.in
-	sh ../makes/build-conf < $^ > $@
-
-gunicorn.service: gunicorn.service.in
-	sh ../makes/build-conf < $^ > $@
-
+#sudoers: sudoers.in
+#	sh ../makes/build-conf < $^ > $@
+#
+#apache-gfarm-s3.conf: apache-gfarm-s3.conf.in
+#	sh ../makes/build-conf < $^ > $@
+#
+#gunicorn.service: gunicorn.service.in
+#	sh ../makes/build-conf < $^ > $@
+#
 clean:
-	rm -f sudoers apache-gfarm-s3.conf gunicorn.service
+#	rm -f sudoers apache-gfarm-s3.conf gunicorn.service
 
 install:
 	$(INSTALL) -c gfarm-s3.conf $(GFARMS3_CONF)

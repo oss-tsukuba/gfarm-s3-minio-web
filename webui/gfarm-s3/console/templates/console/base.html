@@ -11,6 +11,26 @@
 </head>
 <body>
 <div class="container">
+<nav class="navbar  navbar-expand-sm fixed-top navbar-dark bg-dark">
+  <a href="#" class="navbar-brand">Gfarm-S3</a>
+
+<form action="{% url 'logout' %}" method="post">
+{% csrf_token %}
+{% load i18n %}
+<button type="submit" class="btn btn-primary" value="Launch">{% trans 'Logout' %}</button>
+</form>
+
+<form action="{% url 'list' %}" method="post">
+{% csrf_token %}
+<button type="submit" class="btn btn-primary" value="Launch">{% trans 'backToBucketList' %}</button>
+</form>
+
+<form action="{% url 'result' %}" method="post">
+{% csrf_token %}
+<button type="submit" class="btn btn-primary" value="Launch">{% trans 'backToStatusPage' %}</button>
+</form>
+
+</nav>
 {% block content1 %}
 {% endblock %}
 </div>

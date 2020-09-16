@@ -17,7 +17,22 @@
 {% endfor %}</pre>
 </card>
 
-<div id="acl_list" class="list-group"></div>
+<div id="acl_list" class="list-group"
+>{% for e in acl_2_preset %}<div class="d-flex form-control border-0" id = "li_{{ forloop.counter0 }}"
+><select class="select2_users flex-fill" id="sl_{{ forloop.counter0 }}" name="sel:{{ forloop.counter0 }}"
+><option value="{{ e.id }}">{{ e.text }}</option
+></select
+>:<div class="btn-group btn-group-toggle" data-toggle="buttons"
+><label class="btn btn-secondary btn-sm{{ e.a0 }}"
+><input type="radio" name="opt:{{ forloop.counter0 }}" value="rwx"{{ e.c0 }}>RW</label
+><label class="btn btn-secondary btn-sm{{ e.a1 }}"
+><input type="radio" name="opt:{{ forloop.counter0 }}" value="r-x"{{ e.c1 }}>RO</label
+><label class="btn btn-secondary btn-sm{{ e.a2 }}"
+><input type="radio" name="opt:{{ forloop.counter0 }}" value="---"{{ e.c2 }}>--</label
+></div
+><button type="button" class="btn btn-outline-danger btn-sm" onClick="$('#li_{{ forloop.counter0 }}').remove();">Del</button
+></div
+>{% endfor %}</div>
 
 <button type="button" id="add_entry" class="btn btn-outline-primary form-control">add entry</button>
 
@@ -37,6 +52,7 @@
 </ul>
 -->
 
+<!--
 <form action="{% url 'list' %}" method="post">
 {% csrf_token %}
 <div class="form-group">
@@ -50,14 +66,13 @@
 <button type="submit" class="btn btn-primary form-control" value="Launch">{% trans 'backToStatusPage' %}</button>
 </div>
 </form>
+-->
 
 <script>
+var seq = {{ seq }};
 var data_groups_and_users = [
 { id: 0, text: "" },
 {% for e in groups_users %}{ id: "{{ e.id }}", text: "{{ e.text }}" },{% endfor %}
-];
-var acl_2_split = [
-{% for e in acl_2_split %}{ id: "{{ e.id }}", perm: "{{ e.perm }}" },{% endfor %}
 ];
 </script>
 
