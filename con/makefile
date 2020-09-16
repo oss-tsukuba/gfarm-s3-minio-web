@@ -1,14 +1,15 @@
 all:
 
-con::
-	sudo ./con
+#con::
+#	sudo ./con
 
-ins::
-	./local-setting
-	./install_secret
+install::
+#	./local-setting
+#	./install_secret
+	./gfarm-settings
 
 edit::
-	vi /etc/httpd/conf.d/myserver.conf ../etc/apache-gfarm-s3.conf
+	vi ../etc/apache-gfarm-s3.conf /etc/httpd/conf.d/myserver.conf
 
 restart::
 	apachectl restart
