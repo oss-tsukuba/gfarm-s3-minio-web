@@ -63,6 +63,7 @@ status=failure
 if [ -n "$authenticated" ]; then
 	authenticated_method="$authenticated"
 elif ! authenticated_method=$(challenge_auth "$global_username" "$user_password" "$local_username"); then
+	logger -i -p local7.info -t gfarm-s3-login "login failed: $global_username" 
 cat <<-EOF
 	{
 		"status": "$status",

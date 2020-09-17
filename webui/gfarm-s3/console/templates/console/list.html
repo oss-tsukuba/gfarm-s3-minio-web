@@ -1,7 +1,7 @@
 {% extends "console/base.html" %}
 {% load i18n %}
 {% block content1 %}
-<h1>Bucket List</h1
+<h1>{% trans 'bucketList' %}</h1
 
 >{% for o in bucketlist %}<div class="form-control border-0"
 ><a href="{% url 'aclfile' %}?bucket={{ o }}"

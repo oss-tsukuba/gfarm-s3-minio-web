@@ -1,3 +1,4 @@
+{% load i18n %}
 <!doctype html>
 <html lang="en"
 ><head
@@ -26,10 +27,10 @@
 ><div class="collapse navbar-collapse" id="navbarSupportedContent"
 ><ul class="navbar-nav mr-auto"
 ><li class="nav-item active"
-><a class="nav-link" href="{% url 'result' %}">Home</a
+><a class="nav-link" href="{% url 'result' %}">{% trans 'Home' %}</a
 ></li
 ><li class="nav-item active"
-><a class="nav-link" href="{% url 'list' %}">Bucket List</a
+><a class="nav-link" href="{% url 'list' %}">{% trans 'bucketList' %}</a
 ></li
 ></ul
 

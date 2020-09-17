@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-09 12:51+0900\n"
+"POT-Creation-Date: 2020-09-17 11:24+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,60 +18,111 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: templates/console/application.html:5
-msgid "errorMessage"
-msgstr "error!"
+#: templates/console/aclfile.html:43
+msgid "addEntry"
+msgstr "Add Entry"
 
-#: templates/console/application.html:23 templates/console/application.html:26
-#: templates/console/application.html:29
+#: templates/console/aclfile.html:46
+msgid "applyACLchanges"
+msgstr "Apply Changes"
+
+#: templates/console/base.html:30
+msgid "Home"
+msgstr "Home"
+
+#: templates/console/base.html:33 templates/console/list.html:4
+#, fuzzy
+#| msgid "BucketACL"
+msgid "bucketList"
+msgstr "Buckets"
+
+#: templates/console/base.html:43
+msgid "Logout"
+msgstr "Logout"
+
+#: templates/console/k/login.html:18 templates/console/k/login.html:21
+#: templates/console/k/login.html:24 templates/console/login.html:27
 msgid "passwordInstruction"
-msgstr "password instruction"
+msgstr "Password Instruction"
 
-#: templates/console/application.html:37
-msgid "GlobalUsername"
-msgstr "Global username"
-
-#: templates/console/application.html:38
-msgid "UsernamePlacehodler"
-msgstr "Enter Global Username"
-
-#: templates/console/application.html:42
-msgid "Password"
-msgstr "Password"
-
-#: templates/console/application.html:43
-msgid "PasswordPlaceholder"
-msgstr "Enter Password"
-
-#: templates/console/application.html:46
-msgid "GoButton"
-msgstr "Sign In"
-
-#: templates/console/application.html:50
+#: templates/console/k/login.html:30
 msgid "AdvancedOptions"
 msgstr "Advanced Options"
 
-#: templates/console/application.html:59 templates/console/application.html:75
-#: templates/console/result.html:24
+#: templates/console/k/login.html:39 templates/console/k/login.html:55
+#: templates/console/k/result.html:13 templates/console/result.html:18
 msgid "StartGfarmS3"
 msgstr "Start Gfarm-S3"
 
-#: templates/console/application.html:63 templates/console/result.html:28
+#: templates/console/k/login.html:43 templates/console/k/result.html:17
+#: templates/console/result.html:27
 msgid "StopGfarmS3"
 msgstr "Stop Gfarm-S3"
 
-#: templates/console/application.html:67 templates/console/result.html:32
+#: templates/console/k/login.html:47 templates/console/k/result.html:21
 msgid "ShowCurrentStatus"
 msgstr "Show Current Status"
 
-#: templates/console/application.html:71 templates/console/result.html:36
+#: templates/console/k/login.html:51 templates/console/k/result.html:25
 msgid "ShowS3SecretKey"
 msgstr "Show S3 Secret-Key"
 
-#: templates/console/index.html:8
-msgid "AppLink"
-msgstr "applnk"
-
-#: templates/console/result.html:40
+#: templates/console/k/result.html:29
 msgid "BucketACL"
-msgstr "Share Buckets"
+msgstr "Buckets"
+
+#: templates/console/login.html:6
+msgid "errorMessage"
+msgstr "error!"
+
+#: templates/console/login.html:10
+msgid "GlobalUsername"
+msgstr "Global Username"
+
+#: templates/console/login.html:14
+msgid "UsernamePlacehodler"
+msgstr "Enter Global Username"
+
+#: templates/console/login.html:19
+msgid "Password"
+msgstr "Password"
+
+#: templates/console/login.html:23
+msgid "PasswordPlaceholder"
+msgstr "Enter Password"
+
+#: templates/console/login.html:32
+msgid "GoButton"
+msgstr "Sign In"
+
+#: templates/console/result.html:6
+msgid "authenticationMethod"
+msgstr "Authentication Method"
+
+#: templates/console/result.html:7
+msgid "expirationDate"
+msgstr "Expiration Date"
+
+#: templates/console/result.html:8
+#, fuzzy
+#| msgid "GlobalUsername"
+msgid "globalUsername"
+msgstr "Global Username"
+
+#: templates/console/result.html:9
+msgid "s3serverStatus"
+msgstr "S3 Server Status"
+
+#: templates/console/result.html:10
+msgid "accessKey"
+msgstr "Access Key"
+
+#: templates/console/result.html:11
+#, fuzzy
+#| msgid "ShowS3SecretKey"
+msgid "secretKey"
+msgstr "Show S3 Secret-Key"
+
+#: templates/console/result.html:36
+msgid "chgKey"
+msgstr "Change Secret Key"
