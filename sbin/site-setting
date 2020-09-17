@@ -5,40 +5,49 @@ if [ $(id -u) != 0 ]; then
 	exit 1
 fi
 
-HTTPD_CONF_D=/etc/httpd/conf.d
-HTTPD_DocumentRoot=/usr/local/share/www
-SERVER_CRT=/etc/httpd/conf/ssl.key/server.crt
-SERVER_KEY=/etc/httpd/conf/ssl.crt/server.key
+if [ ! -e $HTTPD_CONF_D/myserver.conf ]; then
+	HTTPD_CONF_D=/etc/httpd/conf.d
+	HTTPD_DocumentRoot=/usr/local/share/www
+	SERVER_CRT=/etc/httpd/conf/ssl.key/server.crt
+	SERVER_KEY=/etc/httpd/conf/ssl.crt/server.key
 
-sed < etc/myserver.conf.in > $HTTPD_CONF_D/myserver.conf \
-	-e "s@DocumentRoot@$HTTPD_DocumentRoot"  \
-	-e "s@SERVER_CRT@$SERVER_CRT" \
-	-e "s@SERVER_KEY@$SERVER_KEY"
+	sed < etc/myserver.conf.in > $HTTPD_CONF_D/myserver.conf \
+		-e "s@DocumentRoot@$HTTPD_DocumentRoot"  \
+		-e "s@SERVER_CRT@$SERVER_CRT" \
+		-e "s@SERVER_KEY@$SERVER_KEY"
 
-mkdir -p $HTTPD_DocumentRoot
-mkdir -p $(dirname $SERVER_CRT)
-mkdir -p $(dirname $SERVER_KEY)
-echo "gfarm -- $(date)" > $HTTPD_DocumentRoot/index.html
-cp etc/server.crt $SERVER_CRT
-cp etc/server.key $SERVER_KEY
+	mkdir -p $HTTPD_DocumentRoot
+	mkdir -p $(dirname $SERVER_CRT)
+	mkdir -p $(dirname $SERVER_KEY)
+	echo "gfarm -- $(date)" > $HTTPD_DocumentRoot/index.html
+	cp etc/server.crt $SERVER_CRT
+	cp etc/server.key $SERVER_KEY
+	chmod og+rX /var/log/httpd
 
-chmod og+rX /var/log/httpd
+	systemctl enable httpd
+	systemctl stop httpd
+	systemctl start httpd
+fi
 
-systemctl enable httpd
-systemctl stop httpd
-systemctl start httpd
-
-useradd wsgi
-
-mkdir -p /home/wsgi/.ssh
+id wsgi || useradd wsgi
+mkdir -p /home/wsgi/.ssh /home/wsgi/bin /home/wsgi/libexec
 chmod 700 /home/wsgi/.ssh
-cat /home/user1/.ssh/authorized_keys >> /home/wsgi/.ssh/authorized_keys 
-chown -R wsgi:wsgi /home/wsgi/.ssh
-mkdir -p /home/wsgi/bin
-mkdir -p /home/wsgi/libexec
+cat /home/user1/.ssh/authorized_keys >> /home/wsgi/.ssh/authorized_keys
 cp -p /home/user1/bin/ksh /home/wsgi/bin
 cp -p /home/user1/libexec/kshl /home/wsgi/libexec
 touch /home/wsgi/.hushlogin
+[ -e /home/wsgi/work ] || ln -s /mnt/work /home/wsgi/work
+cat <<EOF > /home/wsgi/.profile
+set -o vi
+PS1='wsgi$ '
+alias ls=ls
+unalias ls
+alias lf='ls -F'
+alias ll='ls -l'
+alias r='fc -e -'
+alias h='fc -l'
+EOF
+chown -R wsgi:wsgi /home/wsgi
 
 #vi /etc/nginx/nginx.conf
 #systemctl enable nginx.service
