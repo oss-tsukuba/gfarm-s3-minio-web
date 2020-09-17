@@ -4,8 +4,8 @@ set -o xtrace
 
 export AWS_PROFILE=user1
 
-ENDPOINT_URL=http://192.168.224.22
-ENDPOINT_URL=https://192.168.224.22
+ENDPOINT_URL=http://192.168.224.11
+ENDPOINT_URL=https://192.168.224.11
 
 export PYTHONWARNINGS="ignore:Unverified HTTPS request"
 
@@ -13,6 +13,16 @@ DEBUG=--debug
 DEBUG=
 
 . ./subr
+
+update_credentials() {
+	aws_access_key_id=K4XcKzocrUhrnCAKrx2Z
+	aws_secret_access_key=$(ssh gfarm cat /home/user1/.gfarm-s3/secret_key)
+	cat <<-EOF > /home/nis/.aws/credentials
+	[user1]
+	aws_access_key_id = $aws_access_key_id 
+	aws_secret_access_key = $aws_secret_access_key 
+	EOF
+}
 
 sets3v4() {
 	aws configure set default.s3.signature_version s3v4
@@ -119,7 +129,7 @@ else
 fi
 
 case "$cmd" in
-sets3v4|test0|testA|testB|test_deeppath|test_mv)
+update_credentials|sets3v4|test0|testA|testB|test_deeppath|test_mv)
 	$cmd;;
 *)
 	echo "usage: $0 sets3v4|test0|testA|testB|test_deeppath|test_mv"

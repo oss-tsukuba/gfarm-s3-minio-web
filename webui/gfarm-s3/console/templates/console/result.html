@@ -6,7 +6,7 @@
 ><div class="form-control border-0">{% trans 'authenticationMethod' %}: {{ authenticated_method }}</div
 ><div class="form-control border-0">{% trans 'expirationDate' %}: {{ expiration_date_calendar_datetime }}</div
 ><div class="form-control border-0">{% trans 'globalUsername' %}: {{ global_username }}</div
-><div class="form-control{% if warning %} alert alert-danger{% endif %} border-0"> {% trans 's3serverStatus' %}: {{ s3server_status }}</div
+><div class="form-control{% if not s3sstatus %} alert alert-danger{% endif %} border-0"> {% trans 's3serverStatus' %}: {{ s3server_status }}</div
 ><div class="form-control d-flex border-0">{% trans 'accessKey' %}: <input onClick="this.select();" value="{{ access_key }}"  class="border-0 flex-grow-1" /></div
 ><!--div class="form-control d-flex border-0">{% trans 'secretKey' %}: <input onClick="this.select();" value="{{ secret_key }}"  class="border-0 flex-grow-1" /></div
 
@@ -54,6 +54,9 @@
 	class="btn btn-primary form-control"
 	value="Launch">{% trans 'chgKey' %}</button
 ></div
+><input type="hidden"
+	name="s3sstatus"
+	value="{{ s3sstatus }}"
 ></form
 
 ></div>

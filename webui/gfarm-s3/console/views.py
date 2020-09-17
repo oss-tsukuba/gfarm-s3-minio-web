@@ -76,8 +76,16 @@ def chgkey(request):
         return HttpResponseRedirect(reverse("login"))
     username = request.session["global_username"]
     authenticated = request.session["authenticated_method"]
-    cmd.cmd("stop", username, "", authenticated = authenticated)
+    if request.method == 'POST':
+        running = request.POST["s3sstatus"]
+    else:
+        running = False
+    logger.debug("RUNNING = {}".format(running))
+    if running:
+        cmd.cmd("stop", username, "", authenticated = authenticated)
     cmd.cmd("keygen", username, "", authenticated = authenticated)
+    if running:
+        cmd.cmd("start", username, "", authenticated = authenticated)
     ### ignore cmd.cmd return value
     return HttpResponseRedirect(reverse("result"))
 
@@ -87,8 +95,7 @@ def result(request):
     username = request.session["global_username"]
     authenticated = request.session["authenticated_method"]
     cmd_result = cmd.cmd("info", username, "", authenticated = authenticated)
-    if not "s3server_status" in cmd_result or not cmd_result["s3server_status"].startswith("200"):
-        cmd_result["warning"] = True
+    cmd_result["s3sstatus"] = "s3server_status" in cmd_result and cmd_result["s3server_status"].startswith("200")
     return render(request, "console/result.html", cmd_result)
 
 def list(request):

@@ -49,7 +49,7 @@ def cmd(action, username, passwd, authenticated = None):
         logger.debug("ERROR 3 --- RETVAL = {} --- STDERR = {}".format(ret, stderr.decode()))
         return {"status": "ERROR 3", "reason": stderr.decode()}
     #logger.debug("SUCCESS --- STDERR = {}".format(stderr.decode()))
-    logger.debug("STDOUT = {}".format(stdout))
+    #logger.debug("STDOUT = {}".format(stdout))
     result = json.loads(stdout.decode().strip())
     if "expiration_date" in result.keys():
         result["expiration_date_calendar_datetime"] = time.ctime(result["expiration_date"])
@@ -82,7 +82,7 @@ def get_bucket_acl(username, bucket):
     p.wait()
 
 ### XXX debug
-    #logger.debug("STDOUT = {}".format(stdout))
+    logger.debug("STDOUT = {}".format(stdout))
 
     return stdout.decode()
 

@@ -5,7 +5,8 @@ set -o xtrace
 ENDPOINT_URL=http://127.0.0.1:9000
 
 MINIO_ACCESS_KEY=K4XcKzocrUhrnCAKrx2Z
-MINIO_SECRET_KEY=39e+URNfFv/CCgs4bYcBMusR7ngMLOxEf6cpXWpB
+#MINIO_SECRET_KEY=39e+URNfFv/CCgs4bYcBMusR7ngMLOxEf6cpXWpB
+MINIO_SECRET_KEY=$(</home/user1/.gfarm-s3/secret_key)
 
 PROFILE=user1
 
