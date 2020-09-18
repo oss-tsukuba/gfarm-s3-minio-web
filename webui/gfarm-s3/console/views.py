@@ -126,19 +126,15 @@ def is_checked(perm, expect):
 
 def edict(e, gu):
     r = e.split(":")
-
     id = r[0] + ":" + r[1]
     perm = r[2]
-
     text = [x for x in gu if x["id"] == id][0]["text"]
-
     a0 = is_active(perm, "rwx")
     a1 = is_active(perm, "r-x")
     a2 = is_active(perm, "---")
     c0 = is_checked(perm, "rwx")
     c1 = is_checked(perm, "r-x")
     c2 = is_checked(perm, "---")
-
     return {"id": id, "text": text,
             "a0": a0, "a1": a1, "a2": a2,
             "c0": c0, "c1": c1, "c2": c2}
@@ -146,20 +142,20 @@ def edict(e, gu):
 def aclfile(request):
     if need_login(request.session):
         return HttpResponseRedirect(reverse("login"))
-
     username = request.session["global_username"]
-
     if request.method == 'GET':
         bucket = request.GET["bucket"]
     elif request.method == 'POST':
-        bucket = request.POST["bucket"]
-        cmd.set_bucket_acl(username, bucket, request.POST)
-
-    original_bucket_acl = cmd.get_bucket_acl(username, bucket)
-    bucket_acl_split = [e for e in original_bucket_acl.split('\n') if e != ""]
-    acl_0 = [e for e in bucket_acl_split if is_metainfo(e)]
-    acl_1 = [e for e in bucket_acl_split if is_unmodifiable(e)]
-    acl_2 = [e for e in bucket_acl_split if is_modifiable(e)]
+        p = request.POST
+        bucket = p["bucket"]
+        acl_1_string = p["acl_1_string"]
+        q = [e for e in p if e.startswith("opt:")]
+        acl_2 = [p[e.replace("opt", "sel")] + ":" + p[e] for e in q]
+        cmd.set_bucket_acl(username, bucket, acl_1_string, acl_2)
+    bucket_acl = cmd.get_bucket_acl(username, bucket)
+    acl_0 = [e for e in bucket_acl if is_metainfo(e)]
+    acl_1 = [e for e in bucket_acl if is_unmodifiable(e)]
+    acl_2 = [e for e in bucket_acl if is_modifiable(e)]
     (groups, users) = cmd.get_groups_users_list(username)
     dict = {"bucket": bucket,
             "acl_0": acl_0,

@@ -14,7 +14,6 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 def gfarm_s3_login(action, username, passwd, stdin = None, authenticated = None, bucket = None):
-### XXX debug
     GFARM_S3_BIN = "/usr/local/bin"
     args = [action, username, passwd]
     if authenticated is not None:
@@ -22,18 +21,9 @@ def gfarm_s3_login(action, username, passwd, stdin = None, authenticated = None,
     if bucket is not None:
         args = ["--bucket", bucket] + args
     gfarm_s3_login_bin = os.path.join(GFARM_S3_BIN, "gfarm-s3-login")
-    #logger.debug("BIN = {}".format(gfarm_s3_login_bin))
-    #logger.debug("ARGS = {}".format(args))
     return Popen([gfarm_s3_login_bin] + args, stdin = stdin, stdout = PIPE, stderr = PIPE, env = {})
 
 def cmd(action, username, passwd, authenticated = None):
-    #GFARM_S3_BIN = "/home/user1/work/gfarm-s3-minio-web/bin"
-    #action = "stop" | "start" | "restart" | "show" | "genkey"
-    #if authenticated is not None:
-        #gfarm_s3_login_args = [action, username, ""]
-    #elif passwd is not None:
-        #gfarm_s3_login_args = [action, username, passwd]
-
     try:
         p = gfarm_s3_login(action, username, passwd, authenticated = authenticated)
     except:
@@ -48,112 +38,69 @@ def cmd(action, username, passwd, authenticated = None):
     if ret != 0:
         logger.debug("ERROR 3 --- RETVAL = {} --- STDERR = {}".format(ret, stderr.decode()))
         return {"status": "ERROR 3", "reason": stderr.decode()}
-    #logger.debug("SUCCESS --- STDERR = {}".format(stderr.decode()))
-    #logger.debug("STDOUT = {}".format(stdout))
     result = json.loads(stdout.decode().strip())
     if "expiration_date" in result.keys():
         result["expiration_date_calendar_datetime"] = time.ctime(result["expiration_date"])
     return result
 
 def get_bucket_list(username):
-    ###s3rootdir = "/home/hp120273/hpci005858/tmp/gfarms3/hpci005858"
-    ###cmd = ["sudo", "-u", username, "/usr/local/bin/gfls", s3rootdir]
-
     p = gfarm_s3_login("gfls", username, "", authenticated = "unspecified")
-
     stdout, stderr = p.communicate()
-
     p.wait()
-
-### XXX debug
-    #logger.debug("STDOUT = {}".format(stdout))
-
-    return [e for e in stdout.decode().split('\n') if e != ""]
+    return split_lines(stdout.decode())
 
 def get_bucket_acl(username, bucket):
-    ##s3rootdir = "/home/hp120273/hpci005858/tmp/gfarms3/hpci005858"
-    ##bucketpath = os.path.join(s3rootdir, bucket)
-    ##cmd = ["sudo", "-u", username, "/usr/local/bin/gfgetfacl", bucketpath]
-
     p = gfarm_s3_login("gfgetfacl", username, "", authenticated = "unspecified", bucket = bucket)
-
     stdout, stderr = p.communicate()
-
     p.wait()
+    #logger.debug("GET_BUCKET_ACL: [{}]".format(stdout.decode() + "\n"))
+    return split_lines(stdout.decode())
 
-### XXX debug
-    logger.debug("STDOUT = {}".format(stdout))
+def need_default(s):
+    return (s.startswith("group:") or s.startswith("user:")) and ("::" not in s)
 
-    return stdout.decode()
+def rewrite_any(s):
+    if s.startswith("group::"):
+        return "group::---"
+    if s.startswith("other::"):
+        return "other::---"
+    return s
 
-def set_bucket_acl(username, bucket, postdata):
-#    logger.debug("SET BUCKET ACL: {} {}".format(username, bucket))
-#    logger.debug("SET BUCKET ACL: postdata = {}".format(postdata))
-#    for key, value in postdata.items():
-#        logger.debug("SET BUCKET ACL: {} = {}".format(key, value))
-    v = [postdata[e.replace("opt", "sel")] + ":" + postdata[e] for e in postdata if e.startswith("opt:")]
+def fix_acl(acl):
+    acl = [rewrite_any(e) for e in acl]
+    default = ["default:" + e for e in acl if need_default(e)]
+    return acl + default
 
-    acl_1_string = postdata["acl_1_string"]
-    acl_2_edited = "\n".join(v)
-
-    #logger.debug("acl_1_string: {}".format(acl_1_string))
-    #logger.debug("acl_2_edited: {}".format(acl_2_edited))
-
-    acl_new = acl_1_string + acl_2_edited 
-
+def set_bucket_acl(username, bucket, acl_1_string, acl_2):
+    acl = "\n".join(fix_acl(split_lines(acl_1_string) + acl_2)) + "\n"
+    logger.debug("ACL_FIXED: [{}]".format(acl))
     p = gfarm_s3_login("gfsetfacl", username, "", authenticated = "unspecified", bucket = bucket, stdin = PIPE)
-
-### + "user:hpci001971:rwx\n"
-
-    stdout, stderr = p.communicate(input = acl_new.encode())
-
+    stdout, stderr = p.communicate(input = acl.encode())
     p.wait()
-
-### XXX debug
-#    logger.debug("STDOUT = {}".format(stdout))
-#    logger.debug("STDERR = {}".format(stderr))
-
     return stdout.decode()
 
 def get_group_list(username):
-    ###cmd = ["sudo", "-u", username, "/usr/local/bin/gfgroup"]
-    ###gfarm_s3_login_args = ["--authenticated", authenticated, "gfgroup", username, ""]
-
     p = gfarm_s3_login("gfgroup", username, "", authenticated = "unspecified")
-
     stdout, stderr = p.communicate()
-
     p.wait()
-
-### XXX debug
-    #logger.debug("STDOUT = {}".format(stdout))
-
-    return [e for e in stdout.decode().split('\n') if e != ""]
+    return split_lines(stdout.decode())
 
 def get_user_list(username):
-    ###cmd = ["sudo", "-u", username, "/usr/local/bin/gfuser", "-l"]
-
     p = gfarm_s3_login("gfuser", username, "", authenticated = "unspecified")
-
     stdout, stderr = p.communicate()
-
     p.wait()
+    return split_lines(stdout.decode())
 
-### XXX debug
-    #logger.debug("STDOUT = {}".format(stdout))
-
-    return [e for e in stdout.decode().split('\n') if e != ""]
-    #return ["a", "b", "c"]
+def split_lines(s):
+    return [e.strip() for e in s.split('\n') if e.strip() != ""]
 
 def get_groups_users_list(username):
     groups = get_group_list(username)
     groups.sort()
     groups = [{"id": "group:" + e, "text": "group:" + e} for e in groups]
-
     users = get_user_list(username)
     users.sort()
     users = [{"id": "user:" + user_id(e), "text": "user:" + pretty_name(e)} for e in users]
-
     return (groups, users)
 
 def user_id(s):
