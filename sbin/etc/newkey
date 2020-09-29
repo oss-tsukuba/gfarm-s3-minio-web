@@ -1,2 +1,18 @@
 #! /bin/sh
-echo KEY=$(openssl rand -base64 20|tr -d /|head -c 13) >> $HOME/work/gfarm-s3-minio-web/sbin/etc/keys
+
+goodp() {
+	if ! echo "$1" | grep -q '[a-z]'; then return 1; fi
+	if ! echo "$1" | grep -q '[A-Z]'; then return 1; fi
+	if ! echo "$1" | grep -q '[0-9]'; then return 1; fi
+	if echo "$1" | grep -q '[+/]'; then return 1; fi
+	return 0
+}
+
+newkey() {
+	key=$(openssl rand -base64 20|tr -d /|head -c 13)
+	while ! goodp $key; do
+		key=$(openssl rand -base64 20|tr -d /|head -c 13)
+	done
+	echo "$key"
+}
+echo KEY=$(newkey) >> $HOME/work/gfarm-s3-minio-web/sbin/etc/keys

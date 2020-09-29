@@ -49,6 +49,26 @@ esac
 AC_MSG_RESULT([$with_myproxy])
 AC_SUBST(with_myproxy)
 
+### --with-myproxy-server=MYPROXY_SERVER
+AC_MSG_CHECKING([for myproxy server])
+AC_ARG_WITH([myproxy-server],
+  AC_HELP_STRING([--with-myproxy-server=MYPROXY_SERVER], [myproxy servername [[portal.hpci.nii.ac.jp]]]))
+case x$with_myproxy_server in
+  x|xyes|xno) with_myproxy_server=portal.hpci.nii.ac.jp ;;
+esac
+AC_MSG_RESULT([$with_myproxy_server])
+AC_SUBST(with_myproxy_server)
+
+### --with-proxy-lifetime=PROXY_LIFETIME
+AC_MSG_CHECKING([for proxy lifetime])
+AC_ARG_WITH([proxy-lifetime],
+  AC_HELP_STRING([--with-proxy-lifetime=PROXY_LIFETIME], [proxy lifetime [[168]]]))
+case x$with_proxy_lifetime in
+  x|xyes|xno) with_proxy_lifetime=168 ;;
+esac
+AC_MSG_RESULT([$with_proxy_lifetime])
+AC_SUBST(with_proxy_lifetime)
+
 ### --with-apache=APACHE_ROOT
 AC_MSG_CHECKING([for Apache HTTP Server])
 AC_ARG_WITH([apache],

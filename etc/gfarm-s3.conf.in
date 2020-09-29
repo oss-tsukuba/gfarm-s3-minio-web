@@ -17,24 +17,26 @@ GFARMS3_LOGIN_METHOD=myproxy-logon,grid-proxy-init,gfarm-shared-key
 #GFARMS3_LOGIN_METHOD=gfarm-shared-key
 #GFARMS3_LOGIN_METHOD=
 
+GFARM_S3_WAIT_COUNT=5
 GFARM_S3_KILL_COUNT=5
 GFARM_S3_LOCKDIR=$GFARM_S3_VAR
 
-MYPROXY_LOGON=/usr/bin/myproxy-logon
-GRID_PROXY_INIT=/usr/bin/grid-proxy-init
-MYPROXY_SERVER=portal.hpci.nii.ac.jp
-PROXY_LIFETIME=168
-GFKEY=/usr/local/bin/gfkey
-GRID_PROXY_INFO=/usr/bin/grid-proxy-info
 GFARM_S3_ACCESS_KEY_MIN_LEN=8
-GFUSER=/usr/local/bin/gfuser
-GFGROUP=/usr/local/bin/gfgroup
-GFLS=/usr/local/bin/gfls
-GFGETFACL=/usr/local/bin/gfgetfacl
-GFSETFACL=/usr/local/bin/gfsetfacl
+
+MYPROXY_LOGON=@with_myproxy@/bin/myproxy-logon
+MYPROXY_SERVER=@with_myproxy_server@
+PROXY_LIFETIME=@with_proxy_lifetime@
+GRID_PROXY_INIT=@with_globus@/bin/grid-proxy-init
+GRID_PROXY_INFO=@with_globus@/bin/grid-proxy-info
+GFKEY=@with_gfarm@/bin/gfkey
+GFUSER=@with_gfarm@/bin/gfuser
+GFGROUP=@with_gfarm@/bin/gfgroup
+GFLS=@with_gfarm@/bin/gfls
+GFGETFACL=@with_gfarm@/bin/gfgetfacl
+GFSETFACL=@with_gfarm@/bin/gfsetfacl
 
 GFARMS3_APACHE_REWRITE_CONF=$GFARM_S3_VAR/rewrite.conf
-APACHECTL=/usr/sbin/apachectl
+APACHECTL=@with_apache@/sbin/apachectl
 
 # gfarm-s3-server
 MINIO_PATH=$GFARM_S3_PREFIX/bin/minio

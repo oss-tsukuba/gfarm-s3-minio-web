@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-17 11:24+0900\n"
+"POT-Creation-Date: 2020-09-25 09:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,115 +18,100 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: templates/console/aclfile.html:43
+#: templates/console/aclfile.html:65
 msgid "addEntry"
-msgstr "エントリを追加"
+msgstr "エントリ追加"
 
-#: templates/console/aclfile.html:46
+#: templates/console/aclfile.html:70
 msgid "applyACLchanges"
-msgstr "更新"
+msgstr "変更を適用"
 
-#: templates/console/base.html:30
+#: templates/console/base.html:31
 msgid "Home"
 msgstr "ホーム"
 
-#: templates/console/base.html:33 templates/console/list.html:4
-#, fuzzy
-#| msgid "BucketACL"
+#: templates/console/base.html:34 templates/console/list.html:7
 msgid "bucketList"
-msgstr "バケット一覧"
+msgstr "共有設定"
 
-#: templates/console/base.html:43
+#: templates/console/base.html:44
 msgid "Logout"
 msgstr "ログアウト"
 
-#: templates/console/k/index.html:7
-msgid "AppLink"
-msgstr "起動"
-
-#: templates/console/k/login.html:18 templates/console/k/login.html:21
-#: templates/console/k/login.html:24 templates/console/login.html:27
-msgid "passwordInstruction"
-msgstr "パスワードについて: ここに、パスワードの説明が入ります"
-
-#: templates/console/k/login.html:30
-msgid "AdvancedOptions"
-msgstr "オプション"
-
-#: templates/console/k/login.html:39 templates/console/k/login.html:55
-#: templates/console/k/result.html:13 templates/console/result.html:18
-msgid "StartGfarmS3"
-msgstr "Gfarm-S3 を起動"
-
-#: templates/console/k/login.html:43 templates/console/k/result.html:17
-#: templates/console/result.html:27
-msgid "StopGfarmS3"
-msgstr "Gfarm-S3 を停止"
-
-#: templates/console/k/login.html:47 templates/console/k/result.html:21
-msgid "ShowCurrentStatus"
-msgstr "現在の状態"
-
-#: templates/console/k/login.html:51 templates/console/k/result.html:25
-msgid "ShowS3SecretKey"
-msgstr "S3シークレットキーを表示"
-
-#: templates/console/k/result.html:29
-msgid "BucketACL"
-msgstr "バケット一覧"
-
-#: templates/console/login.html:6
+#: templates/console/login.html:7
 msgid "errorMessage"
 msgstr "エラー"
 
-#: templates/console/login.html:10
-msgid "GlobalUsername"
-msgstr "ユーザ名(global)"
-
-#: templates/console/login.html:14
+#: templates/console/login.html:15
 msgid "UsernamePlacehodler"
 msgstr "グローバル ユーザ名"
 
-#: templates/console/login.html:19
+#: templates/console/login.html:21
 msgid "Password"
 msgstr "パスワード"
 
-#: templates/console/login.html:23
+#: templates/console/login.html:25
 msgid "PasswordPlaceholder"
 msgstr "パスワード"
 
-#: templates/console/login.html:32
-msgid "GoButton"
-msgstr "起動"
+#: templates/console/login.html:29
+msgid "passwordInstruction"
+msgstr "パスワードについて: ここに、パスワードの説明が入ります"
 
-#: templates/console/result.html:6
+#: templates/console/login.html:35
+msgid "GoButton"
+msgstr "ログイン"
+
+#: templates/console/result.html:8
 msgid "authenticationMethod"
 msgstr "認証方式"
 
-#: templates/console/result.html:7
+#: templates/console/result.html:13
 msgid "expirationDate"
 msgstr "証明書の有効期限"
 
-#: templates/console/result.html:8
-#, fuzzy
-#| msgid "GlobalUsername"
+#: templates/console/result.html:23
+msgid "updateCertificate"
+msgstr "証明書の期限を延長"
+
+#: templates/console/result.html:32
 msgid "globalUsername"
 msgstr "ユーザ名(global)"
 
-#: templates/console/result.html:9
+#: templates/console/result.html:35
 msgid "s3serverStatus"
 msgstr "現在の状態"
 
-#: templates/console/result.html:10
+#: templates/console/result.html:38
 msgid "accessKey"
 msgstr "S3アクセスキー"
 
-#: templates/console/result.html:11
-#, fuzzy
-#| msgid "ShowS3SecretKey"
+#: templates/console/result.html:45
 msgid "secretKey"
 msgstr "S3シークレットキーを表示"
 
-#: templates/console/result.html:36
+#: templates/console/result.html:59
+msgid "viewSecretKey"
+msgstr "S3シークレットキーを表示"
+
+#: templates/console/result.html:71
+msgid "stops3tochangesecretkey"
+msgstr "シークレットキーを変更するにはGfarm-S3を停止してください"
+
+#: templates/console/result.html:78
 msgid "chgKey"
 msgstr "S3シークレットキーを変更"
+
+#: templates/console/result.html:106
+msgid "StartGfarmS3"
+msgstr "Gfarm-S3 を起動"
+
+#: templates/console/result.html:115
+msgid "StopGfarmS3"
+msgstr "Gfarm-S3 を停止"
+
+#~ msgid "AdvancedOptions"
+#~ msgstr "オプション"
+
+#~ msgid "ShowCurrentStatus"
+#~ msgstr "現在の状態"

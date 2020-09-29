@@ -20,12 +20,14 @@ usage: $0 [options...] action global-username password
 options ::= --gfarm_shared_dir gfarm_shared_dir |
             --authenticated authenticated_method_name |
             --bucket bucket
+            --remote_addr remote_addr
 action ::= start|stop|restart|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl
 "
 
 authenticated=""
 gfarm_shared_dir=""
 bucket=""
+remote_addr=""
 
 while [ $# -gt 0 ]; do
 	opt="$1"
@@ -33,6 +35,7 @@ while [ $# -gt 0 ]; do
 	--authenticated) authenticated="$2"; shift;;
 	--gfarm_shared_dir) gfarm_shared_dir="$2"; shift;;
 	--bucket) bucket="$2"; shift;;
+	--remote_addr) remote_addr="$2"; shift;;
 	*) break;;
 	esac
 	shift;
@@ -63,7 +66,7 @@ status=failure
 if [ -n "$authenticated" ]; then
 	authenticated_method="$authenticated"
 elif ! authenticated_method=$(challenge_auth "$global_username" "$user_password" "$local_username"); then
-	logger -i -p local7.info -t gfarm-s3-login "login failed: $global_username" 
+	logger -i -p local7.info -t gfarm-s3-login "login failed: $global_username $remote_addr"
 cat <<-EOF
 	{
 		"status": "$status",

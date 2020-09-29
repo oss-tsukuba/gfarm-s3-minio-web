@@ -1,6 +1,6 @@
 #! /bin/sh
 
-set -o xtrace
+#set -o xtrace
 
 export AWS_PROFILE=user1
 
@@ -12,9 +12,30 @@ export PYTHONWARNINGS="ignore:Unverified HTTPS request"
 DEBUG=--debug
 DEBUG=
 
+default_test=test0
+default_test=testC
+
+vflag=0
+vflag=1
+
 . ./subr
 
+testC() {
+#	aws s3 ls        s3://
+#	aws s3 ls        s3://
+#	aws s3 ls        s3://sss
+#	aws s3 ls        s3://mybucket
+#	aws s3 mb        s3://mybucket
+	aws s3 mb        s3://new3
+#	aws s3 cp /tmp/foo        s3://mybucket/foo
+#	aws s3 ls        s3://sss/hpci001971/
+#	aws s3 ls        s3://sss/hpci001971/tak/
+#	aws s3 cp        s3://sss/hpci001971/tak/foo /tmp/foo
+#	aws s3 cp /tmp/foo        s3://sss/hpci001971/tak/foo
+}
+
 update_credentials() {
+	cat /home/nis/.aws/credentials | sed 's/^/old: /'
 	aws_access_key_id=K4XcKzocrUhrnCAKrx2Z
 	aws_secret_access_key=$(ssh gfarm cat /home/user1/.gfarm-s3/secret_key)
 	cat <<-EOF > /home/nis/.aws/credentials
@@ -22,6 +43,7 @@ update_credentials() {
 	aws_access_key_id = $aws_access_key_id 
 	aws_secret_access_key = $aws_secret_access_key 
 	EOF
+	cat /home/nis/.aws/credentials | sed 's/^/new: /'
 }
 
 sets3v4() {
@@ -125,11 +147,11 @@ EOF
 if [ $# = 1 ]; then
 	cmd="$1"
 else
-	cmd=test0
+	cmd=$default_test
 fi
 
 case "$cmd" in
-update_credentials|sets3v4|test0|testA|testB|test_deeppath|test_mv)
+update_credentials|sets3v4|test0|testA|testB|test_deeppath|test_mv|testC)
 	$cmd;;
 *)
 	echo "usage: $0 sets3v4|test0|testA|testB|test_deeppath|test_mv"

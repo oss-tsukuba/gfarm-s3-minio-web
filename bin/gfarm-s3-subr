@@ -169,21 +169,21 @@ filter_list_occupied_port_by_a_user() {
 		-v portmap_field_local_username="$PORTMAP_FIELD_LOCAL_USERNAME" \
 		-v portmap_field_port="$PORTMAP_FIELD_PORT" \
 		-F : \
-		'$portmap_field_local_username == local_username { print $portmap_field_port }' 
+		'$portmap_field_local_username == local_username { print $portmap_field_port }'
 }
 
 filter_list_occupied_ports() {
 	awk \
 		-v portmap_field_port="$PORTMAP_FIELD_PORT" \
 		-F : \
-		'{ print $portmap_field_port }' 
+		'{ print $portmap_field_port }'
 }
 
 filter_list_users_in_portmap() {
 	awk \
 		-v portmap_field_local_username="$PORTMAP_FIELD_LOCAL_USERNAME" \
 		-F : \
-		'{ print $portmap_field_local_username }' 
+		'{ print $portmap_field_local_username }'
 }
 
 configtest_format_test() {
@@ -385,7 +385,7 @@ update_usermap() {
 #   => stop MinIO
 
 sort_usermap_by_local_username() {
-	sort -t: -k "$USERMAP_FIELD_LOCAL_USERNAME" 
+	sort -t: -k "$USERMAP_FIELD_LOCAL_USERNAME"
 }
 
 list_changed_local_user() {
@@ -407,7 +407,7 @@ list_changed_local_user() {
 }
 
 extract_local_username() {
-	grep -v '^#' | get_local_username_stream 
+	grep -v '^#' | get_local_username_stream
 }
 
 list_removed_local_user() {
@@ -560,6 +560,9 @@ stop_per_user_server() {	# local_username
 #	if ! update_reverse_proxy; then
 #		status=1
 #	fi
+
+### We should update gfarm_s3_user_port_map here:
+### erase pid from entry (set to empty), but keep username and port number
 	return $status
 }
 
@@ -786,7 +789,7 @@ try_start_a_server() {
 	GATEWAY=gfarm
 ##### for debug use only
 #GATEWAY=nas
-#if [ "$GATEWAY" = "nas" ]; then 
+#if [ "$GATEWAY" = "nas" ]; then
 #	gfarm_shared_dir=/home/user1/tmp/gfarms3
 #	gfarm_shared_dir=/gfarm/hp120273/user1/tmp/gfarms3
 #	GFARMS3_GFARM_SHARED_VIRTUAL_NAME=
@@ -851,18 +854,27 @@ stop_server() {
 
 try_stop_a_server() {
 	local port="$1"
+	local pid="$2"
 	local address=127.0.0.1:"$port"
 	if ! mymc_init; then return 1; fi
 	if mc_config $address; then
 		if mc_stop; then
 			mymc_finish
+
+			for i in $(seq 1 1 $GFARM_S3_WAIT_COUNT); do
+				if ! kill -0 $pid; then
+					return 0
+				fi
+				sleep 1
+			done
+
 			return 0
 		fi
 	fi
 	mymc_finish
 	for i in $(seq 1 1 $GFARM_S3_KILL_COUNT); do
 		sleep 1
-		if ! kill -0 $pid; then                                                  
+		if ! kill -0 $pid; then
 			return 0
 		fi
 		kill -TERM $pid
@@ -890,7 +902,8 @@ status_server_quick() {
 		echo "400 S3 server is not recoreded as running"
 		return
 	fi
-	if ! ps -p $pid >/dev/null; then
+### note: $pid may be empty
+	if ! ps -p "$pid" >/dev/null; then
 		echo "401 S3 server process is not running"
 		return
 	fi

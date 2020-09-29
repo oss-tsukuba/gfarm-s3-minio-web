@@ -638,6 +638,8 @@ with_wsgi_group
 with_wsgi_user
 with_gunicorn
 with_apache
+with_proxy_lifetime
+with_myproxy_server
 with_myproxy
 with_globus
 with_gfarm
@@ -769,6 +771,8 @@ enable_libtool_lock
 with_gfarm
 with_globus
 with_myproxy
+with_myproxy_server
+with_proxy_lifetime
 with_apache
 with_gunicorn
 with_wsgi_user
@@ -1429,6 +1433,10 @@ Optional Packages:
                           Globus root directory [[/usr]]
   --with-myproxy=MYPROXY_ROOT
                           Myproxy root directory [[/usr]]
+  --with-myproxy-server=MYPROXY_SERVER
+                          myproxy servername [[portal.hpci.nii.ac.jp]]
+  --with-proxy-lifetime=PROXY_LIFETIME
+                          proxy lifetime [[168]]
   --with-apache=APACHE_ROOT
                           Apache root directory [[/usr]]
   --with-gunicorn=GUNICORN_ROOT
@@ -12194,6 +12202,38 @@ case x$with_myproxy in
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_myproxy" >&5
 $as_echo "$with_myproxy" >&6; }
+
+
+### --with-myproxy-server=MYPROXY_SERVER
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for myproxy server" >&5
+$as_echo_n "checking for myproxy server... " >&6; }
+
+# Check whether --with-myproxy-server was given.
+if test "${with_myproxy_server+set}" = set; then :
+  withval=$with_myproxy_server;
+fi
+
+case x$with_myproxy_server in
+  x|xyes|xno) with_myproxy_server=portal.hpci.nii.ac.jp ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_myproxy_server" >&5
+$as_echo "$with_myproxy_server" >&6; }
+
+
+### --with-proxy-lifetime=PROXY_LIFETIME
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for proxy lifetime" >&5
+$as_echo_n "checking for proxy lifetime... " >&6; }
+
+# Check whether --with-proxy-lifetime was given.
+if test "${with_proxy_lifetime+set}" = set; then :
+  withval=$with_proxy_lifetime;
+fi
+
+case x$with_proxy_lifetime in
+  x|xyes|xno) with_proxy_lifetime=168 ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_proxy_lifetime" >&5
+$as_echo "$with_proxy_lifetime" >&6; }
 
 
 ### --with-apache=APACHE_ROOT
