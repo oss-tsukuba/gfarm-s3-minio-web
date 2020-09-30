@@ -8,11 +8,17 @@
 >{{ bucket }}</div ")"
 ></div ")"
 
+><div "(" class="row"
+><div "(" class="alert alert-light" role="alert">{{ date }}</div ")"
+><span id="msg"
+>{% if cmd_status %}
+<div "(" class="alert alert-success" role="alert">{% trans 'updated' %}</div ")"
+>{% endif %}</span
+></div ")"
+
 ><form "(" action="{% url 'aclfile' %}?bucket={{ bucket }}"
 	method="post"
->{% csrf_token %}
-
-<div "(" class="row"
+>{% csrf_token %}<div "(" class="row"
 ><button type="button" class="btn btn-link btn-sm text-secondary disabled">&nbsp;</button
 ><div "(" class="col-6">user/group name</div ")"
 ><div "(" class=col-2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;read&nbsp;&nbsp;&nbsp;</div ")"
@@ -80,7 +86,9 @@
 ></div ")"
 ><div "(" class="col-6"
 ><button type="submit"
+	id="apl"
 	class="btn btn-primary"
+	disabled
 	value="apply-settings">{% trans 'applyACLchanges' %}</button
 ></div ")"
 ></div ")"

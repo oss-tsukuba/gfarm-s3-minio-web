@@ -35,7 +35,7 @@ all::
 
 	[ -d $(BUILDDIR) ] || $(MKDIR) -p $(BUILDDIR)
 	[ -d $(BUILDDIR)/mc ] || (cd $(BUILDDIR) && git clone $(mc_git))
-	[ -d $(BUILDDIR)/gfarm-s3-minio ] || (cd $(BUILDDIR) && git clone $(minio_git) && cd gfarm-s3-minio && git checkout gatewaygfarm)
+	[ -d $(BUILDDIR)/gfarm-s3-minio ] || (cd $(BUILDDIR) && git clone $(minio_git) && cd gfarm-s3-minio && git checkout gatewaygfarm && git pull)
 
 	(cd $(BUILDDIR)/mc && GOPATH=$(GOPATH) $(GOPATH)/bin/go install)
 

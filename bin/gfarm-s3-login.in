@@ -101,7 +101,7 @@ gfls)
 gfgetfacl)
 	mysudo "$local_username" $GFGETFACL "$gfarm_shared_dir/$bucket"; exit $?;;
 gfsetfacl)
-	mysudo "$local_username" $GFSETFACL -b -M - "$gfarm_shared_dir/$bucket"; exit $?;;
+	mysudo "$local_username" $GFSETFACL -R -b -M - "$gfarm_shared_dir/$bucket"; exit $?;;
 esac
 
 exit_status=$?

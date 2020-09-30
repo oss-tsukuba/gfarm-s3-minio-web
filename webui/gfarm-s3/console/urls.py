@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path('login/', views.login, name = 'login'),
     path('logout/', views.logout, name = 'logout'),
+    path('reauth/', views.reauth, name = 'reauth'),
     path('result/', views.result, name = 'result'),
     path('list/', views.list, name = 'list'),
     path('aclfile/', views.aclfile, name = 'aclfile'),

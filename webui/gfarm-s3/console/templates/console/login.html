@@ -4,8 +4,11 @@
 <!-- ( -->
 <!-- h1>Gfarm-S3</h1 -->
 {% if isLoginFailed %}<div "(" class="alert alert-danger" role="alert"
->{% trans 'errorMessage' %}</div ")">{% endif %}
-<form action="{% url 'login' %}"
+>{% trans 'errorMessage' %}</div ")"
+>{% endif %}
+{% if showReauthMsg %}<div "(" class="alert alert-info row" role="alert"
+>{% trans 'plsreauth' %}</div ")"
+>{% endif %}<form action="{% url 'login' %}"
 	method="post"
 >{% csrf_token %}<div "(" class="form-group"
 ><label for="exampleInputEmail1">{% trans 'globalUsername' %}</label

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-25 09:28+0900\n"
+"POT-Creation-Date: 2020-09-30 16:11+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: templates/console/aclfile.html:65
+#: templates/console/aclfile.html:14
+msgid "updated"
+msgstr "更新しました"
+
+#: templates/console/aclfile.html:87
 msgid "addEntry"
 msgstr "エントリ追加"
 
-#: templates/console/aclfile.html:70
+#: templates/console/aclfile.html:94
 msgid "applyACLchanges"
 msgstr "変更を適用"
 
@@ -42,23 +46,31 @@ msgstr "ログアウト"
 msgid "errorMessage"
 msgstr "エラー"
 
-#: templates/console/login.html:15
+#: templates/console/login.html:10
+msgid "plsreauth"
+msgstr "証明書更新にはログインしてください"
+
+#: templates/console/login.html:14 templates/console/result.html:32
+msgid "globalUsername"
+msgstr "ユーザ名(global)"
+
+#: templates/console/login.html:18
 msgid "UsernamePlacehodler"
 msgstr "グローバル ユーザ名"
 
-#: templates/console/login.html:21
+#: templates/console/login.html:24
 msgid "Password"
 msgstr "パスワード"
 
-#: templates/console/login.html:25
+#: templates/console/login.html:28
 msgid "PasswordPlaceholder"
 msgstr "パスワード"
 
-#: templates/console/login.html:29
+#: templates/console/login.html:32
 msgid "passwordInstruction"
 msgstr "パスワードについて: ここに、パスワードの説明が入ります"
 
-#: templates/console/login.html:35
+#: templates/console/login.html:38
 msgid "GoButton"
 msgstr "ログイン"
 
@@ -73,10 +85,6 @@ msgstr "証明書の有効期限"
 #: templates/console/result.html:23
 msgid "updateCertificate"
 msgstr "証明書の期限を延長"
-
-#: templates/console/result.html:32
-msgid "globalUsername"
-msgstr "ユーザ名(global)"
 
 #: templates/console/result.html:35
 msgid "s3serverStatus"
@@ -102,11 +110,11 @@ msgstr "シークレットキーを変更するにはGfarm-S3を停止してく�
 msgid "chgKey"
 msgstr "S3シークレットキーを変更"
 
-#: templates/console/result.html:106
+#: templates/console/result.html:104
 msgid "StartGfarmS3"
 msgstr "Gfarm-S3 を起動"
 
-#: templates/console/result.html:115
+#: templates/console/result.html:113
 msgid "StopGfarmS3"
 msgstr "Gfarm-S3 を停止"
 

@@ -15,7 +15,7 @@
 ></div ")"
 ><div "(" class="col-sm-4"
 
-><form action="{% url 'login' %}"
+><form action="{% url 'reauth' %}"
 	method="post"
 >{% csrf_token %}<div "(" class="form-group"
 ><button type="submit"
@@ -46,11 +46,6 @@
 	value="{{ secret_key }}"
 	class="border-0 flex-grow-1"
 /></div ")"
-
-
-
-
-
 
 
 --><div "(" class="row"
@@ -96,8 +91,6 @@
 	class="border-0 flex-grow-1"
 /></div ")"
 ></div ")"
-
-
 
 
 ><div "(" class="row"

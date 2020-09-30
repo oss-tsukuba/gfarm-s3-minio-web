@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
+import time
 import logging
 from . import cmd
 
@@ -34,7 +35,8 @@ def need_login(session):
 def login(request):
     if request.method == "GET":
         isLoginFailed = is_login_failed(request.session)
-        return render(request, "console/login.html", {"isLoginFailed": isLoginFailed, "showLowoutButton": False})
+        isReauth = not need_login(request.session)
+        return render(request, "console/login.html", {"isLoginFailed": isLoginFailed, "showLogoutButton": isReauth, "showReauthMsg": isReauth})
     elif request.method == "POST":
         username = request.POST["username"]
         passwd = request.POST["passwd"]
@@ -57,7 +59,11 @@ def login(request):
 def logout(request):
     request.session.flush()
     return HttpResponseRedirect(reverse("login"))
-    return render(request, "console/login.html", {"showLowoutButton": False})
+    #return render(request, "console/login.html", {"showLowoutButton": False, "showReauthMsg": False})
+
+def reauth(request):
+    return HttpResponseRedirect(reverse("login"))
+    #return render(request, "console/login.html", {"showLowoutButton": False, "showReauthMsg": True})
 
 def starts3(request):
     if need_login(request.session):
@@ -137,7 +143,7 @@ def etoent_2(e, p):
 ### end for new_entry_2
 
 def aclfile(request):
-    cmd_status = None
+    cmd_status = False
     if need_login(request.session):
         return HttpResponseRedirect(reverse("login"))
     username = request.session["global_username"]
@@ -167,7 +173,7 @@ def aclfile(request):
         ### end for new_entry_2
 
         cmd.set_bucket_acl(username, bucket, acl_original, acl_edited)
-        cmd_status = "success"
+        cmd_status = True
     bucket_acl = cmd.get_bucket_acl(username, bucket)
     acl_modifiable = [e for e in bucket_acl if is_modifiable(e)]
     (groups, users) = cmd.get_groups_users_list(username)
@@ -179,9 +185,9 @@ def aclfile(request):
             "seq": len(acl_modifiable_entries) + 1,
             "groups_users": groups + users,
             "acl_original_string": "\n".join(bucket_acl),
-            "showLogoutButton": True}
-    if cmd_status is not None:
-        dict["cmd_status"] = cmd_status
+            "showLogoutButton": True,
+            "cmd_status": cmd_status,
+            "date": time.ctime(time.time())}
     return render(request, "console/aclfile.html", dict)
 
 def get_other_perm(bucket_acl):
@@ -220,35 +226,35 @@ def make_entry(e, gu, seq):
 ### opt_name == "opt:"forloop.counter0
 ### checked_perm == "rwx" | "r-x" | "---"
 
-def new_entry(id, e_id, e_text, select_name, opt_name, checked_perm, is_del_button):
-    #logger.debug("checked_perm = {}".format(checked_perm))
-    return ("<div class=\"row\" id=\"" + id + "\">" +
-        "<input type=\"hidden\" name=\"" + select_name + "\" value=\"" + e_id + "\" />" +
-        "<div class=\"col-4\">" + e_text + "</div>" +
-        f_button(opt_name, "RW", "rwx", checked_perm.startswith("rwx")) +
-        f_button(opt_name, "RO", "r-x", checked_perm.startswith("r-x")) +
-        f_button(opt_name, "--", "---", checked_perm.startswith("---")) +
-        "<div class=\"col-2 btn-group\">" +
-        del_button(id, is_del_button) +
-        "</div>" +
-        "</div>")
-
-def f_button(name, text, value, checked):
-    a, c = "", ""
-    if checked:
-        a, c = " active", " checked"
-    return ("<div class=\"col-2 btn-group btn-group-toggle\" data-toggle=\"buttons\">" +
-        "<label class=\"btn btn-secondary btn-md" + a + "\">" +
-        "<input type=\"radio\" name=\"" + name + "\" value=\"" + value + "\"" + c + ">" +
-        text +
-        "</label>" +
-        "</div>")
-
-def del_button(id, f):
-    if f:
-        return "<button type=\"button\" class=\"btn btn-outline-danger btn-md\" onClick=\"$('#" + id + "').remove();\">Del</button>"
-    else:
-        return ""
+### def new_entry(id, e_id, e_text, select_name, opt_name, checked_perm, is_del_button):
+###     #logger.debug("checked_perm = {}".format(checked_perm))
+###     return ("<div class=\"row\" id=\"" + id + "\">" +
+###         "<input type=\"hidden\" name=\"" + select_name + "\" value=\"" + e_id + "\" />" +
+###         "<div class=\"col-4\">" + e_text + "</div>" +
+###         f_button(opt_name, "RW", "rwx", checked_perm.startswith("rwx")) +
+###         f_button(opt_name, "RO", "r-x", checked_perm.startswith("r-x")) +
+###         f_button(opt_name, "--", "---", checked_perm.startswith("---")) +
+###         "<div class=\"col-2 btn-group\">" +
+###         del_button(id, is_del_button) +
+###         "</div>" +
+###         "</div>")
+### 
+### def f_button(name, text, value, checked):
+###     a, c = "", ""
+###     if checked:
+###         a, c = " active", " checked"
+###     return ("<div class=\"col-2 btn-group btn-group-toggle\" data-toggle=\"buttons\">" +
+###         "<label class=\"btn btn-secondary btn-md" + a + "\">" +
+###         "<input type=\"radio\" name=\"" + name + "\" value=\"" + value + "\"" + c + ">" +
+###         text +
+###         "</label>" +
+###         "</div>")
+### 
+### def del_button(id, f):
+###     if f:
+###         return "<button type=\"button\" class=\"btn btn-outline-danger btn-md\" onClick=\"$('#" + id + "').remove();\">Del</button>"
+###     else:
+###         return ""
 
 def new_entry_2(id, e_id, e_text, select_name, opt_name, checked_perm, is_del_button, seq):
     #logger.debug(\"checked_perm = {}\".format(checked_perm))
@@ -286,13 +292,18 @@ def f_button_2(typ, name, text, checked, seq):
         xid = "cr_" + seq
         xset = "true"
         cond = ""
-
+    clear_msg = "$('#msg').empty();"
+    activate_apl = "$('#apl').prop('disabled', false);"
     onclick = "if (" + cond + "$('#" + id + "').prop('checked')) { $('#" + xid + "').prop('checked', " + xset + "); }"
-    return "<input type=\"checkbox\" class=\"default\" name=\"" + name + "\" id=\"" + id + "\" value=\"" + typ + "\" data-toggle=\"toggle\" onClick=\"" + onclick + "\"" + c + "/>"
+    return "<input type=\"checkbox\" class=\"default\" name=\"" + name + "\" id=\"" + id + "\" value=\"" + typ + "\" data-toggle=\"toggle\" onClick=\"" + clear_msg + activate_apl + onclick + "\"" + c + "/>"
 
 def del_button_2(id, f):
     x = "<svg width=\"2em\" height=\"2em\" viewBox=\"0 0 16 16\" class=\"bi bi-x\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z\"/></svg>"
+    clear_msg = "$('#msg').empty();"
+    activate_apl = "$('#apl').prop('disabled', false);"
+    onclick = "$('#" + id + "').remove();"
     if f:
-        return "<button type=\"button\" class=\"btn btn-link btn-sm text-danger\" onClick=\"$('#" + id + "').remove();\">" + x + "</button>"
+        cla = "text-danger"
     else:
-        return "<button type=\"button\" class=\"btn btn-link btn-sm text-secondary disabled\" onClick=\"$('#" + id + "').remove();\">" + x + "</button>"
+        cla = "text-secondary disabled"
+    return "<button type=\"button\" class=\"btn btn-link btn-sm " + cla + "\" onClick=\"" + clear_msg + activate_apl + onclick + "\">" + x + "</button>"

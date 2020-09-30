@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-25 09:28+0900\n"
+"POT-Creation-Date: 2020-09-30 16:11+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: templates/console/aclfile.html:65
+#: templates/console/aclfile.html:14
+msgid "updated"
+msgstr "Updated"
+
+#: templates/console/aclfile.html:87
 msgid "addEntry"
 msgstr "Add an Entry"
 
-#: templates/console/aclfile.html:70
+#: templates/console/aclfile.html:94
 msgid "applyACLchanges"
 msgstr "Apply Changes"
 
@@ -42,23 +46,31 @@ msgstr "Logout"
 msgid "errorMessage"
 msgstr "error!"
 
-#: templates/console/login.html:15
+#: templates/console/login.html:10
+msgid "plsreauth"
+msgstr "Login to Update Proxy Certificate"
+
+#: templates/console/login.html:14 templates/console/result.html:32
+msgid "globalUsername"
+msgstr "Global Username"
+
+#: templates/console/login.html:18
 msgid "UsernamePlacehodler"
 msgstr "Enter Global Username"
 
-#: templates/console/login.html:21
+#: templates/console/login.html:24
 msgid "Password"
 msgstr "Password"
 
-#: templates/console/login.html:25
+#: templates/console/login.html:28
 msgid "PasswordPlaceholder"
 msgstr "Enter Password"
 
-#: templates/console/login.html:29
+#: templates/console/login.html:32
 msgid "passwordInstruction"
 msgstr "Password Instruction"
 
-#: templates/console/login.html:35
+#: templates/console/login.html:38
 msgid "GoButton"
 msgstr "Sign In"
 
@@ -73,10 +85,6 @@ msgstr "Expiration Date"
 #: templates/console/result.html:23
 msgid "updateCertificate"
 msgstr "Update Proxy Certificate"
-
-#: templates/console/result.html:32
-msgid "globalUsername"
-msgstr "Global Username"
 
 #: templates/console/result.html:35
 msgid "s3serverStatus"
@@ -102,11 +110,11 @@ msgstr "Please stop Gfarm-S3 to change Secret-Key"
 msgid "chgKey"
 msgstr "Change Secret-Key"
 
-#: templates/console/result.html:106
+#: templates/console/result.html:104
 msgid "StartGfarmS3"
 msgstr "Start Gfarm-S3"
 
-#: templates/console/result.html:115
+#: templates/console/result.html:113
 msgid "StopGfarmS3"
 msgstr "Stop Gfarm-S3"
 
