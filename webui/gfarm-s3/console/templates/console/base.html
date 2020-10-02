@@ -13,31 +13,32 @@
 ><div class="container"
 
 ><nav class="navbar navbar-expand-sm static-top navbar-dark bg-dark"
-><a href="{% url 'result' %}" class="navbar-brand">Gfarm-S3</a
+><a class="navbar-brand" href="{% url 'result' %}">Gfarm-S3</a
 
 ><button class="navbar-toggler"
 	type="button"
 	data-toggle="collapse"
-	data-target="#navbarSupportedContent"
-	aria-controls="navbarSupportedContent"
+	data-target="#navbarNavDropdown"
+	aria-controls="navbarNavDropdown"
 	aria-expanded="false"
 	aria-label="Toggle navigation"
 ><span class="navbar-toggler-icon"></span
 ></button
 
-><div class="collapse navbar-collapse" id="navbarSupportedContent"
-><ul class="navbar-nav mr-auto"
+
+><div class="collapse navbar-collapse" id="navbarNavDropdown"
+><ul class="navbar-nav"
 ><!--li class="nav-item active"
 ><a class="nav-link" href="{% url 'result' %}">{% trans 'Home' %}</a
 ></li
 -->{% if showLogoutButton %}<li class="nav-item active"
 ><a class="nav-link" href="{% url 'list' %}">{% trans 'bucketList' %}</a
 ></li
->{% endif %}<li class="nav-item active"
->{{ global_username }}</li
-</ul
+>{% endif %}<!--li class="nav-item active"
+>{{ username }}</li
 
-><form class="form-inline my-2 my-sm-0"
+
+--><!--li><form class="form-inline my-2 my-sm-0"
 	action="{% url 'logout' %}"
 	method="post"
 >{% csrf_token %}
@@ -45,6 +46,36 @@
 	class="btn btn-primary my-2 my-sm-0"
 	value="Launch">{% trans 'Logout' %}</button
 >{% endif %}</form
+
+></li
+-->{% if username %}<li class="nav-item dropdown"
+><a class="nav-link
+	dropdown-toggle"
+	href="#"
+	id="navbarDropdownMenuLink"
+	role="button"
+	data-toggle="dropdown"
+	aria-haspopup="true"
+	aria-expanded="false"
+>{{ username }}</a
+><div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"
+
+><!--a class="dropdown-item" href="#">{% trans 'logout' %}</a
+
+--><form class="form-inline my-2 my-sm-0"
+	action="{% url 'logout' %}"
+	method="post"
+>{% csrf_token %}
+{% load i18n %}{% if showLogoutButton %}<button type="submit"
+	class="btn btn-link my-2 my-sm-0"
+	value="Launch">{% trans 'Logout' %}</button
+>{% endif %}</form
+
+></div
+></li
+
+>{% endif %}</ul
+
 
 ></div
 ></nav

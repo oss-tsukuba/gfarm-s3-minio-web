@@ -38,8 +38,12 @@ def login(request):
         isReauth = not need_login(request.session)
         username = None
         if request.session is not None:
-            username = request.session["global_username"]
-        return render(request, "console/login.html", {"isLoginFailed": isLoginFailed, "showLogoutButton": isReauth, "showReauthMsg": isReauth, "username": username})
+            username = request.session.get("global_username", None)
+        render_dict = {"isLoginFailed": isLoginFailed,
+                       "showLogoutButton": isReauth,
+                       "showReauthMsg": isReauth,
+                       "username": username}
+        return render(request, "console/login.html", render_dict)
     elif request.method == "POST":
         username = request.POST["username"]
         passwd = request.POST["passwd"]
@@ -102,16 +106,22 @@ def result(request):
     username = request.session["global_username"]
     authenticated = request.session["authenticated_method"]
     cmd_result = cmd.cmd("info", username, "", authenticated = authenticated)
-    cmd_result["s3sstatus"] = "s3server_status" in cmd_result and cmd_result["s3server_status"].startswith("200")
-    cmd_result["showLogoutButton"] = True
-    return render(request, "console/result.html", cmd_result)
+    s3sstatus = "s3server_status" in cmd_result and cmd_result["s3server_status"].startswith("200")
+    render_dict = cmd_result
+    render_dict["s3sstatus"] = s3sstatus
+    render_dict["showLogoutButton"] = True
+    render_dict["username"] = username
+    return render(request, "console/result.html", render_dict)
 
 def list(request):
     if need_login(request.session):
         return HttpResponseRedirect(reverse("login"))
     username = request.session["global_username"]
     bucketlist = cmd.get_bucket_list(username)
-    return render(request, "console/list.html", {"bucketlist": bucketlist, "showLogoutButton": True})
+    render_dict = {"bucketlist": bucketlist,
+                   "showLogoutButton": True,
+                   "username": username}
+    return render(request, "console/list.html", render_dict)
 
 def is_modifiable(s):
     return not (s.startswith("#") or "::" in s or s.startswith("default:") or s.startswith("mask:"))
@@ -185,15 +195,16 @@ def aclfile(request):
     acl_modifiable_entries.insert(0, {"entry": make_fixed_entry("gfarms3webui:GROUP", "MY GROUP", 0, group_perm)})
     other_perm = get_other_perm(bucket_acl)
     acl_modifiable_entries.insert(1, {"entry": make_fixed_entry("gfarms3webui:OTHER", "OTHER", 1, other_perm)})
-    dict = {"bucket": bucket,
-            "acl_modifiable_entries": acl_modifiable_entries,
-            "seq": len(acl_modifiable_entries) + 2,
-            "groups_users": groups + users,
-            "acl_original_string": "\n".join(bucket_acl),
-            "showLogoutButton": True,
-            "cmd_status": cmd_status,
-            "date": time.ctime(time.time())}
-    return render(request, "console/aclfile.html", dict)
+    render_dict = {"bucket": bucket,
+                   "acl_modifiable_entries": acl_modifiable_entries,
+                   "seq": len(acl_modifiable_entries) + 2,
+                   "groups_users": groups + users,
+                   "acl_original_string": "\n".join(bucket_acl),
+                   "showLogoutButton": True,
+                   "cmd_status": cmd_status,
+                   "date": time.ctime(time.time()),
+                   "username": username}
+    return render(request, "console/aclfile.html", render_dict)
 
 def get_group_perm(bucket_acl):
     grp = [e for e in bucket_acl if e.startswith("group::")][0]
@@ -325,6 +336,7 @@ def f_button_2(typ, name, text, checked, seq):
         xid = "cr_" + seq
         xset = "true"
         cond = ""
+    modified = "window.onbeforeunload = function() { return '!'; };"
     clear_msg = "$('#msg').empty();"
     activate_apl = "$('#apl').prop('disabled', false);"
     onclick = "if (" + cond + "$('#" + id + "').prop('checked')) { $('#" + xid + "').prop('checked', " + xset + "); }"

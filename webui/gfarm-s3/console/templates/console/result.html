@@ -6,10 +6,10 @@
 
 -->
 
-<div "(" class="form-control border-0"
+<!--div "(" class="form-control border-0"
 >{% trans 'globalUsername' %}&nbsp;&nbsp;{{ global_username }}</div ")"
 
-><div "(" class="form-control{% if s3sstatus %} alert alert-success{% else %} alert alert-danger{% endif %} border-0"
+--><div "(" class="form-control{% if s3sstatus %} alert alert-success{% else %} alert alert-danger{% endif %} border-0"
 ><!-- {% trans 's3serverStatus' %}&nbsp;&nbsp;
 -->{% if s3sstatus %}{% trans 'running' %}{% else %}{% trans 'stopped' %}{% endif %}</div ")"
 
@@ -103,7 +103,13 @@
 ></div ")"
 
 ><div "(" class="form-control border-0"
->{% trans 'authenticationMethod' %}&nbsp;&nbsp;{{ authenticated_method }}</div ")"
+>{% trans 'authenticationMethod' %}&nbsp;&nbsp;
+
+{% if authenticated_method == "myproxy-logon" %}{% trans 'myproxyLogon' %}{% endif %}
+{% if authenticated_method == "grid-proxy-init" %}{% trans 'gridProxyInit' %}{% endif %}
+{% if sharedSecret == "gfkey" %}{% trans 'gfkey' %}{% endif %}
+
+</div ")"
 
 ><div "(" class="row"
 ><div "(" class="col-sm-8"

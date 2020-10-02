@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-02 14:33+0900\n"
+"POT-Creation-Date: 2020-10-02 16:36+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,16 +30,22 @@ msgstr "Add an Entry"
 msgid "applyACLchanges"
 msgstr "Apply Changes"
 
-#: templates/console/base.html:31
+#: templates/console/base.html:32
 msgid "Home"
 msgstr "Home"
 
-#: templates/console/base.html:34 templates/console/list.html:7
+#: templates/console/base.html:35 templates/console/list.html:7
 msgid "bucketList"
 msgstr "Shareing"
 
-#: templates/console/base.html:44
+#: templates/console/base.html:47 templates/console/base.html:71
 msgid "Logout"
+msgstr "Logout"
+
+#: templates/console/base.html:63
+#, fuzzy
+#| msgid "Logout"
+msgid "logout"
 msgstr "Logout"
 
 #: templates/console/login.html:7
@@ -54,23 +60,23 @@ msgstr "Enter Password to Update Proxy Certificate"
 msgid "globalUsername"
 msgstr "Username"
 
-#: templates/console/login.html:21
+#: templates/console/login.html:22
 msgid "UsernamePlacehodler"
 msgstr "Enter Global Username"
 
-#: templates/console/login.html:24
+#: templates/console/login.html:25
 msgid "Password"
 msgstr "Password"
 
-#: templates/console/login.html:31
+#: templates/console/login.html:33
 msgid "passwordInstruction"
 msgstr "Password Instruction"
 
-#: templates/console/login.html:33
+#: templates/console/login.html:35
 msgid "PasswordPlaceholder"
 msgstr "Enter Password"
 
-#: templates/console/login.html:38
+#: templates/console/login.html:40
 msgid "GoButton"
 msgstr "Sign In"
 
@@ -86,43 +92,55 @@ msgstr "Running"
 msgid "stopped"
 msgstr "Stopped"
 
-#: templates/console/result.html:19
-msgid "accessKey"
-msgstr "Access-Key"
-
-#: templates/console/result.html:26
-msgid "secretKey"
-msgstr "Secret-Key"
-
-#: templates/console/result.html:40
-msgid "viewSecretKey"
-msgstr "View"
-
-#: templates/console/result.html:52
-msgid "stops3tochangesecretkey"
-msgstr "Please stop Gfarm-S3 to change Secret-Key"
-
-#: templates/console/result.html:59
-msgid "chgKey"
-msgstr "Change"
-
-#: templates/console/result.html:85
+#: templates/console/result.html:24
 msgid "StartGfarmS3"
 msgstr "Start Gfarm-S3"
 
-#: templates/console/result.html:94
+#: templates/console/result.html:33
 msgid "StopGfarmS3"
 msgstr "Stop Gfarm-S3"
+
+#: templates/console/result.html:48
+msgid "accessKey"
+msgstr "Access-Key"
+
+#: templates/console/result.html:55
+msgid "secretKey"
+msgstr "Secret-Key"
+
+#: templates/console/result.html:69
+msgid "viewSecretKey"
+msgstr "View"
+
+#: templates/console/result.html:81
+msgid "stops3tochangesecretkey"
+msgstr "Please stop Gfarm-S3 to change Secret-Key"
+
+#: templates/console/result.html:88
+msgid "chgKey"
+msgstr "Change"
 
 #: templates/console/result.html:106
 msgid "authenticationMethod"
 msgstr "Authentication Method"
 
-#: templates/console/result.html:111
+#: templates/console/result.html:108
+msgid "myproxyLogon"
+msgstr "GSI (myproxy)"
+
+#: templates/console/result.html:109
+msgid "gridProxyInit"
+msgstr "GSI (grid-proxy-init)"
+
+#: templates/console/result.html:110
+msgid "gfkey"
+msgstr "Gfarm Shared Key"
+
+#: templates/console/result.html:117
 msgid "expirationDate"
 msgstr "Expiration Date"
 
-#: templates/console/result.html:122
+#: templates/console/result.html:128
 msgid "updateCertificate"
 msgstr "Update Proxy Certificate"
 
