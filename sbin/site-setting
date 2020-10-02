@@ -46,6 +46,7 @@ alias lf='ls -F'
 alias ll='ls -l'
 alias r='fc -e -'
 alias h='fc -l'
+alias more='LESS=-CMLXfan less'
 EOF
 chown -R wsgi:wsgi /home/wsgi
 

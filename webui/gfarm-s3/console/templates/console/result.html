@@ -2,55 +2,65 @@
 {% load i18n %}
 {% block content1 %}
 <!-- ( -->
-<h1>Current Status</h1
+<!--h4>Current Status</h4
 
-><div "(" class="form-control border-0"
->{% trans 'authenticationMethod' %}: {{ authenticated_method }}</div ")"
+-->
+
+<div "(" class="form-control border-0"
+>{% trans 'globalUsername' %}&nbsp;&nbsp;{{ global_username }}</div ")"
+
+><div "(" class="form-control{% if s3sstatus %} alert alert-success{% else %} alert alert-danger{% endif %} border-0"
+><!-- {% trans 's3serverStatus' %}&nbsp;&nbsp;
+-->{% if s3sstatus %}{% trans 'running' %}{% else %}{% trans 'stopped' %}{% endif %}</div ")"
 
 ><div "(" class="row"
-><div "(" class="col-sm-8"
-><div "(" class="border-0"
->{% trans 'expirationDate' %}: {{ expiration_date_calendar_datetime }}</div ")"
-
-></div ")"
 ><div "(" class="col-sm-4"
 
-><form action="{% url 'reauth' %}"
+>{% if not s3sstatus %}<form action="{% url 'starts3' %}"
 	method="post"
 >{% csrf_token %}<div "(" class="form-group"
 ><button type="submit"
-	class="btn btn-primary"
-	value="Launch">{% trans 'updateCertificate' %}</button
+	class="btn btn-outline-primary"
+	value="Launch">{% trans 'StartGfarmS3' %}</button
 ></div ")"
 ></form
 
+>{% else %}<form action="{% url 'stops3' %}"
+	method="post"
+>{% csrf_token %}<div "(" class="form-group"
+><button type="submit"
+	class="btn btn-outline-primary"
+	value="Launch">{% trans 'StopGfarmS3' %}</button
+></div ")"
+>{% endif %}</form
 
 ></div ")"
+
+><div "(" class="col-sm-4"
 ></div ")"
 
-><div "(" class="form-control border-0"
->{% trans 'globalUsername' %}: {{ global_username }}</div ")"
+></div ")"
 
-><div "(" class="form-control{% if not s3sstatus %} alert alert-danger{% endif %} border-0"
-> {% trans 's3serverStatus' %}: {{ s3server_status }}</div ")"
 
-><div "(" class="form-control d-flex border-0"
->{% trans 'accessKey' %}: <input onClick="this.select();"
+><!--    
+{{ s3server_status }}
+--><div "(" class="form-control d-flex border-0"
+>{% trans 'accessKey' %}&nbsp;&nbsp;<input onClick="this.select();"
 	value="{{ access_key }}"
 	class="border-0 flex-grow-1"
 /></div ")"
 
 
-><!--div "(" class="form-control d-flex border-0"
->{% trans 'secretKey' %}: <input onClick="this.select();"
+><div "(" class="form-control d-flex border-0"
+>{% trans 'secretKey' %}&nbsp;&nbsp;<!--input onClick="this.select();"
 	value="{{ secret_key }}"
 	class="border-0 flex-grow-1"
-/></div ")"
+/--></div ")"
 
 
---><div "(" class="row"
+><div "(" class="row"
 ><div "(" class="col-sm-4"
-><a class="btn btn-primary"
+><a class="btn btn-outline-primary"
 	data-toggle="collapse"
 	href="#collapseSecretKey"
 	role="button"
@@ -72,7 +82,7 @@
 {% endif %}
 
 ><button type="submit"
-	class="btn btn-primary"
+	class="btn btn-outline-primary"
 	value="Launch"
 	{% if s3sstatus %}disabled{% endif %}
 >{% trans 'chgKey' %}</button
@@ -92,34 +102,31 @@
 /></div ")"
 ></div ")"
 
+><div "(" class="form-control border-0"
+>{% trans 'authenticationMethod' %}&nbsp;&nbsp;{{ authenticated_method }}</div ")"
 
 ><div "(" class="row"
+><div "(" class="col-sm-8"
+><div "(" class="border-0"
+>{% trans 'expirationDate' %}&nbsp;&nbsp;{{ expiration_date_calendar_datetime }}</div ")"
+
+></div ")"
+
 ><div "(" class="col-sm-4"
 
->{% if not s3sstatus %}<form action="{% url 'starts3' %}"
+><form action="{% url 'reauth' %}"
 	method="post"
 >{% csrf_token %}<div "(" class="form-group"
 ><button type="submit"
-	class="btn btn-primary"
-	value="Launch">{% trans 'StartGfarmS3' %}</button
+	class="btn btn-outline-primary"
+	value="Launch">{% trans 'updateCertificate' %}</button
 ></div ")"
 ></form
 
->{% else %}<form action="{% url 'stops3' %}"
-	method="post"
->{% csrf_token %}<div "(" class="form-group"
-><button type="submit"
-	class="btn btn-primary"
-	value="Launch">{% trans 'StopGfarmS3' %}</button
-></div ")"
->{% endif %}</form
 
 ></div ")"
-
-><div "(" class="col-sm-4"
 ></div ")"
 
-></div ")"
 
 ><!-- ) -->
 {% endblock %}

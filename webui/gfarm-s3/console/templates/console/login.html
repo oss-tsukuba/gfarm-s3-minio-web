@@ -15,25 +15,27 @@
 ><input type="text"
 	class="form-control"
 	name="username"
-	placeholder="{% trans 'UsernamePlacehodler' %}"
+	{% if username %}value="{{ username }}"{% endif %}
 	required
-	autofocus
+	{% if username is None %}autofocus{% endif %}
 ></div ")"
+	><!--placeholder="{% trans 'UsernamePlacehodler' %}"
 
-><div "(" class="form-group"
+--><div "(" class="form-group"
 ><label for="exampleInputPassword1">{% trans 'Password' %}</label
 ><input type="password"
 	class="form-control"
 	name="passwd"
-	placeholder="{% trans 'PasswordPlaceholder' %}"
 	required
+	{% if username %}autofocus{% endif %}
 	data-toggle="tooltip"
 	data-placement="top"
 	title="{% trans 'passwordInstruction' %}"
 ></div ")"
+	><!-- placeholder="{% trans 'PasswordPlaceholder' %}"
 
-><button type="submit"
-	class="btn btn-primary form-control"
+--><button type="submit"
+	class="btn btn-outline-primary form-control"
 	value="Launch"
 >{% trans 'GoButton' %}</button
 ></form>

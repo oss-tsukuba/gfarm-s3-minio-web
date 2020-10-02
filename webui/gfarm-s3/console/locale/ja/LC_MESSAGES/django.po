@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-30 16:11+0900\n"
+"POT-Creation-Date: 2020-10-02 14:33+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: templates/console/aclfile.html:14
+#: templates/console/aclfile.html:15
 msgid "updated"
 msgstr "更新しました"
 
-#: templates/console/aclfile.html:87
+#: templates/console/aclfile.html:85
 msgid "addEntry"
 msgstr "エントリ追加"
 
-#: templates/console/aclfile.html:94
+#: templates/console/aclfile.html:92
 msgid "applyACLchanges"
 msgstr "変更を適用"
 
@@ -48,13 +48,13 @@ msgstr "エラー"
 
 #: templates/console/login.html:10
 msgid "plsreauth"
-msgstr "証明書更新にはログインしてください"
+msgstr "再度パスワードを入力してください"
 
-#: templates/console/login.html:14 templates/console/result.html:32
+#: templates/console/login.html:14 templates/console/result.html:10
 msgid "globalUsername"
-msgstr "ユーザ名(global)"
+msgstr "ユーザ名"
 
-#: templates/console/login.html:18
+#: templates/console/login.html:21
 msgid "UsernamePlacehodler"
 msgstr "グローバル ユーザ名"
 
@@ -62,61 +62,71 @@ msgstr "グローバル ユーザ名"
 msgid "Password"
 msgstr "パスワード"
 
-#: templates/console/login.html:28
+#: templates/console/login.html:31
+msgid "passwordInstruction"
+msgstr ""
+"GSI (myproxy-login, grid-proxy-init) のパスフレーズ、またはGfarm共有鍵のハッ"
+"シュ値"
+
+#: templates/console/login.html:33
 msgid "PasswordPlaceholder"
 msgstr "パスワード"
-
-#: templates/console/login.html:32
-msgid "passwordInstruction"
-msgstr "パスワードについて: ここに、パスワードの説明が入ります"
 
 #: templates/console/login.html:38
 msgid "GoButton"
 msgstr "ログイン"
 
-#: templates/console/result.html:8
-msgid "authenticationMethod"
-msgstr "認証方式"
-
 #: templates/console/result.html:13
-msgid "expirationDate"
-msgstr "証明書の有効期限"
-
-#: templates/console/result.html:23
-msgid "updateCertificate"
-msgstr "証明書の期限を延長"
-
-#: templates/console/result.html:35
 msgid "s3serverStatus"
 msgstr "現在の状態"
 
-#: templates/console/result.html:38
+#: templates/console/result.html:14
+msgid "running"
+msgstr "起動中"
+
+#: templates/console/result.html:14
+msgid "stopped"
+msgstr "停止中"
+
+#: templates/console/result.html:19
 msgid "accessKey"
-msgstr "S3アクセスキー"
+msgstr "アクセスキー"
 
-#: templates/console/result.html:45
+#: templates/console/result.html:26
 msgid "secretKey"
-msgstr "S3シークレットキーを表示"
+msgstr "シークレットキー"
 
-#: templates/console/result.html:59
+#: templates/console/result.html:40
 msgid "viewSecretKey"
-msgstr "S3シークレットキーを表示"
+msgstr "表示"
 
-#: templates/console/result.html:71
+#: templates/console/result.html:52
 msgid "stops3tochangesecretkey"
 msgstr "シークレットキーを変更するにはGfarm-S3を停止してください"
 
-#: templates/console/result.html:78
+#: templates/console/result.html:59
 msgid "chgKey"
-msgstr "S3シークレットキーを変更"
+msgstr "変更"
 
-#: templates/console/result.html:104
+#: templates/console/result.html:85
 msgid "StartGfarmS3"
-msgstr "Gfarm-S3 を起動"
+msgstr "起動"
 
-#: templates/console/result.html:113
+#: templates/console/result.html:94
 msgid "StopGfarmS3"
-msgstr "Gfarm-S3 を停止"
+msgstr "停止"
+
+#: templates/console/result.html:106
+msgid "authenticationMethod"
+msgstr "認証方式"
+
+#: templates/console/result.html:111
+msgid "expirationDate"
+msgstr "有効期限"
+
+#: templates/console/result.html:122
+msgid "updateCertificate"
+msgstr "延長"
 
 #~ msgid "AdvancedOptions"
 #~ msgstr "オプション"

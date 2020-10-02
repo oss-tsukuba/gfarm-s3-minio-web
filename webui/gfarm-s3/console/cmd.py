@@ -82,17 +82,33 @@ def fix_acl_1(acl):
 
 def fix_acl_2(acl):
     #acl = [e for e in acl if not is_debug_entry(e)]
-    oth = [e for e in acl if e.startswith("gfarms3webui:OTHER")][0]
-    acl = [e for e in acl if not e.startswith("gfarms3webui:OTHER")]
+    logger.debug("acl: {}".format(acl))
+    oth = [e for e in acl if e.startswith("gfarms3webui:OTHER:")][0]
+    grp = [e for e in acl if e.startswith("gfarms3webui:GROUP:")][0]
+    acl = [e for e in acl if not e.startswith("gfarms3webui:")]
     logger.debug("acl: {}".format(acl))
     logger.debug("oth: {}".format(oth))
     default = ["default:" + e for e in acl if need_default(e)]
-    if oth == "gfarms3webui:OTHER:rwx":
-        acl = acl + ["group::rwx", "other::rwx"]
-    elif oth == "gfarms3webui:OTHER:r-x":
-        acl = acl + ["group::r-x", "other::r-x"]
+    acl = acl + grp_to_aclentry(grp)
+    acl = acl + oth_to_aclentry(oth)
 
     return acl + default
+
+def grp_to_aclentry(grp):
+    perm = grp.split(':')[2]
+    return go_aclentry("group", perm)
+
+def oth_to_aclentry(oth):
+    perm = oth.split(':')[2]
+    return go_aclentry("other", perm)
+
+def go_aclentry(object, perm):
+    if perm == "rwx":
+        return [object + "::rwx", "default:" + object + "::rwx"]
+    elif perm == "r-x":
+        return [object + "::r-x", "default:" + object + "::r-x"]
+    else:
+        return [object + "::---", "default:" + object + "::---"]
 
 def set_bucket_acl(username, bucket, acl_1, acl_2):
     logger.debug("bucket: {}".format(bucket))
@@ -102,7 +118,8 @@ def set_bucket_acl(username, bucket, acl_1, acl_2):
     logger.debug("acl_fixed: {}".format(acl))
     p = gfarm_s3_login("gfsetfacl", username, "", authenticated = "unspecified", bucket = bucket, stdin = PIPE)
     stdout, stderr = p.communicate(input = acl.encode())
-    p.wait()
+#    if p.wait() != 0:
+#        return stderr.decode()
     return stdout.decode()
 
 def get_group_list(username):

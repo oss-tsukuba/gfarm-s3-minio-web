@@ -13,7 +13,7 @@
 ><div class="container"
 
 ><nav class="navbar navbar-expand-sm static-top navbar-dark bg-dark"
-><a href="#" class="navbar-brand">Gfarm-S3</a
+><a href="{% url 'result' %}" class="navbar-brand">Gfarm-S3</a
 
 ><button class="navbar-toggler"
 	type="button"
@@ -27,13 +27,15 @@
 
 ><div class="collapse navbar-collapse" id="navbarSupportedContent"
 ><ul class="navbar-nav mr-auto"
-><li class="nav-item active"
+><!--li class="nav-item active"
 ><a class="nav-link" href="{% url 'result' %}">{% trans 'Home' %}</a
 ></li
-><li class="nav-item active"
+-->{% if showLogoutButton %}<li class="nav-item active"
 ><a class="nav-link" href="{% url 'list' %}">{% trans 'bucketList' %}</a
 ></li
-></ul
+>{% endif %}<li class="nav-item active"
+>{{ global_username }}</li
+</ul
 
 ><form class="form-inline my-2 my-sm-0"
 	action="{% url 'logout' %}"

@@ -36,7 +36,10 @@ def login(request):
     if request.method == "GET":
         isLoginFailed = is_login_failed(request.session)
         isReauth = not need_login(request.session)
-        return render(request, "console/login.html", {"isLoginFailed": isLoginFailed, "showLogoutButton": isReauth, "showReauthMsg": isReauth})
+        username = None
+        if request.session is not None:
+            username = request.session["global_username"]
+        return render(request, "console/login.html", {"isLoginFailed": isLoginFailed, "showLogoutButton": isReauth, "showReauthMsg": isReauth, "username": username})
     elif request.method == "POST":
         username = request.POST["username"]
         passwd = request.POST["passwd"]
@@ -169,7 +172,7 @@ def aclfile(request):
         logger.debug("q: [{}]".format(q))
         acl_edited = [etoent_2(e, p) for e in q]
         acl_edited = [e for e in acl_edited if e is not None]
-        #logger.debug("acl_edited: [{}]".format(acl_edited))
+        logger.debug("acl_edited: [{}]".format(acl_edited))
         ### end for new_entry_2
 
         cmd.set_bucket_acl(username, bucket, acl_original, acl_edited)
@@ -177,12 +180,14 @@ def aclfile(request):
     bucket_acl = cmd.get_bucket_acl(username, bucket)
     acl_modifiable = [e for e in bucket_acl if is_modifiable(e)]
     (groups, users) = cmd.get_groups_users_list(username)
-    acl_modifiable_entries = [{"entry": make_entry(e, groups + users, i + 1)} for i, e in enumerate(acl_modifiable)]
+    acl_modifiable_entries = [{"entry": make_entry(e, groups + users, i + 2)} for i, e in enumerate(acl_modifiable)]
+    group_perm = get_group_perm(bucket_acl)
+    acl_modifiable_entries.insert(0, {"entry": make_fixed_entry("gfarms3webui:GROUP", "MY GROUP", 0, group_perm)})
     other_perm = get_other_perm(bucket_acl)
-    acl_modifiable_entries.insert(0, {"entry": make_fixed_entry("gfarms3webui:OTHER", "OTHER", 0, other_perm)})
+    acl_modifiable_entries.insert(1, {"entry": make_fixed_entry("gfarms3webui:OTHER", "OTHER", 1, other_perm)})
     dict = {"bucket": bucket,
             "acl_modifiable_entries": acl_modifiable_entries,
-            "seq": len(acl_modifiable_entries) + 1,
+            "seq": len(acl_modifiable_entries) + 2,
             "groups_users": groups + users,
             "acl_original_string": "\n".join(bucket_acl),
             "showLogoutButton": True,
@@ -190,18 +195,46 @@ def aclfile(request):
             "date": time.ctime(time.time())}
     return render(request, "console/aclfile.html", dict)
 
-def get_other_perm(bucket_acl):
+def get_group_perm(bucket_acl):
     grp = [e for e in bucket_acl if e.startswith("group::")][0]
+    #oth = [e for e in bucket_acl if e.startswith("other::")][0]
+    #logger.debug("oth: {}".format(oth))
+    #logger.debug("grp: {}".format(grp))
+    return get_perm(grp)
+    #grp_perm = grp.split(':')[2]
+    ##oth_perm = oth.split(':')[2]
+    ##logger.debug("oth_perm: {}".format(oth_perm))
+    ##logger.debug("grp_perm: {}".format(grp_perm))
+    #if grp_perm.startswith("rwx")
+    #    return "rwx"
+    #elif grp_perm.startswith("r-x")
+    #    return "r-x"
+    #else:
+    #    return "---"
+
+def get_other_perm(bucket_acl):
+    #grp = [e for e in bucket_acl if e.startswith("group::")][0]
     oth = [e for e in bucket_acl if e.startswith("other::")][0]
     #logger.debug("oth: {}".format(oth))
     #logger.debug("grp: {}".format(grp))
-    grp_perm = grp.split(':')[2]
-    oth_perm = oth.split(':')[2]
-    #logger.debug("oth_perm: {}".format(oth_perm))
-    #logger.debug("grp_perm: {}".format(grp_perm))
-    if grp_perm.startswith("rwx") or oth_perm.startswith("rwx"):
+    #grp_perm = grp.split(':')[2]
+    return get_perm(oth)
+    #oth_perm = oth.split(':')[2]
+    ##logger.debug("oth_perm: {}".format(oth_perm))
+    ##logger.debug("grp_perm: {}".format(grp_perm))
+    #if  oth_perm.startswith("rwx"):
+    #    return "rwx"
+    #elif oth_perm.startswith("r-x"):
+    #    return "r-x"
+    #else:
+    #    return "---"
+
+def get_perm(s):
+    perm = s.split(':')[2]
+    logger.debug("perm: {}".format(perm))
+    if  perm.startswith("rwx"):
         return "rwx"
-    elif grp_perm.startswith("r-x") or oth_perm.startswith("r-x"):
+    elif perm.startswith("r-x"):
         return "r-x"
     else:
         return "---"
@@ -261,7 +294,7 @@ def new_entry_2(id, e_id, e_text, select_name, opt_name, checked_perm, is_del_bu
     return ("<div class=\"row\" id=\"" + id + "\">" +
         del_button_2(id, is_del_button) +
         "<input type=\"hidden\" name=\"" + select_name + "\" value=\"" + e_id + "\" />" +
-        "<div class=\"col-6\">" + e_text + "</div>" +
+        "<div class=\"col-6 text-break\">" + e_text + "</div>" +
 	"&nbsp;" +
         slider_round(f_button_2("r", opt_name, "RO", checked_perm.startswith("r"), seq)) +
 	"&nbsp;" +
