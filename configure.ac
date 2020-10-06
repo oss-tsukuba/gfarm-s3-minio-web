@@ -89,6 +89,16 @@ esac
 AC_MSG_RESULT([$with_gunicorn])
 AC_SUBST(with_gunicorn)
 
+### --with-wsgi-homedir=WSGI_HOMEDIR
+AC_MSG_CHECKING([for WSGI homedir])
+AC_ARG_WITH([wsgi-homedir],
+  AC_HELP_STRING([--with-wsgi-homedir=WSGI_HOMEDIR], [wsgi homedir [[/home/wsgi]]]))
+case x$with_wsgi_homedir in
+  x|xyes|xno) with_wsgi_homedir=/home/wsgi ;;
+esac
+AC_MSG_RESULT([$with_wsgi_homedir])
+AC_SUBST(with_wsgi_homedir)
+
 ### --with-wsgi-user=WSGI_USER
 AC_MSG_CHECKING([for WSGI user])
 AC_ARG_WITH([wsgi-user],

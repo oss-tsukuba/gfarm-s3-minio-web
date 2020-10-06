@@ -638,6 +638,7 @@ with_workdir
 with_wsgi_port
 with_wsgi_group
 with_wsgi_user
+with_wsgi_homedir
 with_gunicorn
 with_apache
 with_proxy_lifetime
@@ -777,6 +778,7 @@ with_myproxy_server
 with_proxy_lifetime
 with_apache
 with_gunicorn
+with_wsgi_homedir
 with_wsgi_user
 with_wsgi_group
 with_wsgi_port
@@ -1445,6 +1447,8 @@ Optional Packages:
                           Apache root directory [[/usr]]
   --with-gunicorn=GUNICORN_ROOT
                           gunicorn root directory [[/usr]]
+  --with-wsgi-homedir=WSGI_HOMEDIR
+                          wsgi homedir [[/home/wsgi]]
   --with-wsgi-user=WSGI_USER
                           wsgi username [[wsgi]]
   --with-wsgi-group=WSGI_GROUP
@@ -12273,6 +12277,22 @@ case x$with_gunicorn in
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gunicorn" >&5
 $as_echo "$with_gunicorn" >&6; }
+
+
+### --with-wsgi-homedir=WSGI_HOMEDIR
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for WSGI homedir" >&5
+$as_echo_n "checking for WSGI homedir... " >&6; }
+
+# Check whether --with-wsgi-homedir was given.
+if test "${with_wsgi_homedir+set}" = set; then :
+  withval=$with_wsgi_homedir;
+fi
+
+case x$with_wsgi_homedir in
+  x|xyes|xno) with_wsgi_homedir=/home/wsgi ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_wsgi_homedir" >&5
+$as_echo "$with_wsgi_homedir" >&6; }
 
 
 ### --with-wsgi-user=WSGI_USER

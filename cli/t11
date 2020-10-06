@@ -4,10 +4,13 @@
 
 export AWS_PROFILE=user1
 
-ENDPOINT_URL=http://192.168.224.11
 ENDPOINT_URL=https://192.168.224.11
+ENDPOINT_URL=http://192.168.224.11
 
 export PYTHONWARNINGS="ignore:Unverified HTTPS request"
+
+NO_VERIFY_SSL=--no-verify-ssl
+NO_VERIFY_SSL=
 
 DEBUG=--debug
 DEBUG=
@@ -20,13 +23,16 @@ vflag=1
 
 . ./subr
 
+date >/tmp/foo
+
 testC() {
 #	aws s3 ls        s3://
 #	aws s3 ls        s3://
 #	aws s3 ls        s3://sss
 #	aws s3 ls        s3://mybucket
 #	aws s3 mb        s3://mybucket
-	aws s3 mb        s3://new3
+	aws s3 mb        s3://new4
+	aws s3 cp /tmp/foo        s3://new4/foo
 #	aws s3 cp /tmp/foo        s3://mybucket/foo
 #	aws s3 ls        s3://sss/hpci001971/
 #	aws s3 ls        s3://sss/hpci001971/tak/

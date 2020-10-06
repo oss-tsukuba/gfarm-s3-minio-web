@@ -1,6 +1,7 @@
 PREFIX=/usr/local
 WSGI_USER=wsgi
 MKDIR=mkdir
+WSGI_HOMEDIR=/home/wsgi
 
 all::
 	mkdir -p gfarm-s3/console/static/console
@@ -18,9 +19,9 @@ clean:
 	rm -r gfarm-s3/console/static/console/package.json
 
 install:
-	tar cf - gfarm-s3 rungunicorn runserver | (cd ~$(WSGI_USER) && tar xfp -)
-	(cd gfarm-s3/console && tar cf - static) | (cd ~$(WSGI_USER) && tar xfp -)
-	chown -R $(WSGI_USER) ~$(WSGI_USER)/gfarm-s3
-	chmod +x ~$(WSGI_USER)/rungunicorn ~$(WSGI_USER)/runserver
-	chmod og+rX ~$(WSGI_USER)
-	chmod -R og+rX ~$(WSGI_USER)/static
+	tar cf - gfarm-s3 rungunicorn runserver | (cd $(WSGI_HOMEDIR) && tar xfp -)
+	(cd gfarm-s3/console && tar cf - static) | (cd $(WSGI_HOMEDIR) && tar xfp -)
+	chown -R $(WSGI_USER) $(WSGI_HOMEDIR)/gfarm-s3
+	chmod +x $(WSGI_HOMEDIR)/rungunicorn $(WSGI_HOMEDIR)/runserver
+	chmod og+rX $(WSGI_HOMEDIR)
+	chmod -R og+rX $(WSGI_HOMEDIR)/static

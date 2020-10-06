@@ -8,8 +8,8 @@ Include @prefix@/var/gfarm-s3/rewrite.conf
 
 #####
 
-Alias /static/ /home/@with_wsgi_user@/static/
+Alias /static/ @with_wsgi_homedir@/static/
 
-<Directory /home/@with_wsgi_user@/static>
+<Directory @with_wsgi_homedir@/static>
 Require all granted
 </Directory>
