@@ -14,7 +14,8 @@ MINIO_PATH=$(PREFIX)/bin/minio
 MC_PATH=$(PREFIX)/bin/mc
 
 mc_git=https://github.com/minio/mc.git
-minio_git=git@github.com:oss-tsukuba/gfarm-s3-minio.git
+#minio_git=git@github.com:oss-tsukuba/gfarm-s3-minio.git
+minio_git=https://github.com/oss-tsukuba/gfarm-s3-minio.git
 
 CGO_LDFLAGS="-Wl,-rpath,$(WITH_GFARM)/lib"
 PKG_CONFIG_PATH="$(WITH_GFARM)/lib/pkgconfig"
