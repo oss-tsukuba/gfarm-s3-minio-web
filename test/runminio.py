@@ -22,7 +22,7 @@ def runminio():
     access_key = "K4XcKzocrUhrnCAKrx2Z"
     secret_key = "39e+URNfFv/CCgs4bYcBMusR7ngMLOxEf6cpXWpB"
     GfarmS3_Cache_Basedir = "/mnt/data/tmp"
-    GfarmS3_Cache_Size_MB = "48"
+    GfarmS3_Cache_Size_MB = "128"
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "r:s:a:k:K", 
