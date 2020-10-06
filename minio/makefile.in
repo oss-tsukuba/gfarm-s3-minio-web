@@ -1,10 +1,10 @@
 PREFIX=@prefix@
 WITH_GFARM=/usr/local
-SRCDIR=/home/user1/work/gfarm-s3-minio-web
-GOPATH=$(SRCDIR)/minio/work/go
-GOPATH=$(SRCDIR)/minio/work/go
+WORKDIR=@with_workdir@
+##/home/user1/work/gfarm-s3-minio-web
+GOPATH=$(WORKDIR)/minio/work/go
 GOBIN=$(GOPATH)/bin
-BUILDDIR=$(SRCDIR)/minio/work/build
+BUILDDIR=$(WORKDIR)/minio/work/build
 
 GO_ARCHIVE=go1.15.linux-amd64.tar.gz
 GO_URL=https://dl.google.com/go/$(GO_ARCHIVE)
@@ -28,7 +28,7 @@ all::
 	##--with-gfarm=/usr/local
 	##--prefix=/usr/local
 
-	###export GOPATH=$(SRCDIR)/minio/work/go
+	###export GOPATH=$(WORKDIR)/minio/work/go
 	###export GOBIN=$GOPATH/bin
 
 	#. /usr/local/etc/gfarm-s3.conf
@@ -45,7 +45,7 @@ all::
 	(cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(GOPATH)/bin/go install)
 
 install-go::
-	-$(MKDIR) -p $$(dirname $GOPATH)
+	-$(MKDIR) -p $$(dirname $(GOPATH))
 	(cd $$(dirname $(GOPATH)) && $(CURL) $(GO_URL) | $(TAR) xfzp -)
 
 install::

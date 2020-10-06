@@ -1,5 +1,0 @@
-#! /bin/sh
-GFARMS3_METADIR=~/.gfarm-s3
-GFARMS3_SECRET_KEY=$GFARMS3_METADIR/secret_key
-mkdir $(dirname $GFARMS3_SECRET_KEY)
-cp etc/secret_key $GFARMS3_SECRET_KEY

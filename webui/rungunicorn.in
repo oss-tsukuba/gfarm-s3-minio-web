@@ -1,0 +1,11 @@
+#! /bin/sh
+
+cd /
+
+@with_gunicorn@/bin/gunicorn \
+	--error-logfile /tmp/gunicorn.err \
+	--log-file /tmp/gunicorn.log \
+	-w 2 \
+	-b 0.0.0.0:@with_wsgi_port@ \
+	--chdir /home/@with_wsgi_user@/gfarm-s3 \
+	gfarms3.wsgi:application

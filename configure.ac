@@ -84,7 +84,7 @@ AC_MSG_CHECKING([for Gunicorn - Python WSGI HTTP Server for UNIX])
 AC_ARG_WITH([gunicorn],
   AC_HELP_STRING([--with-gunicorn=GUNICORN_ROOT], [gunicorn root directory [[/usr]]]))
 case x$with_gunicorn in
-  x|xyes|xno) with_gunicorn=/usr ;;
+  x|xyes|xno) with_gunicorn=/usr/local ;;
 esac
 AC_MSG_RESULT([$with_gunicorn])
 AC_SUBST(with_gunicorn)
@@ -119,6 +119,26 @@ esac
 AC_MSG_RESULT([$with_wsgi_port])
 AC_SUBST(with_wsgi_port)
 
+### --with-workdir=WORKDIR
+AC_MSG_CHECKING([workdir for build s3 server (MinIO)])
+AC_ARG_WITH([workdir],
+  AC_HELP_STRING([--with-workdir=WORKDIR], [work directory [[/usr]]]))
+case x$with_workdir in
+  x|xyes|xno) with_workdir=$HOME/tmp ;;
+esac
+AC_MSG_RESULT([$with_workdir])
+AC_SUBST(with_workdir)
+
+### --with-gfarm-shared-dir=WORKDIR
+AC_MSG_CHECKING([gfarm_shared_dir for build s3 server (MinIO)])
+AC_ARG_WITH([gfarm_shared_dir],
+  AC_HELP_STRING([--with-gfarm-shared-dir=WORKDIR], [work directory [[/usr]]]))
+case x$with_gfarm_shared_dir in
+  x|xyes|xno) with_gfarm_shared_dir=$HOME ;;
+esac
+AC_MSG_RESULT([$with_gfarm_shared_dir])
+AC_SUBST(with_gfarm_shared_dir)
+
 # Checks for libraries.
 AC_CHECK_LIB([gfarm], [gfarm_initialize],, [AC_MSG_ERROR([libgfarm not found])])
 AC_CHECK_LIB([gfarm], [gfarm_get_global_username_by_url],, [AC_MSG_ERROR([Gfarm-2.4.2 or later is required])])
@@ -139,5 +159,8 @@ etc/gunicorn.service
 etc/makefile
 etc/sudoers
 minio/makefile
+webui/makefile
+webui/rungunicorn
+webui/runserver
 ])
 AC_OUTPUT

@@ -1,0 +1,26 @@
+PREFIX=@prefix@
+WSGI_USER=@with_wsgi_user@
+MKDIR=mkdir
+
+all::
+	mkdir -p gfarm-s3/console/static/console
+	(cd gfarm-s3/console/static/console && npm -y init)
+	(cd gfarm-s3/console/static/console && \
+	 npm install jquery@3.4.1 && \
+	 npm install popper.js@1.16.1 && \
+	 npm install bootstrap@4.5.2 && \
+	 npm install select2@4.0.13)
+
+#	npm install popper.js && \
+
+clean:
+	rm -r gfarm-s3/console/static/console/node_modules
+	rm -r gfarm-s3/console/static/console/package.json
+
+install:
+	tar cf - gfarm-s3 rungunicorn runserver | (cd ~$(WSGI_USER) && tar xfp -)
+	(cd gfarm-s3/console && tar cf - static) | (cd ~$(WSGI_USER) && tar xfp -)
+	chown -R $(WSGI_USER) ~$(WSGI_USER)/gfarm-s3
+	chmod +x ~$(WSGI_USER)/rungunicorn ~$(WSGI_USER)/runserver
+	chmod og+rX ~$(WSGI_USER)
+	chmod -R og+rX ~$(WSGI_USER)/static

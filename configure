@@ -633,6 +633,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+with_gfarm_shared_dir
+with_workdir
 with_wsgi_port
 with_wsgi_group
 with_wsgi_user
@@ -778,6 +780,8 @@ with_gunicorn
 with_wsgi_user
 with_wsgi_group
 with_wsgi_port
+with_workdir
+with_gfarm_shared_dir
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1447,6 +1451,9 @@ Optional Packages:
                           wsgi groupname [[wsgi]]
   --with-wsgi-port=WSGI_PORT
                           wsgi port [[8000]]
+  --with-workdir=WORKDIR  work directory [[/usr]]
+  --with-gfarm-shared-dir=WORKDIR
+                          work directory [[/usr]]
 
 Some influential environment variables:
   CC          C compiler command
@@ -12262,7 +12269,7 @@ if test "${with_gunicorn+set}" = set; then :
 fi
 
 case x$with_gunicorn in
-  x|xyes|xno) with_gunicorn=/usr ;;
+  x|xyes|xno) with_gunicorn=/usr/local ;;
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gunicorn" >&5
 $as_echo "$with_gunicorn" >&6; }
@@ -12314,6 +12321,38 @@ case x$with_wsgi_port in
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_wsgi_port" >&5
 $as_echo "$with_wsgi_port" >&6; }
+
+
+### --with-workdir=WORKDIR
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking workdir for build s3 server (MinIO)" >&5
+$as_echo_n "checking workdir for build s3 server (MinIO)... " >&6; }
+
+# Check whether --with-workdir was given.
+if test "${with_workdir+set}" = set; then :
+  withval=$with_workdir;
+fi
+
+case x$with_workdir in
+  x|xyes|xno) with_workdir=$HOME/tmp ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_workdir" >&5
+$as_echo "$with_workdir" >&6; }
+
+
+### --with-gfarm-shared-dir=WORKDIR
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking gfarm_shared_dir for build s3 server (MinIO)" >&5
+$as_echo_n "checking gfarm_shared_dir for build s3 server (MinIO)... " >&6; }
+
+# Check whether --with-gfarm_shared_dir was given.
+if test "${with_gfarm_shared_dir+set}" = set; then :
+  withval=$with_gfarm_shared_dir;
+fi
+
+case x$with_gfarm_shared_dir in
+  x|xyes|xno) with_gfarm_shared_dir=$HOME ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gfarm_shared_dir" >&5
+$as_echo "$with_gfarm_shared_dir" >&6; }
 
 
 # Checks for libraries.
@@ -12412,7 +12451,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gunicorn.service etc/makefile etc/sudoers minio/makefile"
+ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gunicorn.service etc/makefile etc/sudoers minio/makefile webui/makefile webui/rungunicorn webui/runserver"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -13454,6 +13493,9 @@ do
     "etc/makefile") CONFIG_FILES="$CONFIG_FILES etc/makefile" ;;
     "etc/sudoers") CONFIG_FILES="$CONFIG_FILES etc/sudoers" ;;
     "minio/makefile") CONFIG_FILES="$CONFIG_FILES minio/makefile" ;;
+    "webui/makefile") CONFIG_FILES="$CONFIG_FILES webui/makefile" ;;
+    "webui/rungunicorn") CONFIG_FILES="$CONFIG_FILES webui/rungunicorn" ;;
+    "webui/runserver") CONFIG_FILES="$CONFIG_FILES webui/runserver" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

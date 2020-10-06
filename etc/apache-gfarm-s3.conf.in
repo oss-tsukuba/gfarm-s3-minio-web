@@ -5,3 +5,11 @@ ProxyPreserveHost on
 #ProxyAddHeaders off
 
 Include @prefix@/var/gfarm-s3/rewrite.conf
+
+#####
+
+Alias /static/ /home/@with_wsgi_user@/static/
+
+<Directory /home/@with_wsgi_user@/static>
+Require all granted
+</Directory>

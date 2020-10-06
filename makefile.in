@@ -14,6 +14,7 @@ with_wsgi_user=@with_wsgi_user@
 all:
 	(cd etc && make)
 	(cd minio && make install-go && make)
+	(cd webui && make)
 
 #install-go:
 #	$(MKDIR) -p $$(dirname $(GOPATH))
@@ -23,3 +24,4 @@ install:
 	(cd etc && make install)
 	(cd bin && make install)
 	(cd minio && make install)
+	(cd webui && make install)

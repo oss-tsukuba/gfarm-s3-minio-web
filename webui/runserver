@@ -1,3 +1,0 @@
-#! /bin/sh
-cd /home/user1/work/gfarm-s3-minio-web/webui/gfarm-s3
-/usr/bin/python3 manage.py runserver
