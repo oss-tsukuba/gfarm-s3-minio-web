@@ -10,14 +10,16 @@ class Mys3client(object):
 
     def __init__(self):
         self.s3_client = self.gfarms3_client()
-    
+
     def gfarms3_client(self):
         return boto3.client("s3",
             aws_access_key_id = "K4XcKzocrUhrnCAKrx2Z",
-            #aws_secret_access_key = "39e+URNfFv/CCgs4bYcBMusR7ngMLOxEf6cpXWpB",
-            aws_secret_access_key = "TmXnYAhtjbtA3RHjK1Beu/6rvRJlmPVnOKThaZP0/+nT9XOo",
-            endpoint_url = "http://127.0.0.1:9000")
-    
+            aws_secret_access_key = "39e+URNfFv/CCgs4bYcBMusR7ngMLOxEf6cpXWpB",
+            endpoint_url = "http://127.0.0.1:9001")
+
+    def close_connection(self):
+        pass
+
     def create_bucket(self, bucket_name):
         try:
             self.s3_client.create_bucket(Bucket = bucket_name)
@@ -25,11 +27,19 @@ class Mys3client(object):
             sys.stderr.write("{}".format(e))
             return False
         return True
-    
+
+    def delete_bucket(self, bucket_name):
+        try:
+            self.s3_client.delete_bucket(Bucket = bucket_name)
+        except ClientError as e:
+            sys.stderr.write("{}".format(e))
+            return False
+        return True
+
     def list_buckets(self):
         response = self.s3_client.list_buckets()
         return response["Buckets"]
-    
+
     def upload_file(self, file_name, bucket, object_name):
         try:
             response = self.s3_client.upload_file(file_name, bucket, object_name)
@@ -37,7 +47,7 @@ class Mys3client(object):
             sys.stderr.write("{}".format(e))
             return False
         return True
-    
+
     def upload_fileobj(self, f, bucket, object_name):
         try:
             response = self.s3_client.upload_fileobj(f, bucket, object_name)
@@ -45,7 +55,7 @@ class Mys3client(object):
             sys.stderr.write("{}".format(e))
             return False
         return True
-    
+
     def download_fileobj(self, f, bucket, object_name):
         try:
             response = self.s3_client.download_fileobj(bucket, object_name, f)

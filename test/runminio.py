@@ -1,7 +1,7 @@
 import getopt
 import os
 import pwd
-from subprocess import Popen
+from subprocess import Popen, PIPE, DEVNULL
 import sys
 
 def usage():
@@ -74,11 +74,13 @@ def runminio():
     else:
         cmd = [minio_path, "gateway", gateway, "--address", minioAddress, GfarmS3_Gfarm_Shared_Dir, GfarmS3_Gfarm_Shared_Virtual_Name]
 
-    print("env = {}".format(env))
-    print("cmd = {}".format(cmd))
+    #print("env = {}".format(env))
+    #print("cmd = {}".format(cmd))
 
-    p = Popen(cmd, env = env)
+    p = Popen(cmd, stdin = DEVNULL, stdout = PIPE, stderr = DEVNULL, env = env)
+    #p = Popen(cmd, env = env)
     #p.wait()
+    return p
 
 def main():
     runminio()
