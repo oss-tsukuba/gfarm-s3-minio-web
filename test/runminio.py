@@ -15,7 +15,7 @@ def usage():
         .format(__file__))
     sys.exit(2)
 
-def runminio():
+def runminio(pipe = True):
     GfarmS3_Gfarm_Shared_Dir = "/home/hp120273/hpci005858/tmp/nas1"
     GfarmS3_Gfarm_Shared_Virtual_Name = "sss"
     minioAddress = "127.0.0.1:9001"
@@ -77,13 +77,15 @@ def runminio():
     #print("env = {}".format(env))
     #print("cmd = {}".format(cmd))
 
-    p = Popen(cmd, stdin = DEVNULL, stdout = PIPE, stderr = DEVNULL, env = env)
-    #p = Popen(cmd, env = env)
-    #p.wait()
+    if pipe:
+        p = Popen(cmd, stdin = DEVNULL, stdout = PIPE, stderr = DEVNULL, env = env)
+    else:
+        p = Popen(cmd, env = env)
     return p
 
 def main():
-    runminio()
+    p = runminio(pipe = False)
+    p.wait()
 
 if __name__ == "__main__":
     main()
