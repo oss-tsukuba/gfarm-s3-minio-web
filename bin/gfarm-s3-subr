@@ -757,16 +757,13 @@ mc_stop() {
 ## @stdout   (empty)  -- success without spawning MinIO || fail
 ##           port:pid -- success, MinIO's PID == pid
 start_server() {
-	local SUCCESS=0
-	local RETRY=1
-	local ABORT=2		### => *
 
 	local gfarm_shared_dir="$1"
 	for port in $(list_unused_ports "$USER" "$uport"); do
 		try_start_a_server "$gfarm_shared_dir" "$port"
 		case $? in
-		case $SUCCESS) return 0;;
-		case $RETRY) ;;
+		case 0) return 0;;
+		case 1) ;;
 		case *) echo "UNKNOWN ERROR" 1>&2; return 1;;
 		esac
 	done
