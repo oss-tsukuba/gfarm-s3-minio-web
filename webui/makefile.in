@@ -12,8 +12,6 @@ all::
 	 npm install bootstrap@4.5.2 && \
 	 npm install select2@4.0.13)
 
-#	npm install popper.js && \
-
 clean:
 	rm -r gfarm-s3/console/static/console/node_modules
 	rm -r gfarm-s3/console/static/console/package.json

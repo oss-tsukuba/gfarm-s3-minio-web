@@ -118,6 +118,7 @@ def set_bucket_acl(username, bucket, acl_1, acl_2):
     logger.debug("acl_fixed: {}".format(acl))
     p = gfarm_s3_login("gfsetfacl", username, "", authenticated = "unspecified", bucket = bucket, stdin = PIPE)
     stdout, stderr = p.communicate(input = acl.encode())
+### ignore error for now
 #    if p.wait() != 0:
 #        return stderr.decode()
     return stdout.decode()

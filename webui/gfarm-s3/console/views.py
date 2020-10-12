@@ -29,9 +29,6 @@ def need_login(session):
         return True
     return session["global_username"] == ""
 
-#def index(request):
-#    return render(request, "console/index.html", {})
-
 def login(request):
     if request.method == "GET":
         isLoginFailed = is_login_failed(request.session)
@@ -47,7 +44,6 @@ def login(request):
     elif request.method == "POST":
         username = request.POST["username"]
         passwd = request.POST["passwd"]
-        #logger.debug("{}".format(request.META))
         http_x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR", None)
         if http_x_forwarded_for is not None:
             remote_addr = http_x_forwarded_for 
@@ -66,11 +62,9 @@ def login(request):
 def logout(request):
     request.session.flush()
     return HttpResponseRedirect(reverse("login"))
-    #return render(request, "console/login.html", {"showLowoutButton": False, "showReauthMsg": False})
 
 def reauth(request):
     return HttpResponseRedirect(reverse("login"))
-    #return render(request, "console/login.html", {"showLowoutButton": False, "showReauthMsg": True})
 
 def starts3(request):
     if need_login(request.session):
@@ -79,7 +73,7 @@ def starts3(request):
     authenticated = request.session["authenticated_method"]
     ### start MinIO, without authenticateion
     cmd.cmd("start", username, "", authenticated = authenticated)
-    ### ignore cmd.cmd return value
+    ### ignore cmd.cmd return status
     return HttpResponseRedirect(reverse("result"))
 
 def stops3(request):
@@ -88,7 +82,7 @@ def stops3(request):
     username = request.session["global_username"]
     authenticated = request.session["authenticated_method"]
     cmd.cmd("stop", username, "", authenticated = authenticated)
-    ### ignore cmd.cmd return value
+    ### ignore cmd.cmd return status
     return HttpResponseRedirect(reverse("result"))
 
 def chgkey(request):
@@ -97,7 +91,7 @@ def chgkey(request):
     username = request.session["global_username"]
     authenticated = request.session["authenticated_method"]
     cmd.cmd("keygen", username, "", authenticated = authenticated)
-    ### ignore cmd.cmd return value
+    ### ignore cmd.cmd return status
     return HttpResponseRedirect(reverse("result"))
 
 def result(request):
@@ -129,7 +123,6 @@ def is_modifiable(s):
 def split_lines(s):
     return [e.strip() for e in s.split('\n') if e.strip() != ""]
 
-### for new_entry_2
 def opt_to_perm(o):
     logger.debug("opt_to_perm: o = \"{}\"".format(o))
     if o is None:
@@ -144,7 +137,7 @@ def opt_to_perm(o):
     logger.debug("opt_to_perm: FALLBACK: NONE".format(o))
     return "---"
 
-def etoent_2(e, p):
+def etoent(e, p):
     logger.debug("etoent: e = {}".format(e))
     logger.debug("etoent: p[e] = {}".format(p[e]))
     if p[e] == "0":
@@ -153,7 +146,6 @@ def etoent_2(e, p):
     logger.debug("etoent: opt = {}".format(opt))
     perm = opt_to_perm(opt) 
     return p[e] + ":" + perm
-### end for new_entry_2
 
 def aclfile(request):
     cmd_status = False
@@ -168,22 +160,11 @@ def aclfile(request):
         bucket = p["bucket"]
         acl_original = split_lines(p["acl_original_string"])
 
-
-        ### for new_entry
-        ### q = [e for e in p if e.startswith("opt:")]
-        ### #logger.debug("q: [{}]".format(q))
-        ### acl_edited = [p[e.replace("opt", "sel")] + ":" + p[e] for e in q]
-        ### #logger.debug("acl_edited: [{}]".format(acl_edited))
-        ### end for new_entry
-
-
-        ### for new_entry_2
         q = [e for e in p if e.startswith("sel:")]
         logger.debug("q: [{}]".format(q))
-        acl_edited = [etoent_2(e, p) for e in q]
+        acl_edited = [etoent(e, p) for e in q]
         acl_edited = [e for e in acl_edited if e is not None]
         logger.debug("acl_edited: [{}]".format(acl_edited))
-        ### end for new_entry_2
 
         cmd.set_bucket_acl(username, bucket, acl_original, acl_edited)
         cmd_status = True
@@ -208,37 +189,11 @@ def aclfile(request):
 
 def get_group_perm(bucket_acl):
     grp = [e for e in bucket_acl if e.startswith("group::")][0]
-    #oth = [e for e in bucket_acl if e.startswith("other::")][0]
-    #logger.debug("oth: {}".format(oth))
-    #logger.debug("grp: {}".format(grp))
     return get_perm(grp)
-    #grp_perm = grp.split(':')[2]
-    ##oth_perm = oth.split(':')[2]
-    ##logger.debug("oth_perm: {}".format(oth_perm))
-    ##logger.debug("grp_perm: {}".format(grp_perm))
-    #if grp_perm.startswith("rwx")
-    #    return "rwx"
-    #elif grp_perm.startswith("r-x")
-    #    return "r-x"
-    #else:
-    #    return "---"
 
 def get_other_perm(bucket_acl):
-    #grp = [e for e in bucket_acl if e.startswith("group::")][0]
     oth = [e for e in bucket_acl if e.startswith("other::")][0]
-    #logger.debug("oth: {}".format(oth))
-    #logger.debug("grp: {}".format(grp))
-    #grp_perm = grp.split(':')[2]
     return get_perm(oth)
-    #oth_perm = oth.split(':')[2]
-    ##logger.debug("oth_perm: {}".format(oth_perm))
-    ##logger.debug("grp_perm: {}".format(grp_perm))
-    #if  oth_perm.startswith("rwx"):
-    #    return "rwx"
-    #elif oth_perm.startswith("r-x"):
-    #    return "r-x"
-    #else:
-    #    return "---"
 
 def get_perm(s):
     perm = s.split(':')[2]
@@ -252,7 +207,7 @@ def get_perm(s):
 
 def make_fixed_entry(id, text, seq, perm):
     seq = str(seq)
-    return new_entry_2("li_" + seq, id, text, "sel:" + seq, "opt:" + seq, perm, False, seq)
+    return new_entry("li_" + seq, id, text, "sel:" + seq, "opt:" + seq, perm, False, seq)
 
 def make_entry(e, gu, seq):
     r = e.split(':')
@@ -260,69 +215,28 @@ def make_entry(e, gu, seq):
     perm = r[2]
     text = [x for x in gu if x["id"] == id][0]["text"]
     seq = str(seq)
-    return new_entry_2("li_" + seq, id, text, "sel:" + seq, "opt:" + seq, perm, True, seq)
+    return new_entry("li_" + seq, id, text, "sel:" + seq, "opt:" + seq, perm, True, seq)
 
-### id == "li_" + forloop.counter0
-### e_id == e.id
-### e_text == e.text
-### XXX select_id == "sl_"forloop.counter0
-### select_name == "sel:"forloop.counter0
-### opt_name == "opt:"forloop.counter0
-### checked_perm == "rwx" | "r-x" | "---"
-
-### def new_entry(id, e_id, e_text, select_name, opt_name, checked_perm, is_del_button):
-###     #logger.debug("checked_perm = {}".format(checked_perm))
-###     return ("<div class=\"row\" id=\"" + id + "\">" +
-###         "<input type=\"hidden\" name=\"" + select_name + "\" value=\"" + e_id + "\" />" +
-###         "<div class=\"col-4\">" + e_text + "</div>" +
-###         f_button(opt_name, "RW", "rwx", checked_perm.startswith("rwx")) +
-###         f_button(opt_name, "RO", "r-x", checked_perm.startswith("r-x")) +
-###         f_button(opt_name, "--", "---", checked_perm.startswith("---")) +
-###         "<div class=\"col-2 btn-group\">" +
-###         del_button(id, is_del_button) +
-###         "</div>" +
-###         "</div>")
-### 
-### def f_button(name, text, value, checked):
-###     a, c = "", ""
-###     if checked:
-###         a, c = " active", " checked"
-###     return ("<div class=\"col-2 btn-group btn-group-toggle\" data-toggle=\"buttons\">" +
-###         "<label class=\"btn btn-secondary btn-md" + a + "\">" +
-###         "<input type=\"radio\" name=\"" + name + "\" value=\"" + value + "\"" + c + ">" +
-###         text +
-###         "</label>" +
-###         "</div>")
-### 
-### def del_button(id, f):
-###     if f:
-###         return "<button type=\"button\" class=\"btn btn-outline-danger btn-md\" onClick=\"$('#" + id + "').remove();\">Del</button>"
-###     else:
-###         return ""
-
-def new_entry_2(id, e_id, e_text, select_name, opt_name, checked_perm, is_del_button, seq):
+def new_entry(id, e_id, e_text, select_name, opt_name, checked_perm, is_del_button, seq):
     #logger.debug(\"checked_perm = {}\".format(checked_perm))
     return ("<div class=\"row\" id=\"" + id + "\">" +
-        del_button_2(id, is_del_button) +
+        del_button(id, is_del_button) +
         "<input type=\"hidden\" name=\"" + select_name + "\" value=\"" + e_id + "\" />" +
         "<div class=\"col-6 text-break\">" + e_text + "</div>" +
 	"&nbsp;" +
-        slider_round(f_button_2("r", opt_name, "RO", checked_perm.startswith("r"), seq)) +
+        slider_round(f_button("r", opt_name, "RO", checked_perm.startswith("r"), seq)) +
 	"&nbsp;" +
-        slider_round(f_button_2("w", opt_name, "RW", checked_perm.startswith("rw"), seq)) +
+        slider_round(f_button("w", opt_name, "RW", checked_perm.startswith("rw"), seq)) +
         "<div class=\"col-2 btn-group\">" +
         "</div>" +
         "</div>")
-
-#def span(s):
-#    return ("<span class=\"align-middle\">" + s + "</span>")
 
 def slider_round(s):
     return ("<div><label class=\"switch\">" +
         s +
         "<span class=\"slider round\"></span></label></div>")
 
-def f_button_2(typ, name, text, checked, seq):
+def f_button(typ, name, text, checked, seq):
     c = ""
     if checked:
         c = " checked"
@@ -342,7 +256,7 @@ def f_button_2(typ, name, text, checked, seq):
     onclick = "if (" + cond + "$('#" + id + "').prop('checked')) { $('#" + xid + "').prop('checked', " + xset + "); }"
     return "<input type=\"checkbox\" class=\"default\" name=\"" + name + "\" id=\"" + id + "\" value=\"" + typ + "\" data-toggle=\"toggle\" onClick=\"" + clear_msg + activate_apl + onclick + "\"" + c + "/>"
 
-def del_button_2(id, f):
+def del_button(id, f):
     x = "<svg width=\"2em\" height=\"2em\" viewBox=\"0 0 16 16\" class=\"bi bi-x\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z\"/></svg>"
     clear_msg = "$('#msg').empty();"
     activate_apl = "$('#apl').prop('disabled', false);"
