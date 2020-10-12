@@ -129,25 +129,45 @@ esac
 AC_MSG_RESULT([$with_wsgi_port])
 AC_SUBST(with_wsgi_port)
 
-### --with-workdir=WORKDIR
-AC_MSG_CHECKING([workdir for build s3 server (MinIO)])
-AC_ARG_WITH([workdir],
-  AC_HELP_STRING([--with-workdir=WORKDIR], [work directory [[/usr]]]))
-case x$with_workdir in
-  x|xyes|xno) with_workdir=$HOME/tmp ;;
+### --with-minio-builddir=MINIO_BUILDDIR
+AC_MSG_CHECKING([minio-builddir for build s3 server (MinIO)])
+AC_ARG_WITH([minio-builddir],
+  AC_HELP_STRING([--with-minio-builddir=MINIO_BUILDDIR], [work directory [[$HOME/tmp]]]))
+case x$with_minio_builddir in
+  x|xyes|xno) with_minio_builddir=$HOME/tmp ;;
 esac
-AC_MSG_RESULT([$with_workdir])
-AC_SUBST(with_workdir)
+AC_MSG_RESULT([$with_minio_builddir])
+AC_SUBST(with_minio_builddir)
 
-### --with-gfarm-shared-dir=WORKDIR
-AC_MSG_CHECKING([gfarm_shared_dir for build s3 server (MinIO)])
+### --with-gfarm-shared-dir=SHARED_DIR
+AC_MSG_CHECKING([gfarm_shared_dir])
 AC_ARG_WITH([gfarm_shared_dir],
-  AC_HELP_STRING([--with-gfarm-shared-dir=WORKDIR], [work directory [[/usr]]]))
+  AC_HELP_STRING([--with-gfarm-shared-dir=SHARED_DIR], [work directory [[/share]]]))
 case x$with_gfarm_shared_dir in
-  x|xyes|xno) with_gfarm_shared_dir=$HOME ;;
+  x|xyes|xno) with_gfarm_shared_dir=/share ;;
 esac
 AC_MSG_RESULT([$with_gfarm_shared_dir])
 AC_SUBST(with_gfarm_shared_dir)
+
+### --with-cache-basedir=CACHE_BASEDIR
+AC_MSG_CHECKING([minio cache basedir])
+AC_ARG_WITH([cache-basedir],
+  AC_HELP_STRING([--with-cache-basedir=CACHE_BASEDIR], [cache directory [[/var/tmp]]]))
+case x$with_cache_basedir in
+  x|xyes|xno) with_cache_basedir=/var/tmp ;;
+esac
+AC_MSG_RESULT([$with_cache_basedir])
+AC_SUBST(with_cache_basedir)
+
+### --with-cache-size=CACHE_SIZE (MB)
+AC_MSG_CHECKING([minio cache size])
+AC_ARG_WITH([cache-size],
+  AC_HELP_STRING([--with-cache-size=CACHE_SIZE], [cache size [[4096]]]))
+case x$with_cache_size in
+  x|xyes|xno) with_cache_size=4096 ;;
+esac
+AC_MSG_RESULT([$with_cache_size])
+AC_SUBST(with_cache_size)
 
 # Checks for libraries.
 AC_CHECK_LIB([gfarm], [gfarm_initialize],, [AC_MSG_ERROR([libgfarm not found])])
