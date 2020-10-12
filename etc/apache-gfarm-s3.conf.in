@@ -2,14 +2,12 @@ RewriteEngine on
 
 ProxyPass /d http://127.0.0.1:@with_wsgi_port@/d
 ProxyPreserveHost on
-#ProxyAddHeaders off
 
 Include @prefix@/var/gfarm-s3/rewrite.conf
-
-#####
 
 Alias /static/ @with_wsgi_homedir@/static/
 
 <Directory @with_wsgi_homedir@/static>
-Require all granted
+	Require all granted
 </Directory>
+

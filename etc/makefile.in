@@ -10,44 +10,37 @@ GFARMS3_USER_PORT_MAP=$(GFARM_S3_VAR)/gfarm_s3_user_port_map
 GFARMS3_APACHE_REWRITE_CONF=$(GFARM_S3_VAR)/rewrite.conf
 GFARM_S3_VAR=$(PREFIX)/var/gfarm-s3
 
-INSTALL=install -c -m 555
+INSTALL=install
 MKDIR=mkdir
+TOUCH=touch
+CHMOD=chmod
+CHOWN=chown
 
 all: 
-#	sudoers apache-gfarm-s3.conf gunicorn.service
 
-#sudoers: sudoers.in
-#	sh ../makes/build-conf < $^ > $@
-#
-#apache-gfarm-s3.conf: apache-gfarm-s3.conf.in
-#	sh ../makes/build-conf < $^ > $@
-#
-#gunicorn.service: gunicorn.service.in
-#	sh ../makes/build-conf < $^ > $@
-#
 clean:
 #	rm -f sudoers apache-gfarm-s3.conf gunicorn.service
 
 install:
 	$(INSTALL) -c gfarm-s3.conf $(GFARMS3_CONF)
 
-	touch $(GFARMS3_LOCAL_USER_MAP)
-	chmod 644 $(GFARMS3_LOCAL_USER_MAP)
+	$(TOUCH) $(GFARMS3_LOCAL_USER_MAP)
+	$(CHMOD) 644 $(GFARMS3_LOCAL_USER_MAP)
 
-	$(INSTALL) sudoers /etc/sudoers.d/gfarm-s3
+	$(INSTALL) -c sudoers /etc/sudoers.d/gfarm-s3
 	if ! grep -q '^gfarms3:' /etc/group; then sudo groupadd gfarms3; fi
 
 	$(MKDIR) -p $$(dirname $(GFARMS3_USER_PORT_MAP))
-	chown $(WSGI_USER) $$(dirname $(GFARMS3_USER_PORT_MAP))
-	touch $(GFARMS3_USER_PORT_MAP)
-	chown $(WSGI_USER) $(GFARMS3_USER_PORT_MAP)
+	$(CHOWN) $(WSGI_USER) $$(dirname $(GFARMS3_USER_PORT_MAP))
+	$(TOUCH) $(GFARMS3_USER_PORT_MAP)
+	$(CHOWN) $(WSGI_USER) $(GFARMS3_USER_PORT_MAP)
 
 	$(MKDIR) -p $$(dirname $(GFARMS3_APACHE_REWRITE_CONF))
-	chown $(WSGI_USER) $$(dirname $(GFARMS3_APACHE_REWRITE_CONF))
-	touch $(GFARMS3_APACHE_REWRITE_CONF)
-	chown $(WSGI_USER) $(GFARMS3_APACHE_REWRITE_CONF)
+	$(CHOWN) $(WSGI_USER) $$(dirname $(GFARMS3_APACHE_REWRITE_CONF))
+	$(TOUCH) $(GFARMS3_APACHE_REWRITE_CONF)
+	$(CHOWN) $(WSGI_USER) $(GFARMS3_APACHE_REWRITE_CONF)
 
-	cp gunicorn.service /etc/systemd/system/gunicorn.service
+	$(INSTALL) gunicorn.service /etc/systemd/system/gunicorn.service
 
 	@echo please add apache-gfarm-s3.conf content to your httpd.conf
 	@echo systemctl enable --now gunicorn.service

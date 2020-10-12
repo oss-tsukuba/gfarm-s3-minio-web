@@ -1,20 +1,17 @@
 PREFIX=@prefix@
 WITH_GFARM=/usr/local
-WORKDIR=@with_workdir@
-##/home/user1/work/gfarm-s3-minio-web
-GOPATH=$(WORKDIR)/minio/work/go
+MINIO_BUILDDIR=@with_minio_builddir@
+GOPATH=$(MINIO_BUILDDIR)/minio/work/go
 GOBIN=$(GOPATH)/bin
-BUILDDIR=$(WORKDIR)/minio/work/build
+BUILDDIR=$(MINIO_BUILDDIR)/minio/work/build
 
 GO_ARCHIVE=go1.15.linux-amd64.tar.gz
 GO_URL=https://dl.google.com/go/$(GO_ARCHIVE)
 
-#GFARM_S3_PREFIX=@prefix@
 MINIO_PATH=$(PREFIX)/bin/minio
 MC_PATH=$(PREFIX)/bin/mc
 
 mc_git=https://github.com/minio/mc.git
-#minio_git=git@github.com:oss-tsukuba/gfarm-s3-minio.git
 minio_git=https://github.com/oss-tsukuba/gfarm-s3-minio.git
 
 CGO_LDFLAGS="-Wl,-rpath,$(WITH_GFARM)/lib"
@@ -25,24 +22,12 @@ CURL=curl
 TAR=tar
 
 all::
-	##gfarm2fs configurations:
-	##--with-gfarm=/usr/local
-	##--prefix=/usr/local
-
-	###export GOPATH=$(WORKDIR)/minio/work/go
-	###export GOBIN=$GOPATH/bin
-
-	#. /usr/local/etc/gfarm-s3.conf
-
 	[ -d $(BUILDDIR) ] || $(MKDIR) -p $(BUILDDIR)
 	[ -d $(BUILDDIR)/mc ] || (cd $(BUILDDIR) && git clone $(mc_git))
 	[ -d $(BUILDDIR)/gfarm-s3-minio ] || (cd $(BUILDDIR) && git clone $(minio_git) && cd gfarm-s3-minio && git checkout gatewaygfarm && git pull)
 
 	(cd $(BUILDDIR)/mc && GOPATH=$(GOPATH) $(GOPATH)/bin/go install)
 
-	###if [ x"$with_gfarm" = x"/usr" ]; then with_gfarm=; fi
-
-	###set -o xtrace
 	(cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(GOPATH)/bin/go install)
 
 install-go::
