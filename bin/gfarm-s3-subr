@@ -762,9 +762,9 @@ start_server() {
 	for port in $(list_unused_ports "$USER" "$uport"); do
 		try_start_a_server "$gfarm_shared_dir" "$port"
 		case $? in
-		case 0) return 0;;
-		case 1) ;;
-		case *) echo "UNKNOWN ERROR" 1>&2; return 1;;
+		0) return 0;;
+		1) ;;
+		*) echo "UNKNOWN ERROR" 1>&2; return 1;;
 		esac
 	done
 	echo "NO PORT AVAILABLE" 1>&2
