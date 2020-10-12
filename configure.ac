@@ -141,7 +141,7 @@ AC_SUBST(with_minio_builddir)
 
 ### --with-gfarm-shared-dir=SHARED_DIR
 AC_MSG_CHECKING([gfarm_shared_dir])
-AC_ARG_WITH([gfarm_shared_dir],
+AC_ARG_WITH([gfarm-shared-dir],
   AC_HELP_STRING([--with-gfarm-shared-dir=SHARED_DIR], [work directory [[/share]]]))
 case x$with_gfarm_shared_dir in
   x|xyes|xno) with_gfarm_shared_dir=/share ;;
