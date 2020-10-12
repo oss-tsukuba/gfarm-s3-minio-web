@@ -521,9 +521,6 @@ spawn_per_user_server() {	# local_username
 	fi
 	local status=0
 
-#	local secret_key_file=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --show-secret-key-file)
-#	local secret_key_dir=$(dirname $secret_key_file)
-
 	if [ -n "$port" ]; then
 		echo "MinIO started" 1>&2
 		## No need to check `port' confliction,
@@ -557,10 +554,7 @@ stop_per_user_server() {	# local_username
 		status=1
 		## FALLTHRU
 	fi
-#	if ! update_reverse_proxy; then
-#		status=1
-#	fi
-
+### TODO (low priority):
 ### We should update gfarm_s3_user_port_map here:
 ### erase pid from entry (set to empty), but keep username and port number
 	return $status
@@ -763,11 +757,18 @@ mc_stop() {
 ## @stdout   (empty)  -- success without spawning MinIO || fail
 ##           port:pid -- success, MinIO's PID == pid
 start_server() {
+	local SUCCESS=0
+	local RETRY=1
+	local ABORT=2		### => *
+
 	local gfarm_shared_dir="$1"
 	for port in $(list_unused_ports "$USER" "$uport"); do
-		if try_start_a_server "$gfarm_shared_dir" "$port"; then
-			return 0
-		fi
+		try_start_a_server "$gfarm_shared_dir" "$port"
+		case $? in
+		case $SUCCESS) return 0;;
+		case $RETRY) ;;
+		case *) echo "UNKNOWN ERROR" 1>&2; return 1;;
+		esac
 	done
 	echo "NO PORT AVAILABLE" 1>&2
 	return 1
@@ -787,16 +788,6 @@ try_start_a_server() {
 	local tmpfile=$(mktemp $GFARM_S3_TMP/minio-log.XXXXXX) || return 1
 	local pidfile=$(mktemp $GFARM_S3_TMP/minio-pid.XXXXXX) || (rm -f $tmpfile; return 1)
 	GATEWAY=gfarm
-##### for debug use only
-#GATEWAY=nas
-#if [ "$GATEWAY" = "nas" ]; then
-#	gfarm_shared_dir=/home/user1/tmp/gfarms3
-#	gfarm_shared_dir=/gfarm/hp120273/user1/tmp/gfarms3
-#	GFARMS3_GFARM_SHARED_VIRTUAL_NAME=
-#fi
-#MINIO_GFARMS3_CACHEDIR=
-#MINIO_GFARMS3_CACHEDIR_SIZE_MB=128
-#MINIO_GFARMS3_CACHEDIR_SIZE_MB=16
 	(HOME="$GFARMS3_METADIR" $MINIO_PATH gateway $GATEWAY \
 		--address "$address" \
 		"$gfarm_shared_dir" \
@@ -813,33 +804,63 @@ try_start_a_server() {
 		sleep 1
 	done
 
+	local SUCCESS=0
+	local RETRY=1
+	local ABORT=2
+
+### case 0: Minio Launched normally
+###         Pattern "^Endpoint" is in log
+###	    try connect using mc
+###         case 4: fail     => ABORT spawning process
+###         case 5: SUCCESS
+### case 1: Minio Exited  (port is in use)
+###         Pattern "ERROR Unable to start the gateway: Specified port is already in use"
+###                and
+###         pattern "Minio Exited" are in log
+###         RETRY start minio using another port
+### case 2: Minio Exited  (another reason)
+###         Pattern "Minio Exited" is in log
+###         ABORT minio spawing process
+### case 3: no patterns described above does not appear in log
+###         unknown status => kill minil and ABORT spawning process
+
 	if grep -l "^Minio Exited" $tmpfile 1>&2; then
-### debug
-#		rm -f $tmpfile
+
+		if ! grep -l "port is already in use" $tmpfile 1>&2; then
+###			case 2
+			return $ABORT
+		fi
+
+		rm -f $tmpfile
 		rm -f $pidfile
-		return 1	## temporary error (minio has quit)
+###		case 1
+		return $RETRY	## temporary error (minio has quit)
 	fi
 
 	if ! grep -l "^Endpoint" $tmpfile 1>&2; then
 		kill -KILL $(< $pidfile)
-### debug
-#		rm -f $tmpfile
+		rm -f $tmpfile
 		rm -f $pidfile
-		return 2	## fatal error (minio still running)
+###		case 3
+		return $ABORT	## fatal error (minio still running)
 	fi
 
-### debug
-#	rm -f $tmpfile
+###	case 0
+
+	rm -f $tmpfile
 	if ! mymc_init; then return 1; fi
 	if ! mc_config $address; then
 		mymc_finish
 		kill -KILL $(< $pidfile)
 		rm $pidfile
-		return 2	## fatal error (minio still running)
+###		case 0 => case 4
+		return $ABORT	## fatal error (minio still running)
 	fi
 	mymc_finish
 	cat $pidfile
 	rm $pidfile
+###	case 0 => case 5:
+	return $SUCCESS
 }
 
 stop_server() {
