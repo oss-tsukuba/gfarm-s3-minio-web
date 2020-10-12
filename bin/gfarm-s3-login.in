@@ -1,14 +1,8 @@
 #! /bin/sh
 
-###debug
-tmpfile=$(mktemp /tmp/gfarm-s3-login.XXXXXX) || exit 1
-exec 2>$tmpfile
-
 export LANG=C
 export LC_CTYPE=C
 export LC_COLLATE=C
-
-set -o xtrace
 
 prefix=@prefix@
 . @sysconfdir@/gfarm-s3.conf
