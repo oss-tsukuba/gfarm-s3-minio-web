@@ -6,13 +6,28 @@ with_gfarm=@with_gfarm@
 with_apache=@with_apache@
 with_wsgi_user=@with_wsgi_user@
 
+RM=rm
+
 all:
-	(cd etc && make)
-	(cd minio && make install-go && make)
-	(cd webui && make)
+	cd etc && $(MAKE)
+	cd minio && $(MAKE) install-go && $(MAKE)
+	cd webui && $(MAKE)
 
 install:
-	(cd etc && make install)
-	(cd bin && make install)
-	(cd minio && make install)
-	(cd webui && make install)
+	cd etc && $(MAKE) $@
+	cd bin && $(MAKE) $@
+	cd minio && $(MAKE) $@
+	cd webui && $(MAKE) $@
+
+clean:
+	cd etc && $(MAKE) $@
+	cd bin && $(MAKE) $@
+	cd minio && $(MAKE) $@
+	cd webui && $(MAKE) $@
+
+distclean:
+	cd etc && $(MAKE) $@
+	cd bin && $(MAKE) $@
+	cd minio && $(MAKE) $@
+	cd webui && $(MAKE) $@
+	$(RM) -f makefile

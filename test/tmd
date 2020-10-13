@@ -1,6 +1,0 @@
-#! /bin/sh
-
-(
-date
-tty
-) >/tmp/foo

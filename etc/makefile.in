@@ -15,11 +15,11 @@ MKDIR=mkdir
 TOUCH=touch
 CHMOD=chmod
 CHOWN=chown
+SUDO=sudo
+GROUPADD=groupadd
+RM=rm
 
 all: 
-
-clean:
-#	rm -f sudoers apache-gfarm-s3.conf gunicorn.service
 
 install:
 	$(INSTALL) -c gfarm-s3.conf $(GFARMS3_CONF)
@@ -28,7 +28,7 @@ install:
 	$(CHMOD) 644 $(GFARMS3_LOCAL_USER_MAP)
 
 	$(INSTALL) -c sudoers /etc/sudoers.d/gfarm-s3
-	if ! grep -q '^gfarms3:' /etc/group; then sudo groupadd gfarms3; fi
+	if ! grep -q '^gfarms3:' /etc/group; then $(SUDO) $(GROUPADD) gfarms3; fi
 
 	$(MKDIR) -p $$(dirname $(GFARMS3_USER_PORT_MAP))
 	$(CHOWN) $(WSGI_USER) $$(dirname $(GFARMS3_USER_PORT_MAP))
@@ -44,3 +44,9 @@ install:
 
 	@echo please add apache-gfarm-s3.conf content to your httpd.conf
 	@echo systemctl enable --now gunicorn.service
+
+clean:
+
+distclean:
+	$(RM) -f apache-gfarm-s3.conf gfarm-s3.conf gunicorn.service sudoers
+	$(RM) -f makefile

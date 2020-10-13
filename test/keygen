@@ -1,3 +1,0 @@
-#! /bin/sh
-openssl rand -base64 15
-openssl rand -base64 30

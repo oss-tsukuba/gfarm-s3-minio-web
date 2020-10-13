@@ -3,23 +3,26 @@ WSGI_USER=@with_wsgi_user@
 MKDIR=mkdir
 WSGI_HOMEDIR=@with_wsgi_homedir@
 
-all::
-	mkdir -p gfarm-s3/console/static/console
-	(cd gfarm-s3/console/static/console && npm -y init)
-	(cd gfarm-s3/console/static/console && \
-	 npm install jquery@3.4.1 && \
-	 npm install popper.js@1.16.1 && \
-	 npm install bootstrap@4.5.2 && \
-	 npm install select2@4.0.13)
+TAR=tar
+RM=rm
+CHOWN=chown
+CHMOD=chmod
+NPM=npm
 
-clean:
-	rm -r gfarm-s3/console/static/console/node_modules
-	rm -r gfarm-s3/console/static/console/package.json
+all::
+	cd gfarm-s3/console/static/console && $(NPM) install
 
 install:
-	tar cf - gfarm-s3 rungunicorn runserver | (cd $(WSGI_HOMEDIR) && tar xfp -)
-	(cd gfarm-s3/console && tar cf - static) | (cd $(WSGI_HOMEDIR) && tar xfp -)
-	chown -R $(WSGI_USER) $(WSGI_HOMEDIR)/gfarm-s3
-	chmod +x $(WSGI_HOMEDIR)/rungunicorn $(WSGI_HOMEDIR)/runserver
-	chmod og+rX $(WSGI_HOMEDIR)
-	chmod -R og+rX $(WSGI_HOMEDIR)/static
+	$(TAR) cf - gfarm-s3 rungunicorn runserver | (cd $(WSGI_HOMEDIR) && $(TAR) xfp -)
+	(cd gfarm-s3/console && $(TAR) cf - static) | (cd $(WSGI_HOMEDIR) && $(TAR) xfp -)
+	$(CHOWN) -R $(WSGI_USER) $(WSGI_HOMEDIR)/gfarm-s3
+	$(CHMOD) +x $(WSGI_HOMEDIR)/rungunicorn $(WSGI_HOMEDIR)/runserver
+	$(CHMOD) og+rX $(WSGI_HOMEDIR)
+	$(CHMOD) -R og+rX $(WSGI_HOMEDIR)/static
+
+clean:
+	$(RM) -fr gfarm-s3/console/static/console/node_modules
+
+distclean:
+	$(RM) rungunicorn runserver
+	$(RM) -f makefile

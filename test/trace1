@@ -5,23 +5,9 @@ set -o xtrace
 ENDPOINT_URL=http://127.0.0.1:9000
 
 MINIO_ACCESS_KEY=K4XcKzocrUhrnCAKrx2Z
-#MINIO_SECRET_KEY=39e+URNfFv/CCgs4bYcBMusR7ngMLOxEf6cpXWpB
-MINIO_SECRET_KEY=$(</home/user1/.gfarm-s3/secret_key)
+MINIO_SECRET_KEY=$(<$HOME/.gfarm-s3/secret_key)
 
 PROFILE=user1
 
-#mc --config-dir $HOME/.gfarm-s3/.mc config host add $PROFILE $ENDPOINT_URL $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
 mc config host add $PROFILE $ENDPOINT_URL $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
-
-#mc admin policy add $PROFILE getlist k/getlist.json
-#mc admin user remove $PROFILE newuser5
-#mc admin user remove $PROFILE newusr5
-#mc admin user add $PROFILE newusr5 newusr5pass
-#mc admin policy set $PROFILE getlist user=newusr5
-#mc admin user list $PROFILE
 mc admin trace -v -a $PROFILE
-
-#mc admin service stop $PROFILE
-#mc mb $PROFILE/myb
-#mc ls $PROFILE/myb/..
-#mc --json ls $PROFILE
