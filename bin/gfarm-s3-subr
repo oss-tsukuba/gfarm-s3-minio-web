@@ -784,13 +784,18 @@ try_start_a_server() {
 	mymc_finish
 	local tmpfile=$(mktemp $GFARM_S3_TMP/minio-log.XXXXXX) || return 1
 	local pidfile=$(mktemp $GFARM_S3_TMP/minio-pid.XXXXXX) || (rm -f $tmpfile; return 1)
-	GATEWAY=gfarm
-	(HOME="$GFARMS3_METADIR" $MINIO_PATH gateway $GATEWAY \
+	( \
+	 export MINIO_GFARMS3_CACHEDIR=$(mktemp -d $GFARMS3_CACHE_BASEDIR/gfarm-s3-XXXXXXXX) || exit 1; \
+	 export MINIO_GFARMS3_CACHEDIR_SIZE_MB="$GFARMS3_CACHE_SIZE_MB"; \
+	 export GFARMS3_PARTFILE_DIGEST="$GFARMS3_PARTFILE_DIGEST"; \
+	 if ! chmod 700 $MINIO_GFARMS3_CACHEDIR; then exit 1; fi; \
+	 HOME="$GFARMS3_METADIR" $MINIO_PATH gateway gfarm \
 		--address "$address" \
 		"$gfarm_shared_dir" \
 		$GFARMS3_GFARM_SHARED_VIRTUAL_NAME & \
 	 echo "$port:$!" 1>&3; \
 	 wait; \
+	 rm -rf "$MINIO_GFARMS3_CACHEDIR"; \
 	 echo "Minio Exited") <&- >$tmpfile 2>&1 3>$pidfile &
 	for i in $(seq 1 1 60); do
 		if egrep -l "^(Endpoint|Minio Exited)" $tmpfile 1>&2; then

@@ -29,11 +29,12 @@ testC() {
 #	aws s3 ls        s3://
 #	aws s3 ls        s3://
 #	aws s3 ls        s3://sss
+#	aws s3 ls        s3://sss/user2/
 #	aws s3 ls        s3://mybucket
-#	aws s3 mb        s3://mybucket
-	aws s3 mb        s3://new4
-	aws s3 cp /tmp/foo        s3://new4/foo
-#	aws s3 cp /tmp/foo        s3://mybucket/foo
+	aws s3 mb        s3://mybucket
+#	aws s3 mb        s3://new4
+#	aws s3 cp /tmp/foo        s3://new4/foo
+	aws s3 cp /tmp/foo        s3://mybucket/foo
 #	aws s3 ls        s3://sss/hpci001971/
 #	aws s3 ls        s3://sss/hpci001971/tak/
 #	aws s3 cp        s3://sss/hpci001971/tak/foo /tmp/foo
