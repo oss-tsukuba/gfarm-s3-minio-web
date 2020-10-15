@@ -16,12 +16,12 @@ def usage():
     sys.exit(2)
 
 def runminio(pipe = True):
-    GfarmS3_Gfarm_Shared_Dir = "/home/hp120273/hpci005858/tmp/nas1"
+    GfarmS3_Gfarm_Shared_Dir = "/share/user1"
     GfarmS3_Gfarm_Shared_Virtual_Name = "sss"
     minioAddress = "127.0.0.1:9001"
     access_key = "K4XcKzocrUhrnCAKrx2Z"
     secret_key = "39e+URNfFv/CCgs4bYcBMusR7ngMLOxEf6cpXWpB"
-    GfarmS3_Cache_Basedir = "/mnt/data/tmp"
+    GfarmS3_Cache_Basedir = "/mnt/cache/user1"
     GfarmS3_Cache_Size_MB = "128"
 
     try:
@@ -45,9 +45,10 @@ def runminio(pipe = True):
         else:
             assert False, "unhandled option"
 
-    if len(args) != 0:
-        sys.stderr.write("argument number: {}\n".format(len(args)))
-        usage()
+#    if len(args) != 0:
+#        sys.stderr.write("argument number: {}\n".format(len(args)))
+#        sys.stderr.write("args: {}\n".format(args))
+#)        usage()
 
     minio_path = "minio"
 
@@ -64,15 +65,7 @@ def runminio(pipe = True):
 	"GFARMS3_PARTFILE_DIGEST": "yes",
     }
 
-    gateway = "nas"
-    gateway = "gfarm"
-    if gateway == "nas":
-        GfarmS3_Gfarm_Shared_Dir = "/home/user1/tmp/gfarms3"
-        GfarmS3_Gfarm_Shared_Dir = "/gfarm/hp120273/user1/tmp/gfarms3"
-        GfarmS3_Gfarm_Shared_Virtual_Name = ""
-        cmd = [minio_path, "gateway", gateway, "--address", minioAddress, GfarmS3_Gfarm_Shared_Dir]
-    else:
-        cmd = [minio_path, "gateway", gateway, "--address", minioAddress, GfarmS3_Gfarm_Shared_Dir, GfarmS3_Gfarm_Shared_Virtual_Name]
+    cmd = [minio_path, "gateway", "gfarm", "--address", minioAddress, GfarmS3_Gfarm_Shared_Dir, GfarmS3_Gfarm_Shared_Virtual_Name]
 
     #print("env = {}".format(env))
     #print("cmd = {}".format(cmd))
