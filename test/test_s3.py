@@ -23,6 +23,10 @@ class TestS3(unittest.TestCase):
         self.assertNotEqual(buckets, [])
 
     ## send file && receive file
+    def test_send_recv_1(self):
+        e = up_down_n_cmp_sz(self.s3, 1)
+        self.assertIsNone(e)
+
     def test_send_recv_8(self):
         e = up_down_n_cmp_sz(self.s3, 8)
         self.assertIsNone(e)
