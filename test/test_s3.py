@@ -53,6 +53,11 @@ class TestS3(unittest.TestCase):
         e = list_object(self.s3, prefixed = True)
         self.assertIsNone(e)
 
+    ## list shared object(s)
+    def test_list_shared_object(self):
+        e = list_object(self.s3, shared = True)
+        self.assertIsNone(e)
+
     def setUp(self):
         self.minio_p = runminio()
         while True:
@@ -122,7 +127,7 @@ def send_recv_cmp(s3, sendfile, bucket, key, recvfile):
 
     return None
 
-def list_object(s3, prefixed = False):
+def list_object(s3, prefixed = False, shared = False):
     with tempfile.TemporaryDirectory(dir = ".") as tmpdirname:
         print("temporary directory {}".format(tmpdirname))
 
@@ -144,6 +149,13 @@ def list_object(s3, prefixed = False):
                     if prefixed:
                         key1 = key1[:3] + "/" + key1[3 + 1:]
                         key2 = key2[:3] + "/" + key2[3 + 1:]
+
+                    if shared:
+                        key1 = "sss/peer/" + key1
+                        key2 = "sss/pper/" + key2
+                        gfmkdir("/share/peer/" + key1)
+                        gfmkdir("/share/peer/" + key2)
+                        gfchmod("/share/peer/" + key2, 000)
         
                     d = s3.upload_file(sendfile.name, bucket, key1)
                     if d and e is not None:
@@ -166,6 +178,10 @@ def list_object(s3, prefixed = False):
                     if not p == q:
                         e = "object listing mismatch"
 
+                    if shared:
+                        gfrmdir("/share/peer/" + key1)
+                        gfrmdir("/share/peer/" + key2)
+
                     d = s3.delete_object(bucket, key1)
                     if d and e is not None:
                         e = d
@@ -173,6 +189,15 @@ def list_object(s3, prefixed = False):
                     if d and e is not None:
                         e = d
                     return e
+
+def gfmkdir(path):
+    pass
+
+def gfrmdir(path):
+    pass
+
+def gfchmod(path, perm):
+    pass
 
 def random_s3_name():
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k = 24))
