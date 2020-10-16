@@ -757,13 +757,15 @@ mc_stop() {
 ## @stdout   (empty)  -- success without spawning MinIO || fail
 ##           port:pid -- success, MinIO's PID == pid
 start_server() {
+	local SUCCESS=0
+	local RETRY=1
 
 	local gfarm_shared_dir="$1"
 	for port in $(list_unused_ports "$USER" "$uport"); do
 		try_start_a_server "$gfarm_shared_dir" "$port"
 		case $? in
-		0) return 0;;
-		1) ;;
+		$SUCCESS) return 0;;
+		$RETRY) ;;
 		*) echo "UNKNOWN ERROR" 1>&2; return 1;;
 		esac
 	done
@@ -775,15 +777,23 @@ try_start_a_server() {
 	local gfarm_shared_dir="$1"
 	local port="$2"
 	local address=127.0.0.1:"$port"
-	if ! mymc_init; then return 1; fi
+
+	local SUCCESS=0
+	local RETRY=1
+	local ABORT=2
+
+	if ! mymc_init; then
+### case M: mc_init failed
+		return $ABORT
+	fi
 	if mc_config $address; then
 		## MinIO is already running
 		## success with empty stdout
-		return 0
+		return $SUCCESS
 	fi
 	mymc_finish
-	local tmpfile=$(mktemp $GFARM_S3_TMP/minio-log.XXXXXX) || return 1
-	local pidfile=$(mktemp $GFARM_S3_TMP/minio-pid.XXXXXX) || (rm -f $tmpfile; return 1)
+	local tmpfile=$(mktemp $GFARM_S3_TMP/minio-log.XXXXXX) || return $ABORT
+	local pidfile=$(mktemp $GFARM_S3_TMP/minio-pid.XXXXXX) || (rm -f $tmpfile; return $ABORT)
 	( \
 	 export MINIO_GFARMS3_CACHEDIR=$(mktemp -d $GFARMS3_CACHE_BASEDIR/gfarm-s3-XXXXXXXX) || exit 1; \
 	 export MINIO_GFARMS3_CACHEDIR_SIZE_MB="$GFARMS3_CACHE_SIZE_MB"; \
@@ -806,10 +816,6 @@ try_start_a_server() {
 		sleep 1
 	done
 
-	local SUCCESS=0
-	local RETRY=1
-	local ABORT=2
-
 ### case 0: Minio Launched normally
 ###         Pattern "^Endpoint" is in log
 ###	    try connect using mc
@@ -823,12 +829,14 @@ try_start_a_server() {
 ### case 2: Minio Exited  (another reason)
 ###         Pattern "Minio Exited" is in log
 ###         ABORT minio spawing process
-### case 3: no patterns described above does not appear in log
+### case 3: no expected pattern does not appear in log
 ###         unknown status => kill minil and ABORT spawning process
 
 	if grep -l "^Minio Exited" $tmpfile 1>&2; then
 
 		if ! grep -l "port is already in use" $tmpfile 1>&2; then
+			rm -f $tmpfile
+			rm -f $pidfile
 ###			case 2
 			return $ABORT
 		fi
@@ -844,23 +852,27 @@ try_start_a_server() {
 		rm -f $tmpfile
 		rm -f $pidfile
 ###		case 3
-		return $ABORT	## fatal error (minio still running)
+		return $ABORT	## fatal error (minio may still running)
 	fi
 
 ###	case 0
 
 	rm -f $tmpfile
-	if ! mymc_init; then return 1; fi
+	if ! mymc_init; then
+		rm -f $pidfile
+### case M: mc_init failed
+		return $ABORT
+	fi
 	if ! mc_config $address; then
 		mymc_finish
 		kill -KILL $(< $pidfile)
-		rm $pidfile
+		rm -f $pidfile
 ###		case 0 => case 4
 		return $ABORT	## fatal error (minio still running)
 	fi
 	mymc_finish
 	cat $pidfile
-	rm $pidfile
+	rm -f $pidfile
 ###	case 0 => case 5:
 	return $SUCCESS
 }
