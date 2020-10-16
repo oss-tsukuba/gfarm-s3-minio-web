@@ -31,3 +31,4 @@ distclean:
 	cd minio && $(MAKE) $@
 	cd webui && $(MAKE) $@
 	$(RM) -f makefile
+	$(RM) -f config.log config.status
