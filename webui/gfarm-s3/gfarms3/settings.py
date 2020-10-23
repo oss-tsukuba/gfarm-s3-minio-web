@@ -133,8 +133,8 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.file'
 
 
 LANGUAGES = (
-    ('en-us', _('English')),
-    ('ja-jp', _('Japan')),
+    ('en', _('English')),
+    ('ja', _('Japan')),
 )
 
 #LOCALE_PATHS = (
