@@ -452,6 +452,21 @@ mysudo() {
 	fi
 }
 
+check_nopasswd() {
+	local local_user="$1"
+	echo dummy1 |
+	mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 1>&2
+	if [ $? != 0 ]; then
+		return 1
+	fi
+	echo dummy2 |
+	mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 1>&2
+	if [ $? != 0 ]; then
+		return 1
+	fi
+	return 0
+}
+
 challenge_auth() {
 	local global_username="$1"
 	local user_provided_key="$2"
@@ -478,14 +493,18 @@ challenge_auth() {
 
 	case $GFARMS3_LOGIN_METHOD in
 	*grid-proxy-init*)
-		echo "$user_provided_key" |
-		mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 1>&2
-		if [ $? = 0 ]; then
-			echo SUCCESS $GRID_PROXY_INIT 1>&2
-			echo grid-proxy-init
-			return 0
+		if check_nopasswd "$local_user"; then
+			echo SKIP $GRID_PROXY_INIT 1>&2
 		else
-			echo FAIL $GRID_PROXY_INIT 1>&2
+			echo "$user_provided_key" |
+			mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 1>&2
+			if [ $? = 0 ]; then
+				echo SUCCESS $GRID_PROXY_INIT 1>&2
+				echo grid-proxy-init
+				return 0
+			else
+				echo FAIL $GRID_PROXY_INIT 1>&2
+			fi
 		fi
 		;;
 	esac
