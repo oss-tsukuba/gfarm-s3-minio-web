@@ -1,6 +1,6 @@
 #import random
 #import string
-import sys
+#import sys
 #import tempfile
 #import time
 #import filecmp
@@ -83,12 +83,12 @@ class MyWithClass():
         self.name = name
 
     def __enter__(self):
-        print("enter bucket name = {}".format(self.name))
+        #print("enter bucket name = {}".format(self.name))
         self.s3.s3_client.create_bucket(Bucket = self.name)
         return self
 
     def __exit__(self, type, value, traceback):
-        print("exit bucket name = {}".format(self.name))
+        #print("exit bucket name = {}".format(self.name))
         self.s3.delete_bucket(self.name)
 
 #def random_s3_name():

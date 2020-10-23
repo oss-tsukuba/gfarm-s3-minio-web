@@ -2,11 +2,12 @@ import filecmp
 import os
 import random
 import string
-import subprocess
-import sys
+#import subprocess
+#import sys
 import tempfile
 import time
 import unittest
+import warnings
 from runminio import runminio
 from s3client import Mys3client
 
@@ -18,7 +19,7 @@ class TestS3(unittest.TestCase):
         e = self.s3.create_bucket(bucket)
         self.assertIsNone(e)
         buckets = [e for e in self.s3.list_buckets() if e.get("Name") == bucket]
-        print("buckets: {}".format(buckets))
+        #print("buckets: {}".format(buckets))
         self.s3.delete_bucket(bucket)
         self.assertNotEqual(buckets, [])
 
@@ -59,41 +60,43 @@ class TestS3(unittest.TestCase):
         self.assertIsNone(e)
 
     def setUp(self):
+        warnings.simplefilter("ignore", category = ResourceWarning)
         self.minio_p = runminio()
         while True:
             line = self.minio_p.stdout.readline()
             if not line:
                 return False
             line = line.decode()
-            print("+ {}".format(line.strip('\n')))
+            #print("+ {}".format(line.strip('\n')))
             if line.startswith("Object"):
                 break
-        print("setUp: minio pid = {}".format(self.minio_p))
+        #print("setUp: minio pid = {}".format(self.minio_p))
+        time.sleep(2.5)
         self.s3 = Mys3client()
 
     def tearDown(self):
         del self.s3
         self.minio_p.stdout.close()
-        print("tearDown: kill -TERM {}".format(self.minio_p.pid))
+        #print("tearDown: kill -TERM {}".format(self.minio_p.pid))
         self.minio_p.terminate()
         self.minio_p.wait()
 
 def up_down_n_cmp_sz(s3, size):
-    now = time.time()
-    start = now
+    #now = time.time()
+    #start = now
 
     with tempfile.TemporaryDirectory(dir = ".") as tmpdirname:
-        print("temporary directory {}".format(tmpdirname))
+        #print("temporary directory {}".format(tmpdirname))
 
         bucket = random_s3_name()
         with s3.withBucket(bucket) as b:
-            print("bucket name {}".format(b.name)) ## b.name == bucket
+            #print("bucket name {}".format(b.name)) ## b.name == bucket
     
             with tempfile.NamedTemporaryFile(dir = tmpdirname) as sendfile:
-                print("created temporary file: {}".format(sendfile.name))
+                #print("created temporary file: {}".format(sendfile.name))
         
                 with tempfile.NamedTemporaryFile(dir = tmpdirname) as recvfile:
-                    print("created temporary file: {}".format(recvfile.name))
+                    #print("created temporary file: {}".format(recvfile.name))
         
                     e = createFileM(sendfile.name, size, force = True)
                     if e:
@@ -106,8 +109,8 @@ def up_down_n_cmp_sz(s3, size):
                     d = s3.delete_object(bucket, key)
                     if d and e is not None:
                         e = d
-                    now = time.time()
-                    print("@@@ {} ({})".format(myformat(now), now - start))
+                    #now = time.time()
+                    #print("@@@ {} ({})".format(myformat(now), now - start))
                     return e
 
 def send_recv_cmp(s3, sendfile, bucket, key, recvfile):
@@ -129,14 +132,14 @@ def send_recv_cmp(s3, sendfile, bucket, key, recvfile):
 
 def list_object(s3, prefixed = False, shared = False):
     with tempfile.TemporaryDirectory(dir = ".") as tmpdirname:
-        print("temporary directory {}".format(tmpdirname))
+        #print("temporary directory {}".format(tmpdirname))
 
         bucket = random_s3_name()
         with s3.withBucket(bucket) as b:
-            print("bucket name {}".format(b.name)) ## b.name == bucket
+            #print("bucket name {}".format(b.name)) ## b.name == bucket
     
             with tempfile.NamedTemporaryFile(dir = tmpdirname) as sendfile:
-                print("created temporary file: {}".format(sendfile.name))
+                #print("created temporary file: {}".format(sendfile.name))
         
                 with open(sendfile.name, "wb") as f:
                     e = None
@@ -166,15 +169,15 @@ def list_object(s3, prefixed = False, shared = False):
 
                     o = s3.list_objects(bucket)
 
-                    print("{}".format(o))
+                    #print("{}".format(o))
 
                     p = [e.get("Key", None) for e in o]
                     q = [key1, key2]
                     p.sort()
                     q.sort()
 
-                    print("{}".format(p))
-                    print("{}".format(q))
+                    #print("{}".format(p))
+                    #print("{}".format(q))
                     if not p == q:
                         e = "object listing mismatch"
 
@@ -205,7 +208,7 @@ def random_s3_name():
 def createFileM(path, sz, force = False):
     if not force and os.path.isfile(path):
         return "file exists {}".format(path)
-    print("createFileM({}, {})".format(path, sz))
+    #print("createFileM({}, {})".format(path, sz))
     with open(path, "wb") as f:
        for m in range(sz):
            f.write(os.urandom(1 * 1024 * 1024))
@@ -218,6 +221,7 @@ def myformat(t):
 
 def main():
     unittest.main()
+    #unittest.main(warnings = "ignore")
 
 if __name__ == "__main__":
     main()

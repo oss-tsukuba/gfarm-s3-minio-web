@@ -1,6 +1,6 @@
 import getopt
 import os
-import pwd
+#import pwd
 from subprocess import Popen, PIPE, DEVNULL
 import sys
 
