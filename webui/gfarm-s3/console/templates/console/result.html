@@ -107,7 +107,7 @@
 
 {% if authenticated_method == "myproxy-logon" %}{% trans 'myproxyLogon' %}{% endif %}
 {% if authenticated_method == "grid-proxy-init" %}{% trans 'gridProxyInit' %}{% endif %}
-{% if sharedSecret == "gfkey" %}{% trans 'gfkey' %}{% endif %}
+{% if authenticated_method == "gfkey" %}{% trans 'gfkey' %}{% endif %}
 
 </div ")"
 
