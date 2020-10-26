@@ -49,7 +49,6 @@ def login(request):
             remote_addr = http_x_forwarded_for 
         else:
             remote_addr = request.META.get("REMOTE_ADDR", None)
-        logger.debug("@@@ remote_addr = {}".format(remote_addr))
         ### challenge authenticateion
         cmd_result = cmd.cmd("info", username, passwd, remote_addr = remote_addr)
         if cmd_result is None or cmd_result["status"] != "success":
@@ -95,11 +94,12 @@ def chgkey(request):
     return HttpResponseRedirect(reverse("result"))
 
 def result(request):
+    lang = request.LANGUAGE_CODE
     if need_login(request.session):
         return HttpResponseRedirect(reverse("login"))
     username = request.session["global_username"]
     authenticated = request.session["authenticated_method"]
-    cmd_result = cmd.cmd("info", username, "", authenticated = authenticated)
+    cmd_result = cmd.cmd("info", username, "", authenticated = authenticated, lang = lang)
     s3sstatus = "s3server_status" in cmd_result and cmd_result["s3server_status"].startswith("200")
     render_dict = cmd_result
     render_dict["s3sstatus"] = s3sstatus
@@ -148,6 +148,7 @@ def etoent(e, p):
     return p[e] + ":" + perm
 
 def aclfile(request):
+    lang = request.LANGUAGE_CODE
     cmd_status = False
     if need_login(request.session):
         return HttpResponseRedirect(reverse("login"))
@@ -183,7 +184,7 @@ def aclfile(request):
                    "acl_original_string": "\n".join(bucket_acl),
                    "showLogoutButton": True,
                    "cmd_status": cmd_status,
-                   "date": time.ctime(time.time()),
+                   "date": cmd.myctime(time.time(), lang),
                    "username": username}
     return render(request, "console/aclfile.html", render_dict)
 

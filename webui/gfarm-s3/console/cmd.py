@@ -1,9 +1,13 @@
 import json
+import locale
 import logging
 import os
 from subprocess import Popen, PIPE
 import time
+import threading
 import urllib.parse
+
+from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -25,7 +29,7 @@ def gfarm_s3_login(action, username, passwd, stdin = None, authenticated = None,
     gfarm_s3_login_bin = os.path.join(GFARM_S3_BIN, "gfarm-s3-login")
     return Popen([gfarm_s3_login_bin] + args, stdin = stdin, stdout = PIPE, stderr = PIPE, env = {})
 
-def cmd(action, username, passwd, authenticated = None, remote_addr = None):
+def cmd(action, username, passwd, authenticated = None, remote_addr = None, lang = None):
     try:
         p = gfarm_s3_login(action, username, passwd, authenticated = authenticated, remote_addr = remote_addr)
     except:
@@ -42,7 +46,7 @@ def cmd(action, username, passwd, authenticated = None, remote_addr = None):
         return {"status": "ERROR 3", "reason": stderr.decode()}
     result = json.loads(stdout.decode().strip())
     if "expiration_date" in result.keys():
-        result["expiration_date_calendar_datetime"] = time.ctime(result["expiration_date"])
+        result["expiration_date_calendar_datetime"] = myctime(result["expiration_date"], lang)
     return result
 
 def get_bucket_list(username):
@@ -156,3 +160,23 @@ def pretty_name(s):
     uu = ss[1].split('[')
     t = urllib.parse.unquote(uu[0]) + "(" + ss[0] + ")"
     return t
+
+LOCALE_LOCK = threading.Lock()
+
+@contextmanager
+def setlocale(name):
+    with LOCALE_LOCK:
+        saved = locale.setlocale(locale.LC_ALL)
+        try:
+            yield locale.setlocale(locale.LC_ALL, name)
+        finally:
+            locale.setlocale(locale.LC_ALL, saved)
+
+def myctime(sec, lang):
+    lt = time.localtime(sec)
+    if lang == "ja":
+        with setlocale("ja_JP.UTF-8"):
+            return time.strftime("%Y年 %b %-d日  (%a) %H:%M:%S +%Z", lt)
+    else:
+        with setlocale("en_US.UTF-8"):
+            return time.strftime("%a, %d %b %Y %H:%M:%S +%Z", lt)
