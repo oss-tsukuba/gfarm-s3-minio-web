@@ -215,7 +215,7 @@ configtest_global_username_test() {
 }
 
 check_global_username() {
-	echo "checking global_username: $1" 1>&2
+	#echo "checking global_username: $1" 1>&2
 	if [ -z "$1" ]; then
 		## empty string
 		return 1
@@ -224,7 +224,7 @@ check_global_username() {
 }
 
 check_local_username() {
-	echo "checking local_username: $1" 1>&2
+	#echo "checking local_username: $1" 1>&2
 	if [ -z "$1" ]; then
 		## empty string
 		return 1
@@ -233,7 +233,7 @@ check_local_username() {
 }
 
 check_access_key() {
-	echo "checking access_key: $1" 1>&2
+	#echo "checking access_key: $1" 1>&2
 	if ! echo "$1" | grep -q '^[a-zA-Z0-9_]*$'; then
 		echo "invalid char in access_key. (a-zA-Z0-9_)" 1>&2
 		return 1
@@ -295,7 +295,7 @@ configtest_access_key_test() {
 		status=1
 	fi
 	for access_key in $(grep -v '^#' "$1"|get_access_key_stream); do
-		echo "checking access_key: $access_key" 1>&2
+		#echo "checking access_key: $access_key" 1>&2
 		if ! check_access_key "$access_key"; then
 			status=1
 		fi
@@ -321,7 +321,7 @@ configtest_all() {
 	local status=0
 
 	echo configtest_all: 1>&2
-	sed 's/^/> /' "$1" 1>&2
+	#sed 's/^/> /' "$1" 1>&2
 
 	if ! configtest_format_test "$1"; then return 1; fi
 	# when format_test fails, the following tests will not be performed
