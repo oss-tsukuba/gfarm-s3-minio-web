@@ -189,8 +189,8 @@ etc/gunicorn.service
 etc/makefile
 etc/sudoers
 minio/makefile
-webui/makefile
-webui/rungunicorn
-webui/runserver
+web/makefile
+web/rungunicorn
+web/runserver
 ])
 AC_OUTPUT

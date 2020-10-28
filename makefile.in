@@ -11,24 +11,24 @@ RM=rm
 all:
 	cd etc && $(MAKE)
 	cd minio && $(MAKE) install-go && $(MAKE)
-	cd webui && $(MAKE)
+	cd web && $(MAKE)
 
 install:
 	cd etc && $(MAKE) $@
 	cd bin && $(MAKE) $@
 	cd minio && $(MAKE) $@
-	cd webui && $(MAKE) $@
+	cd web && $(MAKE) $@
 
 clean:
 	cd etc && $(MAKE) $@
 	cd bin && $(MAKE) $@
 	cd minio && $(MAKE) $@
-	cd webui && $(MAKE) $@
+	cd web && $(MAKE) $@
 
 distclean:
 	cd etc && $(MAKE) $@
 	cd bin && $(MAKE) $@
 	cd minio && $(MAKE) $@
-	cd webui && $(MAKE) $@
+	cd web && $(MAKE) $@
 	$(RM) -f makefile
 	$(RM) -f config.log config.status
