@@ -12512,7 +12512,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gunicorn.service etc/makefile etc/sudoers minio/makefile webui/makefile webui/rungunicorn webui/runserver"
+ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gunicorn.service etc/makefile etc/sudoers minio/makefile web/makefile web/rungunicorn web/runserver"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -13554,9 +13554,9 @@ do
     "etc/makefile") CONFIG_FILES="$CONFIG_FILES etc/makefile" ;;
     "etc/sudoers") CONFIG_FILES="$CONFIG_FILES etc/sudoers" ;;
     "minio/makefile") CONFIG_FILES="$CONFIG_FILES minio/makefile" ;;
-    "webui/makefile") CONFIG_FILES="$CONFIG_FILES webui/makefile" ;;
-    "webui/rungunicorn") CONFIG_FILES="$CONFIG_FILES webui/rungunicorn" ;;
-    "webui/runserver") CONFIG_FILES="$CONFIG_FILES webui/runserver" ;;
+    "web/makefile") CONFIG_FILES="$CONFIG_FILES web/makefile" ;;
+    "web/rungunicorn") CONFIG_FILES="$CONFIG_FILES web/rungunicorn" ;;
+    "web/runserver") CONFIG_FILES="$CONFIG_FILES web/runserver" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
