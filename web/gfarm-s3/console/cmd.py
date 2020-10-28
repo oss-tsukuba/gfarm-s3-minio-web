@@ -6,6 +6,7 @@ from subprocess import Popen, PIPE
 import time
 import threading
 import urllib.parse
+from django.utils.translation import gettext as _
 
 from contextlib import contextmanager
 
@@ -174,9 +175,12 @@ def setlocale(name):
 
 def myctime(sec, lang):
     lt = time.localtime(sec)
-    if lang == "ja":
-        with setlocale("ja_JP.UTF-8"):
-            return time.strftime("%Y年 %b %-d日  (%a) %H:%M:%S +%Z", lt)
-    else:
-        with setlocale("en_US.UTF-8"):
-            return time.strftime("%a, %d %b %Y %H:%M:%S +%Z", lt)
+    format = _('ctime_format')
+    return time.strftime(format, lt)
+
+#    if lang == "ja":
+#        with setlocale("ja_JP.UTF-8"):
+#            return time.strftime("%Y年 %b %-d日  (%a) %H:%M:%S +%Z", lt)
+#    else:
+#        with setlocale("en_US.UTF-8"):
+#            return time.strftime("%a, %d %b %Y %H:%M:%S +%Z", lt)

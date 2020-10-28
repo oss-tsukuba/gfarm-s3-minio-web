@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-23 17:14+0900\n"
+"POT-Creation-Date: 2020-10-28 14:17+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +16,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+#: cmd.py:178
+msgid "ctime_format"
+msgstr "%Y年 %b %-d日  (%a) %H:%M:%S %Z"
 
 #: templates/console/aclfile.html:15
 msgid "updated"
@@ -38,14 +41,9 @@ msgstr "ホーム"
 msgid "bucketList"
 msgstr "共有設定"
 
-#: templates/console/base.html:47 templates/console/base.html:71
+#: templates/console/base.html:47 templates/console/base.html:63
+#: templates/console/base.html:71
 msgid "Logout"
-msgstr "ログアウト"
-
-#: templates/console/base.html:63
-#, fuzzy
-#| msgid "Logout"
-msgid "logout"
 msgstr "ログアウト"
 
 #: templates/console/login.html:7
@@ -56,7 +54,7 @@ msgstr "エラー"
 msgid "plsreauth"
 msgstr "再度パスワードを入力してください"
 
-#: templates/console/login.html:14 templates/console/result.html:10
+#: templates/console/login.html:14
 msgid "globalUsername"
 msgstr "ユーザ名"
 
@@ -70,9 +68,7 @@ msgstr "パスワード"
 
 #: templates/console/login.html:33
 msgid "passwordInstruction"
-msgstr ""
-"GSI (myproxy-login, grid-proxy-init) のパスフレーズ、またはGfarm共有鍵のハッ"
-"シュ値"
+msgstr "ユーザ証明書のパスフレーズまたはGfarm共有鍵のハッシュ値"
 
 #: templates/console/login.html:35
 msgid "PasswordPlaceholder"
@@ -82,43 +78,43 @@ msgstr "パスワード"
 msgid "GoButton"
 msgstr "ログイン"
 
-#: templates/console/result.html:13
-msgid "s3serverStatus"
-msgstr "現在の状態"
+#: templates/console/result.html:8
+msgid "status"
+msgstr ""
 
-#: templates/console/result.html:14
+#: templates/console/result.html:11
 msgid "running"
 msgstr "起動中"
 
-#: templates/console/result.html:14
+#: templates/console/result.html:11
 msgid "stopped"
 msgstr "停止中"
 
-#: templates/console/result.html:24
+#: templates/console/result.html:21
 msgid "StartGfarmS3"
 msgstr "起動"
 
-#: templates/console/result.html:33
+#: templates/console/result.html:30
 msgid "StopGfarmS3"
 msgstr "停止"
 
-#: templates/console/result.html:48
+#: templates/console/result.html:40
 msgid "accessKey"
 msgstr "アクセスキー"
 
-#: templates/console/result.html:55
+#: templates/console/result.html:52
 msgid "secretKey"
 msgstr "シークレットキー"
 
-#: templates/console/result.html:69
+#: templates/console/result.html:76
 msgid "viewSecretKey"
 msgstr "表示"
 
-#: templates/console/result.html:81
+#: templates/console/result.html:88
 msgid "stops3tochangesecretkey"
 msgstr "シークレットキーを変更するにはGfarm-S3を停止してください"
 
-#: templates/console/result.html:88
+#: templates/console/result.html:95
 msgid "chgKey"
 msgstr "変更"
 
@@ -126,15 +122,15 @@ msgstr "変更"
 msgid "authenticationMethod"
 msgstr "認証方式"
 
-#: templates/console/result.html:108
+#: templates/console/result.html:109
 msgid "myproxyLogon"
 msgstr "GSI (myproxy)"
 
-#: templates/console/result.html:109
+#: templates/console/result.html:110
 msgid "gridProxyInit"
 msgstr "GSI (grid-proxy-init)"
 
-#: templates/console/result.html:110
+#: templates/console/result.html:111
 msgid "gfkey"
 msgstr "Gfarm共有鍵"
 
@@ -142,12 +138,6 @@ msgstr "Gfarm共有鍵"
 msgid "expirationDate"
 msgstr "有効期限"
 
-#: templates/console/result.html:128
+#: templates/console/result.html:129
 msgid "updateCertificate"
-msgstr "延長"
-
-#~ msgid "AdvancedOptions"
-#~ msgstr "オプション"
-
-#~ msgid "ShowCurrentStatus"
-#~ msgstr "現在の状態"
+msgstr "更新"

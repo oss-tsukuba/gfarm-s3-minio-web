@@ -1,20 +1,17 @@
 {% extends "console/base.html" %}
 {% load i18n %}
 {% block content1 %}
-<!-- ( -->
-<!--h4>Current Status</h4
 
--->
+<table "[" class="table-striped border-0"
+><tr "("
+><td "("
+>{% trans 'status' %}</td ")"
+><td "("
+<div "(" class="{% if s3sstatus %} alert alert-success{% else %} alert alert-danger{% endif %} border-0"
+>{% if s3sstatus %}{% trans 'running' %}{% else %}{% trans 'stopped' %}{% endif %}</div ")"
 
-<!--div "(" class="form-control border-0"
->{% trans 'globalUsername' %}&nbsp;&nbsp;{{ global_username }}</div ")"
-
---><div "(" class="form-control{% if s3sstatus %} alert alert-success{% else %} alert alert-danger{% endif %} border-0"
-><!-- {% trans 's3serverStatus' %}&nbsp;&nbsp;
--->{% if s3sstatus %}{% trans 'running' %}{% else %}{% trans 'stopped' %}{% endif %}</div ")"
-
-><div "(" class="row"
-><div "(" class="col-sm-4"
+></td ")"
+><td "("
 
 >{% if not s3sstatus %}<form action="{% url 'starts3' %}"
 	method="post"
@@ -34,32 +31,42 @@
 ></div ")"
 >{% endif %}</form
 
-></div ")"
+></td ")"
 
-><div "(" class="col-sm-4"
-></div ")"
+></tr ")"
 
-></div ")"
-
-
-><!--    
-{{ s3server_status }}
---><div "(" class="form-control d-flex border-0"
->{% trans 'accessKey' %}&nbsp;&nbsp;<input onClick="this.select();"
+><tr "("
+><td "("
+>{% trans 'accessKey' %}</td ")"
+><td "("
+><input onClick="this.select();"
 	value="{{ access_key }}"
 	class="border-0 flex-grow-1"
-/></div ")"
+
+></td ")"
+></tr ")"
+
+><tr "("
+><td "("
+
+>{% trans 'secretKey' %}</td ")"
+
+><td "("
 
 
+
+><div "(" class="collapse" id="collapseSecretKey"
 ><div "(" class="form-control d-flex border-0"
->{% trans 'secretKey' %}&nbsp;&nbsp;<!--input onClick="this.select();"
+><input onClick="this.select();"
 	value="{{ secret_key }}"
 	class="border-0 flex-grow-1"
-/--></div ")"
+/></div ")"
+></div ")"
+
+></td ")"
 
 
-><div "(" class="row"
-><div "(" class="col-sm-4"
+><td "("
 ><a class="btn btn-outline-primary"
 	data-toggle="collapse"
 	href="#collapseSecretKey"
@@ -68,8 +75,8 @@
 	aria-controls="collapseSecretKey"
 >{% trans 'viewSecretKey' %}</a
 
-></div ")"
-><div "(" class="col-sm-8"
+></td ")"
+><td "("
 
 ><form action="{% url 'chgkey' %}"
 	method="post"
@@ -90,37 +97,31 @@
 ></div ")"
 ></form
 
-></div ")"
-></div ")"
+></td ")"
+></tr ")"
 
 
-><div "(" class="collapse" id="collapseSecretKey"
-><div "(" class="form-control d-flex border-0"
-><input onClick="this.select();"
-	value="{{ secret_key }}"
-	class="border-0 flex-grow-1"
-/></div ")"
-></div ")"
+><tr "("
+><td "("
+>{% trans 'authenticationMethod' %}</td ")"
+><td "("
 
-><div "(" class="form-control border-0"
->{% trans 'authenticationMethod' %}&nbsp;&nbsp;
-
-{% if authenticated_method == "myproxy-logon" %}{% trans 'myproxyLogon' %}{% endif %}
+>{% if authenticated_method == "myproxy-logon" %}{% trans 'myproxyLogon' %}{% endif %}
 {% if authenticated_method == "grid-proxy-init" %}{% trans 'gridProxyInit' %}{% endif %}
 {% if authenticated_method == "gfkey" %}{% trans 'gfkey' %}{% endif %}
+</td ")"
+></tr ")"
 
-</div ")"
+><tr "("
+><td "("
+>{% trans 'expirationDate' %}</td ")"
+><td "("
+>{{ expiration_date_calendar_datetime }}</td ")"
 
-><div "(" class="row"
-><div "(" class="col-sm-8"
-><div "(" class="border-0"
->{% trans 'expirationDate' %}&nbsp;&nbsp;{{ expiration_date_calendar_datetime }}</div ")"
 
-></div ")"
+><td "("
 
-><div "(" class="col-sm-4"
-
-><form action="{% url 'reauth' %}"
+>{% if authenticated_method != "gfkey" %}<form action="{% url 'reauth' %}"
 	method="post"
 >{% csrf_token %}<div "(" class="form-group"
 ><button type="submit"
@@ -129,10 +130,9 @@
 ></div ")"
 ></form
 
+>{% endif %}</td ")"
+></tr ")"
 
-></div ")"
-></div ")"
+></table "]"
 
-
-><!-- ) -->
 {% endblock %}
