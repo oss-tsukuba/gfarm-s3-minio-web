@@ -1,0 +1,42 @@
+{% extends "console/base.html" %}
+{% load i18n %}
+{% block content1 %}
+
+<table "[" class="table-responsive table-striped border-0"
+
+><tr "("
+><td class="align-middle pl-2 pr-2" "("
+><a class="link" href="{% url 'result' %}">{% trans 'Home' %}</a
+><td class="align-middle pl-2 pr-2" "("
+>&nbsp;</td ")"
+/></td ")"
+></tr ")"
+
+><tr "("
+><td class="align-middle pl-2 pr-2" "("
+>{% trans 'accessKey' %}</td ")"
+><td class="align-middle pl-2 pr-2" "("
+><input onClick="this.select();"
+	value="{{ access_key }}"
+	class="border-0 flex-grow-1"
+
+/></td ")"
+></tr ")"
+
+><tr "("
+><td class="align-middle pl-2 pr-2" "("
+>{% trans 'secretKey' %}</td ")"
+><td class="align-middle pl-2 pr-2" "("
+><input onClick="this.select();"
+	value="{{ secret_key }}"
+	class="border-0 flex-grow-1"
+/></td ")"
+
+
+></tr ")"
+
+
+></table "]"
+
+
+{% endblock %}
