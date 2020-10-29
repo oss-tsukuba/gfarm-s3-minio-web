@@ -2,61 +2,52 @@
 {% load i18n %}
 {% block content1 %}
 
-<table "[" class="table-striped border-0"
+<table "[" class="table-responsive table-striped border-0"
 ><tr "("
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 >{% trans 'status' %}</td ")"
-><td "("
+><td  "("
 <div "(" class="{% if s3sstatus %} alert alert-success{% else %} alert alert-danger{% endif %} border-0"
 >{% if s3sstatus %}{% trans 'running' %}{% else %}{% trans 'stopped' %}{% endif %}</div ")"
 
 ></td ")"
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 
->{% if not s3sstatus %}<form action="{% url 'starts3' %}"
+><form action="{% if not s3sstatus %}{% url 'starts3' %}{% else %}{% url 'stops3' %}{% endif %}"
 	method="post"
->{% csrf_token %}<div "(" class="form-group"
+>{% csrf_token %}<div "(" class="form-group pt-2"
 ><button type="submit"
-	class="btn btn-outline-primary"
-	value="Launch">{% trans 'StartGfarmS3' %}</button
+	class="btn btn-outline-primary h-75"
+	value="Launch">{% if not s3sstatus %}{% trans 'StartGfarmS3' %}{% else %}{% trans 'StopGfarmS3' %}{% endif %}</button
 ></div ")"
 ></form
-
->{% else %}<form action="{% url 'stops3' %}"
-	method="post"
->{% csrf_token %}<div "(" class="form-group"
-><button type="submit"
-	class="btn btn-outline-primary"
-	value="Launch">{% trans 'StopGfarmS3' %}</button
-></div ")"
->{% endif %}</form
 
 ></td ")"
 
 ></tr ")"
 
 ><tr "("
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 >{% trans 'accessKey' %}</td ")"
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 ><input onClick="this.select();"
 	value="{{ access_key }}"
 	class="border-0 flex-grow-1"
 
-></td ")"
+/></td ")"
 ></tr ")"
 
 ><tr "("
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 
 >{% trans 'secretKey' %}</td ")"
 
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 
 
 
 ><div "(" class="collapse" id="collapseSecretKey"
-><div "(" class="form-control d-flex border-0"
+><div "(" class="form-control border-0"
 ><input onClick="this.select();"
 	value="{{ secret_key }}"
 	class="border-0 flex-grow-1"
@@ -66,8 +57,9 @@
 ></td ")"
 
 
-><td "("
-><a class="btn btn-outline-primary"
+><td class="align-middle pl-2 pr-2" "("
+><div class="btn-group pt-2" "["
+><a class="btn btn-outline-primary h-75"
 	data-toggle="collapse"
 	href="#collapseSecretKey"
 	role="button"
@@ -75,10 +67,9 @@
 	aria-controls="collapseSecretKey"
 >{% trans 'viewSecretKey' %}</a
 
-></td ")"
-><td "("
-
-><form action="{% url 'chgkey' %}"
+><!--/td ")"
+><td class="align-middle pl-2 pr-2" "("
+--><form action="{% url 'chgkey' %}"
 	method="post"
 >{% csrf_token %}<div "(" class="form-group"
 ><div "(" class="button-wrapper" 
@@ -89,7 +80,7 @@
 {% endif %}
 
 ><button type="submit"
-	class="btn btn-outline-primary"
+	class="btn btn-outline-primary h-75"
 	value="Launch"
 	{% if s3sstatus %}disabled{% endif %}
 >{% trans 'chgKey' %}</button
@@ -97,14 +88,14 @@
 ></div ")"
 ></form
 
-></td ")"
+></div "]"></td ")"
 ></tr ")"
 
 
 ><tr "("
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 >{% trans 'authenticationMethod' %}</td ")"
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 
 >{% if authenticated_method == "myproxy-logon" %}{% trans 'myproxyLogon' %}{% endif %}
 {% if authenticated_method == "grid-proxy-init" %}{% trans 'gridProxyInit' %}{% endif %}
@@ -113,19 +104,19 @@
 ></tr ")"
 
 ><tr "("
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 >{% trans 'expirationDate' %}</td ")"
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 >{{ expiration_date_calendar_datetime }}</td ")"
 
 
-><td "("
+><td class="align-middle pl-2 pr-2" "("
 
 >{% if authenticated_method != "gfkey" %}<form action="{% url 'reauth' %}"
 	method="post"
->{% csrf_token %}<div "(" class="form-group"
+>{% csrf_token %}<div "(" class="form-group pt-2"
 ><button type="submit"
-	class="btn btn-outline-primary"
+	class="btn btn-outline-primary h-75"
 	value="Launch">{% trans 'updateCertificate' %}</button
 ></div ")"
 ></form

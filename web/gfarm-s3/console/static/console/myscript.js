@@ -8,25 +8,29 @@ $(function() {
 		$("#sl_" + seq).select2({data: data_groups_and_users});
 		$('#msg').empty();
 		$('#apl').prop('disabled', false);
-		window.onbeforeunload = function() { return '!'; };
+		//window.onbeforeunload = function() { return '!'; };
 		seq += 1;
 	}
 
 	$("#add_entry").on("click", f_add_entry);
 
-//	window.onbeforeunload = function() { return '!'; };
+//	window.onbeforeunload = function() { if ($('#msg') != "") { return '!'; } };
 
 	function new_entry(id, select_id, select_name, opt_name, checked_perm, is_del_button, seq) {
-		return ("<div class=\"row\" id=\"" + id + "\">" +
+		return ("<tr id=\"" + id + "\">" +
+			"<td>" +
 			del_button(id, is_del_button) +
-		'<select class="select2_users col-6" id="' + select_id + '" name="' + select_name + '" theme="classic"></select>' +
-			"&nbsp;" +
+			"</td>" +
+			"<td>" +
+			'<select class="select2_users col-10" id="' + select_id + '" name="' + select_name + '" theme="classic"></select>' +
+			"</td>" +
+			"<td class=\"width: 40px align-middle pl-2 pr-2\">" +
 			slider_round(f_button("r", opt_name, "RO", checked_perm == "r-x", seq)) +
-			"&nbsp;" +
+			"</td>" +
+			"<td class=\"width: 40px align-middle pl-2 pr-2\">" +
 			slider_round(f_button("w", opt_name, "RW", checked_perm == "rwx", seq)) +
-			"<div class=\"col-2 btn-group\">" +
-			"</div>" +
-			"</div>");
+			"</td>" +
+			"</tr>");
 	}
 
 	function slider_round(s) {

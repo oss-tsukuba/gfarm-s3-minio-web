@@ -34,16 +34,16 @@ def cmd(action, username, passwd, authenticated = None, remote_addr = None, lang
     try:
         p = gfarm_s3_login(action, username, passwd, authenticated = authenticated, remote_addr = remote_addr)
     except:
-        logger.debug("ERROR 1")
+        #logger.debug("ERROR 1")
         return {"status": "ERROR 1", "reason": "Popen failed"}
     try:
         stdout, stderr = p.communicate()
         ret = p.wait()
     except:
-        logger.debug("ERROR 2 --- RETCODE = {} STDERR = None".format(p.returncode))
+        #logger.debug("ERROR 2 --- RETCODE = {} STDERR = None".format(p.returncode))
         return {"status": "ERROR 2", "reason": "retcode = {}".format(p.returncode)}
     if ret != 0:
-        logger.debug("ERROR 3 --- RETVAL = {} --- STDERR = {}".format(ret, stderr.decode()))
+        #logger.debug("ERROR 3 --- RETVAL = {} --- STDERR = {}".format(ret, stderr.decode()))
         return {"status": "ERROR 3", "reason": stderr.decode()}
     result = json.loads(stdout.decode().strip())
     if "expiration_date" in result.keys():
@@ -60,7 +60,7 @@ def get_bucket_acl(username, bucket):
     p = gfarm_s3_login("gfgetfacl", username, "", authenticated = "unspecified", bucket = bucket)
     stdout, stderr = p.communicate()
     p.wait()
-    logger.debug("GET_BUCKET_ACL: [{}]".format(stdout.decode() + "\n"))
+    #logger.debug("GET_BUCKET_ACL: [{}]".format(stdout.decode() + "\n"))
     return split_lines(stdout.decode())
 
 def need_default(s):
@@ -87,12 +87,12 @@ def fix_acl_1(acl):
 
 def fix_acl_2(acl):
     #acl = [e for e in acl if not is_debug_entry(e)]
-    logger.debug("acl: {}".format(acl))
+    #logger.debug("acl: {}".format(acl))
     oth = [e for e in acl if e.startswith("gfarms3webui:OTHER:")][0]
     grp = [e for e in acl if e.startswith("gfarms3webui:GROUP:")][0]
     acl = [e for e in acl if not e.startswith("gfarms3webui:")]
-    logger.debug("acl: {}".format(acl))
-    logger.debug("oth: {}".format(oth))
+    #logger.debug("acl: {}".format(acl))
+    #logger.debug("oth: {}".format(oth))
     default = ["default:" + e for e in acl if need_default(e)]
     acl = acl + grp_to_aclentry(grp)
     acl = acl + oth_to_aclentry(oth)
@@ -116,11 +116,11 @@ def go_aclentry(object, perm):
         return [object + "::---", "default:" + object + "::---"]
 
 def set_bucket_acl(username, bucket, acl_1, acl_2):
-    logger.debug("bucket: {}".format(bucket))
-    logger.debug("acl_1: {}".format(acl_1))
-    logger.debug("acl_2: {}".format(acl_2))
+    #logger.debug("bucket: {}".format(bucket))
+    #logger.debug("acl_1: {}".format(acl_1))
+    #logger.debug("acl_2: {}".format(acl_2))
     acl = "\n".join(fix_acl_1(acl_1) + fix_acl_2(acl_2)) + "\n"
-    logger.debug("acl_fixed: {}".format(acl))
+    #logger.debug("acl_fixed: {}".format(acl))
     p = gfarm_s3_login("gfsetfacl", username, "", authenticated = "unspecified", bucket = bucket, stdin = PIPE)
     stdout, stderr = p.communicate(input = acl.encode())
 ### ignore error for now
@@ -176,11 +176,9 @@ def setlocale(name):
 def myctime(sec, lang):
     lt = time.localtime(sec)
     format = _('ctime_format')
-    return time.strftime(format, lt)
-
-#    if lang == "ja":
-#        with setlocale("ja_JP.UTF-8"):
-#            return time.strftime("%Y年 %b %-d日  (%a) %H:%M:%S +%Z", lt)
-#    else:
-#        with setlocale("en_US.UTF-8"):
-#            return time.strftime("%a, %d %b %Y %H:%M:%S +%Z", lt)
+    if lang == "ja":
+        l = "ja_JP.UTF-8"
+    else:
+        l = "en_US.UTF-8"
+    with setlocale(l):
+       return time.strftime(format, lt)

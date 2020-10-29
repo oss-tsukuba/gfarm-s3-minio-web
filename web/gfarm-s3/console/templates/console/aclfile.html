@@ -1,97 +1,83 @@
 {% extends "console/base.html" %}
 {% load i18n %}
 {% block content1 %}
-<!-- ( -->
+<!-- ( 
+-->
 
-<div "(" class="row"
+<div "("
 ><div "(" class="col-md-12 h3"
 >{{ bucket }}</div ")"
 ></div ")"
 
-><div "(" class="row"
-><div "(" class="alert alert-light" role="alert">{{ date }}</div ")"
+><div "("
+><td "("
+></td ")"
+><td "("
+><div "("
+>owner: {{ bucket_owner }} group: {{ bucket_group }} {{ date }}</div ")"
 ><span id="msg"
 >{% if cmd_status %}
 <div "(" class="alert alert-success" role="alert">{% trans 'updated' %}</div ")"
 >{% endif %}</span
+><div></div></td ")"
 ></div ")"
+
 
 ><form "(" action="{% url 'aclfile' %}?bucket={{ bucket }}"
 	method="post"
->{% csrf_token %}<div "(" class="row"
+>{% csrf_token %}<table "[" class="table-responsive table-striped border-0"
+
+<th "("
+><td "(" style="width: 50px"
 ><button type="button" class="btn btn-link btn-sm text-secondary disabled">&nbsp;</button
-><div "(" class="col-6">user/group</div ")"
-><div "(" class=col-2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;read&nbsp;&nbsp;&nbsp;</div ")"
-><div "(" class=col-2">&nbsp;&nbsp;&nbsp;write</div ")"
-></div ")">
+></td ")"
+><td "(" style="width: 300px"
+><div "(" class="col-10">user/group</div ")"
+></td ")"
+><td "(" style="width: 40px align-middle pl-2 pr-2"
+><div "(" class="">read</div ")"
+></td ")"
+><td "(" style="width: 40px align-middle pl-2 pr-2"
+><div "(" class="">write</div ")"
+></td ")"
+></th ")">
 
 {% for e in acl_modifiable_entries %}{{ e.entry|safe }}{% endfor %}
 
-<!--div "( 77777" class="row" id="li_77777"
-><div "(" class="col-2"
-><button type="button"
-	class="btn btn-link btn-sm"
-	onClick="$('#li_77777').remove();"
->
-
-<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-  <path fill-rule="evenodd" d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-</svg>
-
-</button
-></div ")"
-><div "(" class="col-4"
-><input type="hidden"
-	name="sel:77777"
-	value="group:77777"
-/>group:77777</div ")"
-><div "(" class="col-4 btn-group" role="group" aria-label="Basic example"
-><div "(" 
-><label class="switch"
-><input type="checkbox" class="default"
-	name="opt:77777"
-	id="cr_77777"
-	value="r" checked
-	data-toggle="toggle"
-	onClick="if (! $('#cr_77777').prop('checked')) { $('#cw_77777').prop('checked', false); }"
-/><span class="slider round"></span></label
-></div ")"
-><div "(" 
-><label class="switch"
-><input type="checkbox" class="default"
-	name="opt:77777"
-	id="cw_77777"
-	value="w"
-	data-toggle="toggle"
-	onClick="if ($('#cw_77777').prop('checked')) { $('#cr_77777').prop('checked', true); }"
-/><span class="slider round"></span></label
-></div ")"
-></div ")"
-></div ") 77777"
-
---><div "(" class="row" id="acl_list_anchor"
+<tr "(" id="acl_list_anchor"
+><td "("
+></td ")"
 ><input type="hidden"
 	name="bucket"
 	value="{{ bucket }}"
 /><input type="hidden"
 	name="acl_original_string"
 	value="{{ acl_original_string }}"
-/></div ")"
+><td "("
+></td ")"
+><td "("
+></td ")"
+><td "("
+></td ")"
+/></tr ")"
 
-><div "(" class="row"
-><div "(" class="col-6"
-><button type="button"
+><tr "("
+><td colspan="4" "("
+><div class="btn-group pt-2" "["
+><div><button type="button"
 	id="add_entry"
 	class="btn btn-outline-primary">{% trans 'addEntry' %}</button
-></div ")"
-><div "(" class="col-6"
-><button type="submit"
+></div><div><button type="submit"
 	id="apl"
 	class="btn btn-outline-primary"
 	disabled
 	value="apply-settings">{% trans 'applyACLchanges' %}</button
-></div ")"
-></div ")"
+></div></div "]"
+></td
+></tr ")"
+
+
+></table "]"
 
 ></form ")"
 
