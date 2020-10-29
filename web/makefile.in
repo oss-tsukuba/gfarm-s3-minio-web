@@ -15,7 +15,7 @@ all::
 install:
 	$(TAR) cf - gfarm-s3 rungunicorn runserver | (cd $(WSGI_HOMEDIR) && $(TAR) xfp -)
 	(cd gfarm-s3/console && $(TAR) cf - static) | (cd $(WSGI_HOMEDIR) && $(TAR) xfp -)
-	$(CHOWN) -R $(WSGI_USER) $(WSGI_HOMEDIR)/gfarm-s3
+	$(CHOWN) -R $(WSGI_USER):$(WSGI_GROUP) $(WSGI_HOMEDIR)/gfarm-s3 $(WSGI_HOMEDIR)/rungunicorn $(WSGI_HOMEDIR)/runserver $(WSGI_HOMEDIR)/static
 	$(CHMOD) +x $(WSGI_HOMEDIR)/rungunicorn $(WSGI_HOMEDIR)/runserver
 	$(CHMOD) og+rX $(WSGI_HOMEDIR)
 	$(CHMOD) -R og+rX $(WSGI_HOMEDIR)/static
