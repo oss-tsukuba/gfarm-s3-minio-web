@@ -815,7 +815,7 @@ try_start_a_server() {
 	local pidfile=$(mktemp $GFARM_S3_TMP/minio-pid.XXXXXX) || (rm -f $tmpfile; return $ABORT)
 	( \
 	 export MINIO_GFARMS3_CACHEDIR=$(mktemp -d $GFARMS3_CACHE_BASEDIR/gfarm-s3-XXXXXXXX) || exit 1; \
-	 export MINIO_GFARMS3_CACHEDIR_SIZE_MB="$GFARMS3_CACHE_SIZE_MB"; \
+	 export MINIO_GFARMS3_CACHEDIR_SIZE_MB="$GFARMS3_CACHE_SIZE_MB_PER_USER"; \
 	 export GFARMS3_PARTFILE_DIGEST="$GFARMS3_PARTFILE_DIGEST"; \
 	 if ! chmod 700 $MINIO_GFARMS3_CACHEDIR; then exit 1; fi; \
 	 HOME="$GFARMS3_METADIR" $MINIO_PATH gateway gfarm \
