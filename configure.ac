@@ -176,6 +176,7 @@ AC_CHECK_LIB([gfarm], [gfarm_get_global_username_by_url],, [AC_MSG_ERROR([Gfarm-
 AC_CONFIG_FILES([makefile
 bin/gfarm-s3-configtest
 bin/gfarm-s3-diff-local-usermap
+bin/gfarm-s3-generate-usermap-hpci
 bin/gfarm-s3-login
 bin/gfarm-s3-server
 bin/gfarm-s3-sharedsecret-password

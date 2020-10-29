@@ -1,0 +1,63 @@
+#! /bin/sh
+
+PREFIX=@prefix@
+
+. $PREFIX/etc/gfarm-s3.conf
+
+if [ $# = 1 -a x"$1" = x"-y" ]; then
+	yflag=1
+fi
+
+parse_grid_mapfile() {
+	sed 's/^"[^"]*\[\(hpci[0-9]*\)\]" \([a-zA-Z0-9_][a-zA-Z0-9_]*\)$/\1:\2:\1/'
+}
+
+debug_dummy() {
+cat <<-EOF 
+	"/C=JP/O=NII/OU=HPCI/CN=Given1%40Family1[hpci000001]" user1
+	"/C=JP/O=NII/OU=HPCI/CN=Given2%40Family2[hpci000002]" user2
+	"/C=JP/O=NII/OU=HPCI/CN=Given3%40Family3[hpci000003]" user3
+EOF
+}
+
+read_grid_mapfile() {
+	debug_dummy
+	#cat /etc/grid-security/grid-mapfile
+}
+
+tmpfile=$(mktemp) || exit 1
+editor=$(mktemp) || exit 1
+
+cleanup() {
+	rm -f "$tmpfile" "$editor"
+}
+
+trap cleanup 0
+
+read_grid_mapfile | parse_grid_mapfile > $tmpfile
+
+diff -u $GFARMS3_LOCAL_USER_MAP $tmpfile
+
+if [ -z "$yflag" ]; then
+	printf "continue? [Y/n]"
+	read ans
+	case "$ans" in
+	""|Y|y|Yes|yes) ;;
+	*) echo "aborted by user request" 1>&2; exit 1;;
+	esac
+fi
+
+cat <<EOF > $editor
+#! /bin/sh -e
+cat "$tmpfile" > "\$1"
+exit 0
+EOF
+
+chmod +x $editor
+
+set -o errexit
+
+EDITOR=$editor $PREFIX/bin/gfarm-s3-viusermap
+
+users=$(cat $GFARMS3_LOCAL_USER_MAP | grep -v '^#' | awk -F : '{print $2}')
+for u in $users; do usermod -a -G gfarms3 $u; done
