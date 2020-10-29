@@ -12512,7 +12512,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gunicorn.service etc/makefile etc/sudoers minio/makefile web/makefile web/rungunicorn web/runserver"
+ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gunicorn.service etc/makefile etc/sudoers minio/makefile web/makefile web/rungunicorn web/runserver"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -13541,6 +13541,7 @@ do
     "makefile") CONFIG_FILES="$CONFIG_FILES makefile" ;;
     "bin/gfarm-s3-configtest") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-configtest" ;;
     "bin/gfarm-s3-diff-local-usermap") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-diff-local-usermap" ;;
+    "bin/gfarm-s3-generate-usermap-hpci") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-generate-usermap-hpci" ;;
     "bin/gfarm-s3-login") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-login" ;;
     "bin/gfarm-s3-server") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-server" ;;
     "bin/gfarm-s3-sharedsecret-password") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-sharedsecret-password" ;;
