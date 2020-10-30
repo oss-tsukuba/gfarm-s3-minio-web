@@ -186,29 +186,23 @@ sudo mkdir -p $CACHE_BASEDIR
 sudo chmod 1777 $CACHE_BASEDIR
 ``
 
-##### create shared directory
-
-The following procedure shall be performed by Gfarm Administrator.
-
-``
-gfmkdir -p ${SHARED_DIR#/}
-gfchmod 1777 ${SHARED_DIR#/}
-``
-
 ##### register users
 
-gfmkdir and gfchown in the following procedure
-shall be performed by Gfarm Administrator.
+To register a user, global username, local username, S3access key ID,
+of a user is used.
+
+Here, global username is a user's Gfarm user ID,
+local username is the user's login ID for the Gfarm S3 host system.
+Access key ID is dedicated to Gfarm S3 system.
+
+The following is an example that
+global username is hpci0001,
+local username is user1,
+and access key ID is s3accesskeyid.
 
 ``
 sudo $GFARM_S3_PREFIX/bin/gfarm-s3-useradd hpci0001 user1 s3accesskeyid
 sudo usermod -a -G gfarms3 user1
-gfmkdir ${SHARED_DIR#/}/hpci0001
-gfchown hpci0001 ${SHARED_DIR#/}/hpci0001
-#sudo $GFARM_S3_PREFIX/bin/gfarm-s3-useradd user1 user1 K4XcKzocrUhrnCAKrx2Z
-#sudo usermod -a -G gfarms3 user1
-#gfmkdir ${SHARED_DIR#/}/user1
-#gfchown user1 ${SHARED_DIR#/}/user1
 ``
 
 ##### fix httpd.conf
@@ -252,174 +246,26 @@ sudo -u user1 $GFARM_S3_PREFIX/bin/gfarm-s3-sharedsecret-password
 
 Access WebUI using user-id (user1) and password showen by above command.
 
+
+
+##### create shared directory
+The following procedure shall be performed by Gfarm Administrator.
+
+Create $SHARED_DIR and $SHARED_DIR/global-username on Gfarm.
+
+Here, $SHARE_DIR is the directory which decided in "prepare" section.
+
+For example, registration info for hpci0001 (in above example) looks
+like following:
+
+``
+gfsudo gfmkdir -p ${SHARED_DIR#/}
+gfsudo gfchmod 1777 ${SHARED_DIR#/}
+
+gfsudo gfmkdir ${SHARED_DIR#/}/hpci0001
+gfsudo gfchown hpci0001 ${SHARED_DIR#/}/hpci0001
+``
+
+Ask Gfarm administrator to do above operation.
+
 enjoy.
-
-
------------ followings are not finished -----------
-
-
-2. PREREQUISITES
-
-
-   gfarm-2.7
-   
-        httpd -- Apache
-        uuid 
-        myproxy 
-        python3-devel 
-        python3-pip 
-        nodejs 
-
-'Django<2.2'
-gunicorn
-
-
-Note: Django newer 2.2 requires sqlite 3.8
-which is not installed Centos7.
-On Centos7, upgrading sqlite to 3.8 may affect
-to other programs behaviour.
-
-
-
-3.
-
-3.1 get source code
-
-
-GFARM_SE_MINIO_WEB_SRC=/mnt/work/gfarm-s3-minio-web
-GFARM_SE_MINIO_SRC=/mnt/work/gfarm-s3-minio
-
-3.2 choose parameters
-
-GFARM_S3_PREFIX=/usr/local
-
-  The installation prefix for Gfarm-S3
-
-
-
-SHARED_DIR=$GFDOCKER_GFARMS3_SHARED_DIR
-
-  The Gfarm directroy that stores 
-    
-
-
-CACHE_BASEDIR=$GFDOCKER_GFARMS3_CACHE_BASEDIR
-
-CACHE_SIZE=$GFDOCKER_GFARMS3_CACHE_SIZE
-
-
-
-
-Choose wsgi user
-
-WSGI_USER=wsgi
-WSGI_GROUP=wsgi
-
-	The user & group that runs gunicoron
-
-WSGI_PORT=8000
-
-	The port of gunicorn service
-
-WSGI_HOMEDIR=/home/wsgi
-	Django application, databases, and static contents
-	are installed in this directory.
-
-
-
-MYPROXY_SERVER= (none)
-
-	This value is passed to myproxy-logon 
-
-
-
-4. configure & build
-
-
-4.1
-Choose the working directory for building Gfarm-S3.
-
-MINIO_BUILDDIR:
-Building Gfarm-S3 requires working golang environment.
-To simplify building procedure, makefile automatically downloads and install
-golang into temporary working directory.
-
-
-
-4.2 configure
-
-configure options:
-
-        --prefix=$GFARM_S3_PREFIX \
-        --with-gfarm=/usr/local \
-        --with-globus=/usr \
-        --with-myproxy=/usr \
-        --with-apache=/usr \
-        --with-gunicorn=/usr/local \
-        --with-wsgi-homedir=$WSGI_HOMEDIR \
-        --with-wsgi-user=$WSGI_USER \
-        --with-wsgi-group=$WSGI_GROUP \
-        --with-wsgi-port=$WSGI_PORT \
-        --with-cache-basedir=$CACHE_BASEDIR \
-        --with-cache-size=$CACHE_SIZE \  
-        --with-myproxy-server=$MYPROXY_SERVER \
-        --with-gfarm-shared-dir=$SHARED_DIR \
-        --with-minio-builddir=$MINIO_BUILDDIR
-
-
-4.3 check Gfarm-s3 settings
-
-Review etc/gfarm-s3.conf.
-
-IMPORTANT:
-Maximum user number is limited to GFARMS3_PORT_MAX - GFARMS3_PORT_MIN.
-Change GFARMS3_PORT_MAX and GFARMS3_PORT_MIN to appropriate values
-that meet your envirnment.
-
-
-
-4.3 build
-
-$ make install-go
-$ make
-$ sudo make install
-
-
-4.4 create data directory
-
-4.4.1 create cache directory
-
-$ sudo mkdir -p $CACHE_BASEDIR
-$ sudo chmod 1777 $CACHE_BASEDIR
-
-4.4.2 create cache directory
-create shared directory (on Gfarm)
-gfmkdir -p $SHARED_DIR
-gfchmod 1777 $SHARED_DIR
-
-
-4.5 register users
-
-The Gfarm-S3 system 
-
-
-4.5.1 register users using gfarm-s3-useradd
-
-The
-gfarm-s3-useradd adds a user to Gfarm-S3 system.
-
-example:
-$ gfarm-s3-useradd global001 local001 s3accesskeyid
-
-
-4.5.2 register users using gfarm-s3-viusermap
-
-file format is following:
-
-The file contains tuples of global username, local username, and access-key-ID
-one per line.
-Lines starting with '#' are ignored.
-
-global username, local username, and access-key-ID are separeted with
-a ':'.
-

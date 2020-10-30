@@ -211,27 +211,22 @@ sudo mkdir -p $CACHE_BASEDIR
 sudo chmod 1777 $CACHE_BASEDIR
 ``
 
-##### 共有ディレクトリを作成する
-以下の操作は、Gfarm管理者が実行する
-
-``
-gfmkdir -p ${SHARED_DIR#/}
-gfchmod 1777 ${SHARED_DIR#/}
-``
-
 ##### ユーザを登録する
 
-以下の操作のうち、gfmkdir, gfchownはGfarm管理者が実行する
+ユーザ登録にはglobal username、local username, S3用 access key ID の
+3つ組情報が必要となる。
+
+global username は Gfarm利用者のID、
+local username はGfarm S3を動かすホストでの上記ユーザのログインIDである。
+access key IDは本システム専用のIDとなる。
+
+以下の例は、global username が hpci0001、
+local username が user1、
+access key ID としてはs3accesskeyidを指定したものである。
 
 ``
 sudo $GFARM_S3_PREFIX/bin/gfarm-s3-useradd hpci0001 user1 s3accesskeyid
 sudo usermod -a -G gfarms3 user1
-gfmkdir ${SHARED_DIR#/}/hpci0001
-gfchown hpci0001 ${SHARED_DIR#/}/hpci0001
-#sudo $GFARM_S3_PREFIX/bin/gfarm-s3-useradd user1 user1 K4XcKzocrUhrnCAKrx2Z
-#sudo usermod -a -G gfarms3 user1
-#gfmkdir ${SHARED_DIR#/}/user1
-#gfchown user1 ${SHARED_DIR#/}/user1
 ``
 
 ##### httpdの設定を修正する
@@ -278,5 +273,23 @@ WebUIにアクセスし、user1とこのパスワードでログインする
 ``
 sudo -u user1 $GFARM_S3_PREFIX/bin/gfarm-s3-sharedsecret-password
 ``
+
+##### Gfarmに必要なディレクトリを作成する
+
+Gfarm S3で共通に必要なディレクトリ $SHARED_DIR と、
+各ユーザに必要なディレクトリ$SHARED_DIR/global-username を作成する。
+
+ここに「準備」で決定したディレクトリである。
+上記の例で追加した hpci0001 というユーザであれば、以下の例のようになる。
+
+``
+gfsudo gfmkdir -p ${SHARED_DIR#/}
+gfsudo gfchmod 1777 ${SHARED_DIR#/}
+
+gfsudo gfmkdir ${SHARED_DIR#/}/hpci0001
+gfsudo gfchown hpci0001 ${SHARED_DIR#/}/hpci0001
+``
+
+上記の操作は、Gfarm管理者に依頼して実行する。
 
 以上
