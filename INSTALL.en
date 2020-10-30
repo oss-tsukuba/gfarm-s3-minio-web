@@ -17,6 +17,9 @@ Though the Gfarm-S3 installation procedure is complecated
 for Gfarm-S3 depends on non-standard software,
 the following procedure will do for most environment.
 
+[IMPORTANT NOTE] Gfarm S3 requires Gfarm 2.7 (or later).
+The installation procedure must be done by Gfarm Administrator.
+
 #### obtain source code
 
 Decide where to put source code and get source code.
