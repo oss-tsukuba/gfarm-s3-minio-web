@@ -21,29 +21,33 @@ the following procedure will do for most environment.
 The system administorate priviliege (root) and
 Gfarm administrator (gfarmadm) privilege are required.
 
-#### obtain source code
-
-Decide where to put source code and get source code.
-Let us assmme souce code will go GFARM_SE_MINIO_WEB_SRC and
-GFARM_SE_MINIO_SRC.
+##### Choose working directory
+(feel free to remove working directory after installation procedure finished)
 
 ```
-GFARM_SE_MINIO_WEB_SRC=/tmp/work/gfarm-s3-minio-web
-mkdir -p $(dirname $GFARM_SE_MINIO_WEB_SRC)
-(cd $(dirname $GFARM_SE_MINIO_WEB_SRC) &&
+export WORK=$HOME/tmp
+mkdir -p $WORK
+export MINIO_BUILDDIR=$HOME/tmp
+mkdir -p $MINIO_BUILDDIR/minio/work/build
+```
+
+#### Obtain source code
+
+```
+(cd $WORK &&
  git clone git@github.com:oss-tsukuba/gfarm-s3-minio-web.git)
-(cd $GFARM_SE_MINIO_WEB_SRC && git checkout develop)
+(cd $WORK/gfarm-s3-minio-web &&
+ git checkout develop)
 
-GFARM_SE_MINIO_SRC=/tmp/work/gfarm-s3-minio
-mkdir -p $(dirname $GFARM_SE_MINIO_SRC)
-(cd $(dirname $GFARM_SE_MINIO_SRC) &&
+(cd $MINIO_BUILDDIR/minio/work/build &&
  git clone git@github.com:oss-tsukuba/gfarm-s3-minio.git)
-(cd $GFARM_SE_MINIO_SRC && git checkout gatewaygfarm)
+(cd $MINIO_BUILDDIR/minio/work/build/gfarm-s3-minio &&
+ git checkout gatewaygfarm)
 ```
 
-#### preparation
+#### Preparation
 
-##### choose parameters
+##### Choose parameters
 ```
 GFARM_S3_PREFIX=/usr/local      # Gfarm-S3 install prefix
 SHARED_DIR=/share               # S3 bucket rootdir on Gfarm
@@ -57,7 +61,7 @@ WSGI_PORT=8000                  # wsgi port
 MYPROXY_SERVER=                 # myporoxy server for myproxy-logon
 ```
 
-##### install prerequisites
+##### Install prerequisites
 ```
 sudo yum update -y
 sudo yum install -y httpd mod_ssl uuid myproxy \
@@ -72,18 +76,18 @@ sudo python3 -m pip install gunicorn
 sudo python3 -m pip install boto3
 ```
 
-##### site settings (Apache)
+##### Site settings (Apache)
 
 skip this section if apache is already installed and configured properly.
 
-###### deploy apache http server
+###### Deploy apache http server
 
 ```
 HTTPD_CONF=/etc/httpd/conf.d/myserver.conf
 HTTPD_DocumentRoot=/usr/local/share/www
 ```
 
-###### site settings for apache
+###### Site settings for apache
 ```
 cat <<EOF | sudo dd of=$HTTPD_CONF
 ServerName ${GFDOCKER_SUBNET%.0/24}.$GFDOCKER_START_HOST_ADDR
@@ -104,45 +108,28 @@ ServerName ${GFDOCKER_SUBNET%.0/24}.$GFDOCKER_START_HOST_ADDR
 EOF
 ```
 
-###### genereate main index of the site
+###### Genereate main index of the site
 ```
 sudo mkdir -p $HTTPD_DocumentRoot
 echo "gfarm -- $(date)" | sudo dd of=$HTTPD_DocumentRoot/index.html
 ```
 
-###### enable httpd
+###### Enable httpd
 ```
 sudo systemctl enable httpd
 ```
 
 (nginx is not supported yet; vi /etc/nginx/nginx.conf; systemctl enable nginx.service)
 
-##### create user and group for wsgi
+##### Create user and group for wsgi
 ```
 sudo groupadd $WSGI_GROUP
 id $WSGI_USER || sudo useradd $WSGI_USER -g $WSGI_GROUP -d $WSGI_HOMEDIR
 ```
 
-#### install gfarm-s3
+#### Install gfarm-s3
 
-##### choose working directory
-(feel free to remove working directory after installation procedure finished)
-
-```
-export WORK=$HOME/tmp/work
-mkdir -p $WORK
-export MINIO_BUILDDIR=$HOME/tmp/work
-mkdir -p $MINIO_BUILDDIR
-mkdir -p $MINIO_BUILDDIR/minio/work/build
-```
-
-##### copy source code into woking space
-```
-rsync -a $GFARM_SE_MINIO_WEB_SRC/ $WORK/gfarm-s3-minio-web/
-rsync -a $GFARM_SE_MINIO_SRC/ $MINIO_BUILDDIR/minio/work/build/gfarm-s3-minio/
-```
-
-##### run configure in Gfarm-S3 source code
+##### Run configure in Gfarm-S3 source code
 
 ```
 (cd $WORK/gfarm-s3-minio-web && ./configure \
@@ -163,30 +150,30 @@ rsync -a $GFARM_SE_MINIO_SRC/ $MINIO_BUILDDIR/minio/work/build/gfarm-s3-minio/
 	--with-minio-builddir=$MINIO_BUILDDIR)
 ```
 
-##### install go
+##### Install go
 ```
 (cd $WORK/gfarm-s3-minio-web/minio && make install-go)
 ```
 
-##### build Gfarm-S3
+##### Build Gfarm-S3
 ```
 (cd $WORK/gfarm-s3-minio-web && make)
 ```
 
-##### install Gfarm-S3
+##### Install Gfarm-S3
 ```
 (cd $WORK/gfarm-s3-minio-web && sudo make install)
 ```
 
-#### gfarm-s3-settings
+#### Gfarm-s3-settings
 
-##### create cache directory
+##### Create cache directory
 ```
 sudo mkdir -p $CACHE_BASEDIR
 sudo chmod 1777 $CACHE_BASEDIR
 ```
 
-##### register users
+##### Register users
 
 To register a user, global username, local username, S3access key ID,
 of a user is used.
@@ -205,50 +192,55 @@ sudo $GFARM_S3_PREFIX/bin/gfarm-s3-useradd user0001 localuser1 s3accesskeyid
 sudo usermod -a -G gfarms3 localuser1
 ```
 
-##### fix httpd.conf
+##### Fix httpd.conf
 
-###### stop httpd
+###### Stop httpd
 ```
 sudo apachectl stop
 ```
 
-###### add following file content to httpd.conf
+###### Add following file content to httpd.conf
 ```
 sudo vi $WORK/gfarm-s3-minio-web/etc/apache-gfarm-s3.conf $HTTPD_CONF
 ```
 
-###### add link to index page
+###### Add link to index page
 ```
 echo '<a href="/d/console">gfarm-s3</a>' |
 sudo sh -c "cat >> $HTTPD_DocumentRoot/index.html"
 ```
 
-###### start httpd
+###### Start httpd
 ```
 sudo apachectl start
 ```
 
-##### start gunicorn service
+##### Start gunicorn service
 ```
 sudo systemctl enable --now gunicorn.service
 ```
 
-##### cleanup
+##### Cleanup
 ```
 (cd $WORK/gfarm-s3-minio-web && sudo make clean)
 (cd $WORK/gfarm-s3-minio-web && sudo make distclean)
 ```
 
-#### show sharedsecret password
+#### Show sharedsecret password
+To show a user's password, run gfarm-s3-sharedsecret-password as 
+a corresponding local user (localuser1).
+To login WebUI, use global username (user0001) and the password.
+For myproxy-logon and grid-proxy-init , use proxy certificate's password.
+
 ```
 sudo -u localuser1 $GFARM_S3_PREFIX/bin/gfarm-s3-sharedsecret-password
 ```
 
-Access WebUI using user-id (localuser1) and password showen by above command.
+Access WebUI using global user id (user0001) and password showen by above command.
 
 
 
-##### create shared directory
+##### Create shared directory on Gfarm filesystem
 The following procedure shall be performed by Gfarm Administrator.
 
 Create $SHARED_DIR and $SHARED_DIR/global-username on Gfarm.

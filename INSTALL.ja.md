@@ -37,23 +37,28 @@ Gfarm S3は、以下のコンポーネントから構成される
 されている環境で行う。ホストの管理権限 (root) および
 Gfarmの管理者権限 (gfarmadm) が必要となる。
 
-#### Gfarm S3のソースコードを入手する
-
-ソースの置き場所は $GFARM_SE_MINIO_WEB_SRC, $GFARM_SE_MINIO_SRC
-とする。
+##### Gfarm-S3をビルドするための作業ディレクトリを作成
+(インストール後は削除して構わないのでどこでもよい)
 
 ```
-GFARM_SE_MINIO_WEB_SRC=/tmp/work/gfarm-s3-minio-web
-mkdir -p $(dirname $GFARM_SE_MINIO_WEB_SRC)
-(cd $(dirname $GFARM_SE_MINIO_WEB_SRC) &&
- git clone git@github.com:oss-tsukuba/gfarm-s3-minio-web.git)
-(cd $GFARM_SE_MINIO_WEB_SRC && git checkout develop)
+export WORK=$HOME/tmp
+mkdir -p $WORK
+export MINIO_BUILDDIR=$HOME/tmp
+mkdir -p $MINIO_BUILDDIR/minio/work/build
+```
 
-GFARM_SE_MINIO_SRC=/tmp/work/gfarm-s3-minio
-mkdir -p $(dirname $GFARM_SE_MINIO_SRC)
-(cd $(dirname $GFARM_SE_MINIO_SRC) &&
+#### Gfarm S3のソースコードを入手する
+
+```
+(cd $WORK &&
+ git clone git@github.com:oss-tsukuba/gfarm-s3-minio-web.git)
+(cd $WORK/gfarm-s3-minio-web &&
+ git checkout develop)
+
+(cd $MINIO_BUILDDIR/minio/work/build &&
  git clone git@github.com:oss-tsukuba/gfarm-s3-minio.git)
-(cd $GFARM_SE_MINIO_SRC && git checkout gatewaygfarm)
+(cd $MINIO_BUILDDIR/minio/work/build/gfarm-s3-minio &&
+ git checkout gatewaygfarm)
 ```
 
 #### 準備
@@ -144,23 +149,6 @@ id $WSGI_USER || sudo useradd $WSGI_USER -g $WSGI_GROUP -d $WSGI_HOMEDIR
 ```
 
 #### install gfarm-s3
-
-##### Gfarm-S3をビルドする作業ディレクトリを作成
-(インストール後は削除して構わないのでどこでもよい)
-
-```
-export WORK=$HOME/tmp/work
-mkdir -p $WORK
-export MINIO_BUILDDIR=$HOME/tmp/work
-mkdir -p $MINIO_BUILDDIR
-mkdir -p $MINIO_BUILDDIR/minio/work/build
-```
-
-##### 入手したソースコードを作業ディレクトリにコピー
-```
-rsync -a $GFARM_SE_MINIO_WEB_SRC/ $WORK/gfarm-s3-minio-web/
-rsync -a $GFARM_SE_MINIO_SRC/ $MINIO_BUILDDIR/minio/work/build/gfarm-s3-minio/
-```
 
 ##### 作業ディレクトリに移動し configure
 
@@ -266,20 +254,23 @@ sudo systemctl enable --now gunicorn.service
 
 以降、入手したソースコード、作業ディレクトリを削除してもOK
 
-#### ユーザ(localuser1)用のパスワードを表示する
-WebUIにアクセスし、localuser1とこのパスワードでログインする
-(S3のシークレットアクセスキーではない)
+#### ユーザ(user0001)用のパスワードを表示する
+パスワードの表示は、local user (localuser1) 権限で 
+gfarm-s3-sharedsecret-passwordを実行する。
+WebUIにアクセスし、global username (user0001)と、このパスワードでログインする
+myproxy-logon, grid-proxy-init の場合には代理証明書のパスワードでログインする。
+
 
 ```
 sudo -u localuser1 $GFARM_S3_PREFIX/bin/gfarm-s3-sharedsecret-password
 ```
 
-##### Gfarmに必要なディレクトリを作成する
+##### Gfarmファイルシステム上に必要なディレクトリを作成する
 
 Gfarm S3で共通に必要なディレクトリ $SHARED_DIR と、
 各ユーザに必要なディレクトリ$SHARED_DIR/global-username を作成する。
 
-ここに「準備」で決定したディレクトリである。
+ここに$SHARED_dirは「準備」セクションで決定したディレクトリである。
 上記の例で追加した user0001 というユーザであれば、以下の例のようになる。
 
 ```
