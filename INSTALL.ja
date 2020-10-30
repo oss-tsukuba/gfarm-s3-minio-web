@@ -1,0 +1,205 @@
+Gfarm S3 インストール手順書
+
+1. Overview
+
+Gfarm-S3 is a S3 compatible service system for Gfarm.
+
+Gfarm-S3は、以下のコンポーネントから構成される
+   * S3 互換サーバ (MinIO),
+   * リバースプロキシ (Apache),
+   * wsgi サーバ (gunicorn),
+   * WebUI フレームワーク (Django).
+
+インストール手順は、以下のとおり
+  0. 事前準備
+     * 依存パッケージのインストール
+     * Apacheのインストール
+     * WebUIフレームワークを動作させるユーザを作成
+
+  1. Gfarm-S3のソースコードから以下のコンポーネントをインストール
+     * WebUI フレームワーク (Django)
+     * S3 互換サーバ (MinIO)
+     * gunicorn用のsystemdファイル
+
+  2. ApacheにGfarm-S3用の設定を追加
+
+  3. guniconサービスを起動
+
+
+1.1 Quick Installation
+
+本節ではインストール手順を簡単に説明する
+本手順はCentos7およびCentos8で動作確認している
+
+### Gfarm-S3のソースコードを入手する::
+
+  $ GFARM_SE_MINIO_WEB_SRC=/mnt/work/gfarm-s3-minio-web
+  $ cd $(dirname $GFARM_SE_MINIO_WEB_SRC)
+  $ git clone git@github.com:oss-tsukuba/gfarm-s3-minio-web.git
+  $ (cd gfarm-s3-minio-web && git checkout develop)
+  $ GFARM_SE_MINIO_SRC=/mnt/work/gfarm-s3-minio
+  $ cd $(dirname $GFARM_SE_MINIO_SRC)
+  $ git clone git@github.com:oss-tsukuba/gfarm-s3-minio.git
+  $ (cd gfarm-s3-minio && git checkout gatewaygfarm)
+
+### パラメータを選択する
+### (configure によりgfarm-s3-minio-web/etc/gfarm-s3.conf.in に反映
+###  される。インストール後の修正も可能)
+  | GFARM_S3_PREFIX=/usr/local      -- Gfarm-S3をインストールする場所
+  | SHARED_DIR=/share               -- Gfarm上のGfarm-S3に使用するディレクトリ
+  | CACHE_BASEDIR=/mnt/cache        -- キャッシュ用ディレクトリ
+  | CACHE_SIZE=1024                 -- 1ユーザあたりのキャッシュサイズ(MB)
+  | WSGI_USER=wsgi                  -- wsgiを動かすユーザID
+  | WSGI_GROUP=wsgi                 -- 同グループ
+  | WSGI_HOMEDIR=/home/wsgi         -- 同ホームディレクトリ
+  | WSGI_PORT=8000                  -- 同待ち受けポート
+  |                                 -- (AF_UNIXはテストしていません)
+  | MYPROXY_SERVER=                 -- myproxy-logonを使用するば場合はサーバを指定する
+  | USERS=$GFDOCKER_GFARMS3_USERS
+
+### 依存パッケージをインストールする::
+  $ sudo yum update -y
+  $ sudo yum install -y \
+	httpd \
+	mod_ssl \
+	uuid \
+	myproxy \
+	python3-devel \
+	python3-pip \
+	nodejs \
+
+### nginx はサポートされていない
+### sudo yum install -y nginx
+
+### 依存パッケージをインストールする(つづき)::
+  $ sudo python3 -m pip install 'Django<2.2'
+  $ sudo python3 -m pip install gunicorn
+  $ sudo python3 -m pip install boto3
+
+### (参考) Apacheを設定する
+
+## インストール場所を決める::
+  $ HTTPD_CONF=/etc/httpd/conf.d/myserver.conf
+  $ HTTPD_DocumentRoot=/usr/local/share/www
+
+## 設定ファイルを作成::
+  $ cat <<EOF | sudo dd of=$HTTPD_CONF
+ServerName ${GFDOCKER_SUBNET%.0/24}.$GFDOCKER_START_HOST_ADDR
+<VirtualHost *:80>
+	DocumentRoot $HTTPD_DocumentRoot
+	ServerAdmin root@localhost
+	CustomLog logs/access_log common
+	ErrorLog logs/error_log
+
+	<Directory "$HTTPD_DocumentRoot">
+		AllowOverride FileInfo AuthConfig Limit Indexes
+		Options MultiViews Indexes SymLinksIfOwnerMatch Includes
+		AllowOverride All
+		Require all granted
+	</Directory>
+
+</VirtualHost>
+EOF
+
+### メインインデックスを配置::
+  $ sudo mkdir -p $HTTPD_DocumentRoot
+  $ echo "gfarm -- $(date)" | sudo dd of=$HTTPD_DocumentRoot/index.html
+
+### Apacheを有効化する::
+  $ sudo systemctl enable httpd
+
+### nginx はサポートしていない
+#vi /etc/nginx/nginx.conf
+#systemctl enable nginx.service
+## debug
+#chmod o+rx /var/log/nginx
+
+## wsgi用のユーザを作成する
+  $ id $WSGI_USER || sudo useradd $WSGI_USER -g $WSGI_GROUP -d $WSGI_HOMEDIR
+
+#### install gfarm-s3
+
+## Gfarm-S3をビルドする作業ディレクトリを作成
+## (インストール後は削除して構わないのでどこでもよい)
+  $ export WORK=$HOME/tmp/work
+  $ mkdir -p $WORK
+  $ export MINIO_BUILDDIR=$HOME/tmp/work
+  $ mkdir -p $MINIO_BUILDDIR
+  $ mkdir -p $MINIO_BUILDDIR/minio/work/build
+
+## 入手したソースコードを作業ディレクトリにコピー
+  $ rsync -a $GFARM_SE_MINIO_WEB_SRC/ $WORK/gfarm-s3-minio-web/
+  $ if [ -e $GFARM_SE_MINIO_SRC ]; then
+  >	rsync -a $GFARM_SE_MINIO_SRC/ $MINIO_BUILDDIR/minio/work/build/gfarm-s3-minio/
+  > fi
+
+## configure する
+## パラメータは上で決定したものを使用
+  $ (cd $WORK/gfarm-s3-minio-web && ./configure \
+	--prefix=$GFARM_S3_PREFIX \
+	--with-gfarm=/usr/local \
+	--with-globus=/usr \
+	--with-myproxy=/usr \
+	--with-apache=/usr \
+	--with-gunicorn=/usr/local \
+	--with-wsgi-homedir=$WSGI_HOMEDIR \
+	--with-wsgi-user=$WSGI_USER \
+	--with-wsgi-group=$WSGI_GROUP \
+	--with-wsgi-port=$WSGI_PORT \
+	--with-cache-basedir=$CACHE_BASEDIR \
+	--with-cache-size=$CACHE_SIZE \
+	--with-myproxy-server=$MYPROXY_SERVER \
+	--with-gfarm-shared-dir=$SHARED_DIR \
+	--with-minio-builddir=$MINIO_BUILDDIR)
+
+### Go を作業ディレクトリにインストールする::
+  $ (cd $WORK/gfarm-s3-minio-web/minio && make install-go)
+
+### Gfarm-S3をビルドする::
+  $ (cd $WORK/gfarm-s3-minio-web && make)
+
+### Gfarm-S3をインストールする::
+  $ (cd $WORK/gfarm-s3-minio-web && sudo make install)
+
+#### Gfarm-S3の設定
+
+## キャッシュディレクトリを作成する::
+  $ sudo mkdir -p $CACHE_BASEDIR
+  $ sudo chmod 1777 $CACHE_BASEDIR
+
+## 共有ディレクトリを作成する::
+  $ gfmkdir -p ${SHARED_DIR#/} || true
+  $ gfchmod 1777 ${SHARED_DIR#/} || true
+
+## ユーザを登録する::
+  $ sudo $GFARM_S3_PREFIX/bin/gfarm-s3-useradd hpci0001 user1 s3accesskeyid
+  $ sudo usermod -a -G gfarms3 user1
+  $ gfmkdir ${SHARED_DIR#/}/$local_user || true
+
+## httpd.confを修正する
+## httpdを停止::
+  $ sudo apachectl stop
+
+## 以下のファイルの内容を、httpd.confに追加する
+  | $WORK/gfarm-s3-minio-web/etc/apache-gfarm-s3.conf
+
+## リンクを追加
+echo '<a href="/d/console">gfarm-s3</a>' |
+	sudo dd conv=notrunc conv=append of=$HTTPD_DocumentRoot/index.html
+
+## httpdを起動::
+  $ sudo apachectl start
+
+## gunicorn serviceを起動する
+## (gunicorn.serviceはGfarm-S3のmake installでコピーされている)
+  $ sudo systemctl enable --now gunicorn.service
+
+## cleanup
+  $ (cd $WORK/gfarm-s3-minio-web && sudo make clean)
+  $ (cd $WORK/gfarm-s3-minio-web && sudo make distclean)
+## ソースコード、作業ディレクトリを削除してもOK
+
+## ユーザ(user1)用のパスワードを表示する
+  $ user1$ $GFARM_S3_PREFIX/bin/gfarm-s3-sharedsecret-password
+
+以上
