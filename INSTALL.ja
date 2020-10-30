@@ -34,7 +34,8 @@ Gfarm S3は、以下のコンポーネントから構成される
 本手順はCentos7およびCentos8で動作確認している
 
 【重要】インストールは、Gfarm 2.7 (以降) がインストール
-されている環境で、Gfarmの管理者権限のあるユーザで行う。
+されている環境で行う。ホストの管理権限 (root) および
+Gfarmの管理者権限 (gfarmadm) が必要となる。
 
 #### Gfarm S3のソースコードを入手する
 
@@ -138,7 +139,7 @@ sudo systemctl enable httpd
 
 ##### wsgi用のグループとユーザを作成する
 ``
-sudo groupadd $WSGI_GROUP || true
+sudo groupadd $WSGI_GROUP
 id $WSGI_USER || sudo useradd $WSGI_USER -g $WSGI_GROUP -d $WSGI_HOMEDIR
 ``
 
@@ -211,19 +212,26 @@ sudo chmod 1777 $CACHE_BASEDIR
 ``
 
 ##### 共有ディレクトリを作成する
+以下の操作は、Gfarm管理者が実行する
+
 ``
-gfmkdir -p ${SHARED_DIR#/} || true
-gfchmod 1777 ${SHARED_DIR#/} || true
+gfmkdir -p ${SHARED_DIR#/}
+gfchmod 1777 ${SHARED_DIR#/}
 ``
 
 ##### ユーザを登録する
+
+以下の操作のうち、gfmkdir, gfchownはGfarm管理者が実行する
+
 ``
 sudo $GFARM_S3_PREFIX/bin/gfarm-s3-useradd hpci0001 user1 s3accesskeyid
-gfmkdir ${SHARED_DIR#/}/hpci0001 || true
 sudo usermod -a -G gfarms3 user1
+gfmkdir ${SHARED_DIR#/}/hpci0001
+gfchown hpci0001 ${SHARED_DIR#/}/hpci0001
 #sudo $GFARM_S3_PREFIX/bin/gfarm-s3-useradd user1 user1 K4XcKzocrUhrnCAKrx2Z
-#gfmkdir ${SHARED_DIR#/}/user1 || true
 #sudo usermod -a -G gfarms3 user1
+#gfmkdir ${SHARED_DIR#/}/user1
+#gfchown user1 ${SHARED_DIR#/}/user1
 ``
 
 ##### httpdの設定を修正する
