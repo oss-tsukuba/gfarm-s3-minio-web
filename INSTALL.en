@@ -98,6 +98,7 @@ EOF
 #chmod o+rx /var/log/nginx
 
 ## create user for wsgi
+  $ sudo groupadd $WSGI_GROUP || true
   $ id $WSGI_USER || sudo useradd $WSGI_USER -g $WSGI_GROUP -d $WSGI_HOMEDIR
 
 #### install gfarm-s3
@@ -160,8 +161,8 @@ EOF
   | $WORK/gfarm-s3-minio-web/etc/apache-gfarm-s3.conf
 
 ## add link to index page
-echo '<a href="/d/console">gfarm-s3</a>' |
-	sudo dd conv=notrunc conv=append of=$HTTPD_DocumentRoot/index.html
+  $ echo '<a href="/d/console">gfarm-s3</a>' |
+	sudo sh -c "cat >> $HTTPD_DocumentRoot/index.html"
 
 ## start httpd
   $ sudo apachectl start
