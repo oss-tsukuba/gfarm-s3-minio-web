@@ -11,6 +11,11 @@ Gfarm S3は、以下のコンポーネントから構成される
 * wsgi サーバ (gunicorn),
 * WebUI フレームワーク (Django).
 
+※ nginxはサポートされてません
+
+※ wsgiの設定について: Centos7標準のApacheではwsgiとの通信にAF_UNIXが
+使用できないため、本文書ではAF_INETを使用する手順を示しています
+
 インストール手順は、以下のとおり
 
 0. 事前準備
@@ -78,7 +83,6 @@ WSGI_USER=wsgi                  # wsgiを動かすユーザID
 WSGI_GROUP=wsgi                 # 同グループ
 WSGI_HOMEDIR=/home/wsgi         # 同ホームディレクトリ
 WSGI_PORT=8000                  # 同待ち受けポート
-			        # (AF_UNIXはテストしていません)
 MYPROXY_SERVER=                 # myproxy-logonを使用するば場合はサーバを指定する
 ```
 
@@ -89,8 +93,6 @@ sudo yum update -y
 sudo yum install -y httpd mod_ssl uuid myproxy \
          python3-devel python3-pip nodejs 
 ```
-
-(nginx はサポートされていない; sudo yum install -y nginx)
 
 ```
 sudo python3 -m pip install 'Django<2.2'
@@ -139,8 +141,6 @@ echo "gfarm -- $(date)" | sudo dd of=$HTTPD_DocumentRoot/index.html
 ```
 sudo systemctl enable httpd
 ```
-
-(nginx はサポートしていない; vi /etc/nginx/nginx.conf; systemctl enable nginx.service)
 
 ##### wsgi用のグループとユーザを作成する
 ```

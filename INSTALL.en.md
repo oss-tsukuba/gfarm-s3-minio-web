@@ -10,16 +10,21 @@ reverse proxy (Apache),
 wsgi server (gunicorn),
 and WebUI framework (Django).
 
+NOTE: nginx is not supported
+
+NOTE: Apache comes with Centos7 does not support AF_UNIX communication to wsgi.
+In this document, the communication configuration that uses AF_INET is
+described.
 
 ### 1.1 Quick Installation
 
-Though the Gfarm-S3 installation procedure is complecated 
+Though the Gfarm-S3 installation procedure is complicated 
 for Gfarm-S3 depends on non-standard software,
 the following procedure will do for most environment.
 
 [IMPORTANT NOTE] Gfarm S3 requires Gfarm 2.7 (or later).
-The system administorate priviliege (root) and
-Gfarm administrator (gfarmadm) privilege are required.
+The system administrator privileges (root) and
+Gfarm administrator (gfarmadm) privileges are required.
 
 ##### Choose working directory
 (feel free to remove working directory after installation procedure finished)
@@ -68,8 +73,6 @@ sudo yum install -y httpd mod_ssl uuid myproxy \
          python3-devel python3-pip nodejs 
 ```
 
-(nginx is not supported yet; sudo yum install -y nginx)
-
 ```
 sudo python3 -m pip install 'Django<2.2'
 sudo python3 -m pip install gunicorn
@@ -108,7 +111,7 @@ ServerName ${GFDOCKER_SUBNET%.0/24}.$GFDOCKER_START_HOST_ADDR
 EOF
 ```
 
-###### Genereate main index of the site
+###### Generate main index of the site
 ```
 sudo mkdir -p $HTTPD_DocumentRoot
 echo "gfarm -- $(date)" | sudo dd of=$HTTPD_DocumentRoot/index.html
@@ -118,8 +121,6 @@ echo "gfarm -- $(date)" | sudo dd of=$HTTPD_DocumentRoot/index.html
 ```
 sudo systemctl enable httpd
 ```
-
-(nginx is not supported yet; vi /etc/nginx/nginx.conf; systemctl enable nginx.service)
 
 ##### Create user and group for wsgi
 ```
