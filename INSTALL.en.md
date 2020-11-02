@@ -47,7 +47,7 @@ mkdir -p $MINIO_BUILDDIR/minio/work/build
 (cd $MINIO_BUILDDIR/minio/work/build &&
  git clone git@github.com:oss-tsukuba/gfarm-s3-minio.git)
 (cd $MINIO_BUILDDIR/minio/work/build/gfarm-s3-minio &&
- git checkout gatewaygfarm)
+ git checkout gfarm)
 ```
 
 #### Preparation
