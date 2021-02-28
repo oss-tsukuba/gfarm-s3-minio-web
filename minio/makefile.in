@@ -34,7 +34,8 @@ all::
 
 install-go::
 	-$(MKDIR) -p $$(dirname $(GOPATH))
-	cd $$(dirname $(GOPATH)) && $(CURL) $(GO_URL) | $(TAR) xfzp -
+	[ -f $(GOPATH)/$(GO_ARCHIVE) ] || $(CURL) -o $(GOPATH)/$(GO_ARCHIVE) $(GO_URL)
+	cd $$(dirname $(GOPATH)) && $(TAR) xfzp $(GOPATH)/$(GO_ARCHIVE)
 
 install::
 	install -c -m 555 $(GOBIN)/mc "$(MC_PATH)"
