@@ -2,74 +2,78 @@
 {% load i18n %}
 {% block content1 %}
 
-<table "[" class="table-responsive table-striped border-0"
-><tr "("
-><td class="align-middle pl-2 pr-2" "("
->{% trans 'status' %}</td ")"
-><td  "("
-<div "(" class="{% if s3sstatus %} alert alert-success{% else %} alert alert-danger{% endif %} border-0"
->{% if s3sstatus %}{% trans 'running' %}{% else %}{% trans 'stopped' %}{% endif %}</div ")"
+<style>
+button {
+	margin: 0 !important;
+}
+.borderless td, .borderless th {
+    border: none;
+}
+</style>
 
-></td ")"
-><td class="align-middle pl-2 pr-2" "("
+          <div class="container">
+<div class="table-responsive">
+<table class="table borderless" >
 
+<!-- -------------------------------------------------------------- -->
+<tr class="bg-light"
+ "(">
+
+<!-- ==================== -->
+<td width="30%" "("
 ><form action="{% if not s3sstatus %}{% url 'starts3' %}{% else %}{% url 'stops3' %}{% endif %}"
 	method="post"
->{% csrf_token %}<div "(" class="form-group pt-2"
+>{% csrf_token %}<div "(" class="form-group"
 ><button type="submit"
-	class="btn btn-outline-primary h-75"
-	value="Launch">{% if not s3sstatus %}{% trans 'StartGfarmS3' %}{% else %}{% trans 'StopGfarmS3' %}{% endif %}</button
+	class="btn btn-outline-primary h-75 form-control"
+	value="Launch"
+>{% if not s3sstatus %}{% trans 'StartGfarmS3' %}{% else %}{% trans 'StopGfarmS3' %}{% endif %}</button
 ></div ")"
 ></form
+></td ")" >
 
+<!-- ==================== -->
+<td "("
+>
+<div "(" class="{% if s3sstatus %} alert alert-success{% else %} alert alert-danger{% endif %} border-0"
+>{% if s3sstatus %}{% trans 'running' %}{% else %}{% trans 'stopped' %}{% endif %}</div ")"
 ></td ")"
+></tr ")" >
 
-></tr ")"
+<!-- -------------------------------------------------------------- -->
+<tr "(" >
 
-><tr "("
-><td class="align-middle pl-2 pr-2" "("
+<!-- ==================== -->
+<td width="30%" "("
 >{% trans 'accessKey' %}</td ")"
-><td class="align-middle pl-2 pr-2" "("
+>
+
+<!-- ==================== -->
+<td  "("
 ><input onClick="this.select();"
 	value="{{ access_key }}"
 	class="border-0 flex-grow-1"
-
+	style="width: 100%"
 /></td ")"
 ></tr ")"
+>
 
-><tr "("
-><td class="align-middle pl-2 pr-2" "("
+<!-- -------------------------------------------------------------- -->
+<tr class="bg-light" "("
+>
 
->{% trans 'secretKey' %}</td ")"
-
-><td class="align-middle pl-2 pr-2" "("
-
-
-
-><div "(" class="collapse" id="collapseSecretKey"
-><div "(" class="form-control border-0"
-><input onClick="this.select();"
-	value="{{ secret_key }}"
-	class="border-0 flex-grow-1"
-/></div ")"
-></div ")"
-
-></td ")"
-
-
-><td class="align-middle pl-2 pr-2" "("
-><div class="btn-group pt-2" "["
-><a class="btn btn-outline-primary h-75"
+<!-- ==================== -->
+<td width="30%" "("
+><!--div class="btn-group pt-2" "["
+--><a class="btn btn-outline-primary h-75"
 	data-toggle="collapse"
 	href="#collapseSecretKey"
 	role="button"
 	aria-expanded="false"
 	aria-controls="collapseSecretKey"
 >{% trans 'viewSecretKey' %}</a
-
-><!--/td ")"
-><td class="align-middle pl-2 pr-2" "("
---><form action="{% url 'chgkey' %}"
+>
+<!--form action="{% url 'chgkey' %}"
 	method="post"
 >{% csrf_token %}<div "(" class="form-group"
 ><div "(" class="button-wrapper" 
@@ -78,7 +82,6 @@
 	data-placement="top"
 	title="{% trans 'stops3tochangesecretkey' %}"
 {% endif %}
-
 ><button type="submit"
 	class="btn btn-outline-primary h-75"
 	value="Launch"
@@ -87,43 +90,148 @@
 ></div ")"
 ></div ")"
 ></form
+--><!--/div "]"--></td ")"
 
-></div "]"></td ")"
+>
+<!-- ==================== -->
+<td  "("
+
+><!--div "(" class="collapse" id="collapseSecretKey"
+	style="width: 100%"
+--><!--div "(" class="form-control border-0"
+	style="width: 100%"
+--><input onClick="this.select();"
+class="collapse" id="collapseSecretKey"
+	value="{{ secret_key }}"
+	class="border-0 flex-grow-1"
+	style="width: 100%"
+/><!--/div ")"
+--><!--/div ")"
+--></td ")"
 ></tr ")"
+>
 
+<!-- -------------------------------------------------------------- -->
+<tr class="bg-light" "("
+>
 
-><tr "("
-><td class="align-middle pl-2 pr-2" "("
+<!-- ==================== -->
+<td width="30%" "("
+><!--div class="btn-group pt-2" "["
+--><!--a class="btn btn-outline-primary h-75"
+	data-toggle="collapse"
+	href="#collapseSecretKey"
+	role="button"
+	aria-expanded="false"
+	aria-controls="collapseSecretKey"
+>{% trans 'viewSecretKey' %}</a
+-->
+<form action="{% url 'chgkey' %}"
+	method="post"
+>{% csrf_token %}<div "(" class="form-group"
+><div "(" class="button-wrapper" 
+	{% if s3sstatus %}
+	data-toggle="tooltip"
+	data-placement="top"
+	title="{% trans 'stops3tochangesecretkey' %}"
+{% endif %}
+><button type="submit"
+	class="btn btn-outline-primary h-75"
+	value="Launch"
+	{% if s3sstatus %}disabled{% endif %}
+>{% trans 'chgKey' %}</button
+></div ")"
+></div ")"
+></form
+><!--/div "]"--></td ")"
+
+>
+<!-- ==================== -->
+<td  "("
+
+><!--div "(" class="collapse" id="collapseSecretKey"
+	style="width: 100%"
+--><!--div "(" class="form-control border-0"
+	style="width: 100%"
+--><!--input onClick="this.select();"
+class="collapse" id="collapseSecretKey"
+	value="{{ secret_key }}"
+	class="border-0 flex-grow-1"
+	style="width: 100%"
+/--><!--/div ")"
+--><!--/div ")"
+--></td ")"
+></tr ")"
+>
+
+<!-- -------------------------------------------------------------- -->
+<tr "("
+>
+
+<!-- ==================== -->
+<td width="30%" "("
 >{% trans 'authenticationMethod' %}</td ")"
-><td class="align-middle pl-2 pr-2" "("
+>
 
+<!-- ==================== -->
+<td  "("
 >{% if authenticated_method == "myproxy-logon" %}{% trans 'myproxyLogon' %}{% endif %}
 {% if authenticated_method == "grid-proxy-init" %}{% trans 'gridProxyInit' %}{% endif %}
 {% if authenticated_method == "gfkey" %}{% trans 'gfkey' %}{% endif %}
 </td ")"
 ></tr ")"
+>
 
-><tr "("
-><td class="align-middle pl-2 pr-2" "("
+<!-- -------------------------------------------------------------- -->
+<tr class="bg-light" "("
+>
+
+<!-- ==================== -->
+<td width="30%" "("
 >{% trans 'expirationDate' %}</td ")"
-><td class="align-middle pl-2 pr-2" "("
+>
+
+<!-- ==================== -->
+<td  "("
 >{{ expiration_date_calendar_datetime }}</td ")"
+>
 
+</td ")"
+></tr ")"
 
-><td class="align-middle pl-2 pr-2" "("
+<!-- -------------------------------------------------------------- -->
+{% if authenticated_method != "gfkey" %}
+<tr class="bg-light" "("
+>
 
->{% if authenticated_method != "gfkey" %}<form action="{% url 'reauth' %}"
+<!-- ==================== -->
+<td width="30%" "("
+>
+
+<form action="{% url 'reauth' %}"
 	method="post"
 >{% csrf_token %}<div "(" class="form-group pt-2"
 ><button type="submit"
 	class="btn btn-outline-primary h-75"
-	value="Launch">{% trans 'updateCertificate' %}</button
+	value="Launch"
+
+>{% trans 'updateCertificate' %}</button
 ></div ")"
 ></form
 
->{% endif %}</td ")"
-></tr ")"
+></td ")"
 
-></table "]"
+<!-- ==================== -->
+<td "("
+>
+</tr ")"
+>
+{% endif %}
+<!-- -------------------------------------------------------------- -->
+
+</table 
+      ></div>
+      </div>
 
 {% endblock %}
+

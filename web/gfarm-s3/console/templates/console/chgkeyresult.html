@@ -2,34 +2,39 @@
 {% load i18n %}
 {% block content1 %}
 
+          <div class="container">
+<div class="table-responsive">
 <table "[" class="table-responsive table-striped border-0"
 
 ><tr "("
-><td class="align-middle pl-2 pr-2" "("
+><td "("
 ><a class="link" href="{% url 'result' %}">{% trans 'Home' %}</a
-><td class="align-middle pl-2 pr-2" "("
+><td "("
 >&nbsp;</td ")"
 /></td ")"
 ></tr ")"
 
 ><tr "("
-><td class="align-middle pl-2 pr-2" "("
+><td "("
 >{% trans 'accessKey' %}</td ")"
-><td class="align-middle pl-2 pr-2" "("
+><td "("
 ><input onClick="this.select();"
 	value="{{ access_key }}"
 	class="border-0 flex-grow-1"
+	style="width: 100%"
 
 /></td ")"
 ></tr ")"
 
 ><tr "("
-><td class="align-middle pl-2 pr-2" "("
+><td "("
 >{% trans 'secretKey' %}</td ")"
-><td class="align-middle pl-2 pr-2" "("
+><td "("
 ><input onClick="this.select();"
 	value="{{ secret_key }}"
 	class="border-0 flex-grow-1"
+	style="width: 100%"
+	style="width: 100%"
 /></td ")"
 
 
@@ -37,6 +42,8 @@
 
 
 ></table "]"
+          ></div>
+          </div>
 
 
 {% endblock %}
