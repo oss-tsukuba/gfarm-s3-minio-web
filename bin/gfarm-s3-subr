@@ -800,6 +800,10 @@ try_start_a_server() {
 	local SUCCESS=0
 	local RETRY=1
 	local ABORT=2
+	local GATEWAY=gfarm
+	#gfarm_shared_dir=/tmp/nas
+	#GFARMS3_GFARM_SHARED_VIRTUAL_NAME=
+	#GATEWAY=nas
 
 	if ! mymc_init; then
 ### case M: mc_init failed
@@ -818,7 +822,7 @@ try_start_a_server() {
 	 export MINIO_GFARMS3_CACHEDIR_SIZE_MB="$GFARMS3_CACHE_SIZE_MB_PER_USER"; \
 	 export GFARMS3_PARTFILE_DIGEST="$GFARMS3_PARTFILE_DIGEST"; \
 	 if ! chmod 700 $MINIO_GFARMS3_CACHEDIR; then exit 1; fi; \
-	 HOME="$GFARMS3_METADIR" $MINIO_PATH gateway gfarm \
+	 HOME="$GFARMS3_METADIR" $MINIO_PATH gateway $GATEWAY \
 		--address "$address" \
 		"$gfarm_shared_dir" \
 		$GFARMS3_GFARM_SHARED_VIRTUAL_NAME & \
