@@ -6,7 +6,7 @@ export LC_COLLATE=C
 
 prefix=@prefix@
 . @sysconfdir@/gfarm-s3.conf
-. $GFARM_S3_BIN/gfarm-s3-subr
+. $GFARM_S3_LIB/gfarm-s3-subr
 
 USAGE="usage: $0 global-username local-username [access_key_id]"
 

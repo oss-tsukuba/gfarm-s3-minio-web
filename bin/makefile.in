@@ -1,6 +1,7 @@
 PREFIX=@prefix@
 
 BINDIR=$(PREFIX)/bin
+LIBDIR=$(PREFIX)/lib
 INSTALL=install
 
 scripts= \
@@ -10,7 +11,6 @@ scripts= \
 	gfarm-s3-login \
 	gfarm-s3-server \
 	gfarm-s3-sharedsecret-password \
-	gfarm-s3-subr \
 	gfarm-s3-update-reverse-proxy \
 	gfarm-s3-useradd \
 	gfarm-s3-viusermap
@@ -29,6 +29,7 @@ all:
 
 install:
 	for i in $(scripts); do $(INSTALL) -c -m 555 $$i $(BINDIR); done
+	$(INSTALL) -c -m 644 gfarm-s3-subr $(LIBDIR)
 
 clean:
 

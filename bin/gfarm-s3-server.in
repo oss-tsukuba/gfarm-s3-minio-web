@@ -35,7 +35,7 @@ done
 
 prefix=@prefix@
 . @sysconfdir@/gfarm-s3.conf
-. $GFARM_S3_BIN/gfarm-s3-subr
+. $GFARM_S3_LIB/gfarm-s3-subr
 
 for var in $variables_overridable; do
 	eval $var=\${SAVED_$var:-\$$var}
