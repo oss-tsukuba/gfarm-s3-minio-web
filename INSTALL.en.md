@@ -94,7 +94,10 @@ HTTPD_DocumentRoot=/usr/local/share/www
 ```
 cat <<EOF | sudo dd of=$HTTPD_CONF
 ServerName ${GFDOCKER_SUBNET%.0/24}.$GFDOCKER_START_HOST_ADDR
-<VirtualHost *:80>
+<VirtualHost *:443>
+	SSLEngine on
+	SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+	SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
 	DocumentRoot $HTTPD_DocumentRoot
 	ServerAdmin root@localhost
 	CustomLog logs/access_log common
@@ -203,6 +206,11 @@ sudo apachectl stop
 ###### Add following file content to httpd.conf
 ```
 sudo vi $WORK/gfarm-s3-minio-web/etc/apache-gfarm-s3.conf $HTTPD_CONF
+```
+
+###### deploy 403 error message file
+```
+cp $WORK/gfarm-s3-minio-web/etc/e403.html $HTTPD_DocumentRoot/e403.html
 ```
 
 ###### Add link to index page

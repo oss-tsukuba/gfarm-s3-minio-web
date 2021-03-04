@@ -114,7 +114,10 @@ HTTPD_DocumentRoot=/usr/local/share/www
 ```
 cat <<EOF | sudo dd of=$HTTPD_CONF
 ServerName ${GFDOCKER_SUBNET%.0/24}.$GFDOCKER_START_HOST_ADDR
-<VirtualHost *:80>
+<VirtualHost *:443>
+	SSLEngine on
+	SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+	SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
 	DocumentRoot $HTTPD_DocumentRoot
 	ServerAdmin root@localhost
 	CustomLog logs/access_log common
@@ -227,6 +230,11 @@ sudo apachectl stop
 以下は、上述の$HTTPD_CONFに追加する例
 ```
 sudo vi $WORK/gfarm-s3-minio-web/etc/apache-gfarm-s3.conf $HTTPD_CONF
+```
+
+###### 403 error message file を配備する
+```
+cp $WORK/gfarm-s3-minio-web/etc/e403.html $HTTPD_DocumentRoot/e403.html
 ```
 
 ###### メインインデックスにWebUIへのリンクを追加
