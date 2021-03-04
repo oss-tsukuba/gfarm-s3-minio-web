@@ -215,9 +215,12 @@ cp $WORK/gfarm-s3-minio-web/etc/e403.html $HTTPD_DocumentRoot/e403.html
 
 ###### Add link to index page
 ```
-echo '<a href="/d/console">gfarm-s3</a>' |
+echo '<a href="/gfarm/console">gfarm-s3</a>' |
 sudo sh -c "cat >> $HTTPD_DocumentRoot/index.html"
 ```
+(to change ``gfarm'' to another name, fix following definition in $WORK/gfarm-s3-minio-web/web/gfarm-s3/gfarms3/urls.py also:
+    path('gfarm/console/', include('console.urls')),
+)
 
 ###### Start httpd
 ```

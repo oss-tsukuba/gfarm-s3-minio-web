@@ -17,6 +17,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path('d/console/', include('console.urls')),
+    path('gfarm/console/', include('console.urls')),
 #    path('admin/', admin.site.urls),
 ]

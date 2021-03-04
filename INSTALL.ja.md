@@ -239,9 +239,12 @@ cp $WORK/gfarm-s3-minio-web/etc/e403.html $HTTPD_DocumentRoot/e403.html
 
 ###### メインインデックスにWebUIへのリンクを追加
 ```
-echo '<a href="/d/console">gfarm-s3</a>' |
+echo '<a href="/gfarm/console">gfarm-s3</a>' |
 sudo sh -c "cat >> $HTTPD_DocumentRoot/index.html"
 ```
+(gfarm以外にするには、 $WORK/gfarm-s3-minio-web/web/gfarm-s3/gfarms3/urls.py の``gfarm''も変更
+    path('gfarm/console/', include('console.urls')),
+)
 
 ###### httpdを起動
 ```

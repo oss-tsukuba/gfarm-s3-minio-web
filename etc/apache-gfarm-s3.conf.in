@@ -1,6 +1,6 @@
 RewriteEngine on
 
-ProxyPass /d http://127.0.0.1:@with_wsgi_port@/d
+ProxyPass /gfarm http://127.0.0.1:@with_wsgi_port@/gfarm
 ProxyPreserveHost on
 
 Include @prefix@/var/gfarm-s3/rewrite.conf
