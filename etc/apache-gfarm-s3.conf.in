@@ -11,3 +11,8 @@ Alias /static/ @with_wsgi_homedir@/static/
 	Require all granted
 </Directory>
 
+ErrorDocument 404 /e403.html
+
+RewriteEngine On
+RewriteRule e403.html - [R=403,L]
+
