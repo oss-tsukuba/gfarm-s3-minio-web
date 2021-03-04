@@ -1,82 +1,74 @@
 {% extends "console/base.html" %}
+
 {% load i18n %}
 {% block content1 %}
 
-<style>
-button {
-	margin: 0 !important;
-}
-.borderless td, .borderless th {
-    border: none;
-}
-</style>
+<table class="table-responsive borderless border-0"
+><tbody
+><th
+><td  style="width: 4000px"
+></td
+></th
 
-          <div class="container">
-<div class="table-responsive">
-<table class="table borderless" >
+><tr><td><hr></td></tr
 
-<!-- -------------------------------------------------------------- -->
-<tr class="bg-light"
- "(">
-
-<!-- ==================== -->
-<td width="30%" "("
+><tr
+><td style="width:100%" class="bg-light"
+>{% trans 'CurrentStatus' %}
+<div style='float: right; text-align: right'
 ><form action="{% if not s3sstatus %}{% url 'starts3' %}{% else %}{% url 'stops3' %}{% endif %}"
 	method="post"
->{% csrf_token %}<div "(" class="form-group"
-><button type="submit"
+	class="form-inline"
+>{% csrf_token %}
+<button type="submit"
 	class="btn btn-outline-primary h-75 form-control"
 	value="Launch"
 >{% if not s3sstatus %}{% trans 'StartGfarmS3' %}{% else %}{% trans 'StopGfarmS3' %}{% endif %}</button
-></div ")"
-></form
-></td ")" >
+></div></form
+></td
+></tr
+><tr
+><td class="h5"
+><div  class="{% if s3sstatus %} alert alert-success{% else %} alert alert-danger{% endif %} border-0"
+>{% if s3sstatus %}{% trans 'running' %}{% else %}{% trans 'stopped' %}{% endif %}</div
+></td
+></tr
 
-<!-- ==================== -->
-<td "("
->
-<div "(" class="{% if s3sstatus %} alert alert-success{% else %} alert alert-danger{% endif %} border-0"
->{% if s3sstatus %}{% trans 'running' %}{% else %}{% trans 'stopped' %}{% endif %}</div ")"
-></td ")"
-></tr ")" >
+><tr><td><hr></td></tr
 
-<!-- -------------------------------------------------------------- -->
-<tr "(" >
-
-<!-- ==================== -->
-<td width="30%" "("
->{% trans 'accessKey' %}</td ")"
->
-
-<!-- ==================== -->
-<td  "("
+><tr
+><td "class=h6-small"
+>{% trans 'accessKey' %}</td
+></tr
+><tr
+><td class="h5"
 ><input onClick="this.select();"
+
 	value="{{ access_key }}"
 	class="border-0 flex-grow-1"
 	style="width: 100%"
-/></td ")"
-></tr ")"
->
+	readonly="readonly"
+/></td
+></tr
 
-<!-- -------------------------------------------------------------- -->
-<tr class="bg-light" "("
->
+><tr><td><hr></td></tr
 
-<!-- ==================== -->
-<td width="30%" "("
-><!--div class="btn-group pt-2" "["
---><a class="btn btn-outline-primary h-75"
+><tr
+><td
+>{% trans 'secretKey' %}
+<div style='float: right; text-align: right'
+><form action="{% url 'chgkey' %}"
+	method="post"
+	class="form-inline"
+>{% csrf_token %}
+<a class="btn btn-outline-primary h-75"
 	data-toggle="collapse"
 	href="#collapseSecretKey"
 	role="button"
 	aria-expanded="false"
 	aria-controls="collapseSecretKey"
 >{% trans 'viewSecretKey' %}</a
->
-<!--form action="{% url 'chgkey' %}"
-	method="post"
->{% csrf_token %}<div "(" class="form-group"
-><div "(" class="button-wrapper" 
+><div  class="button-wrapper"
 	{% if s3sstatus %}
 	data-toggle="tooltip"
 	data-placement="top"
@@ -87,151 +79,65 @@ button {
 	value="Launch"
 	{% if s3sstatus %}disabled{% endif %}
 >{% trans 'chgKey' %}</button
-></div ")"
-></div ")"
-></form
---><!--/div "]"--></td ")"
-
->
-<!-- ==================== -->
-<td  "("
-
-><!--div "(" class="collapse" id="collapseSecretKey"
-	style="width: 100%"
---><!--div "(" class="form-control border-0"
-	style="width: 100%"
---><input onClick="this.select();"
+></div
+></div></form
+></td
+></tr
+><tr
+><td
+><input onClick="this.select();"
 class="collapse" id="collapseSecretKey"
 	value="{{ secret_key }}"
 	class="border-0 flex-grow-1"
 	style="width: 100%"
-/><!--/div ")"
---><!--/div ")"
---></td ")"
-></tr ")"
->
+	readonly="readonly"
+/></td
+></tr
 
-<!-- -------------------------------------------------------------- -->
-<tr class="bg-light" "("
->
+><tr><td><hr></td></tr
 
-<!-- ==================== -->
-<td width="30%" "("
-><!--div class="btn-group pt-2" "["
---><!--a class="btn btn-outline-primary h-75"
-	data-toggle="collapse"
-	href="#collapseSecretKey"
-	role="button"
-	aria-expanded="false"
-	aria-controls="collapseSecretKey"
->{% trans 'viewSecretKey' %}</a
--->
-<form action="{% url 'chgkey' %}"
-	method="post"
->{% csrf_token %}<div "(" class="form-group"
-><div "(" class="button-wrapper" 
-	{% if s3sstatus %}
-	data-toggle="tooltip"
-	data-placement="top"
-	title="{% trans 'stops3tochangesecretkey' %}"
-{% endif %}
-><button type="submit"
-	class="btn btn-outline-primary h-75"
-	value="Launch"
-	{% if s3sstatus %}disabled{% endif %}
->{% trans 'chgKey' %}</button
-></div ")"
-></div ")"
-></form
-><!--/div "]"--></td ")"
-
->
-<!-- ==================== -->
-<td  "("
-
-><!--div "(" class="collapse" id="collapseSecretKey"
-	style="width: 100%"
---><!--div "(" class="form-control border-0"
-	style="width: 100%"
---><!--input onClick="this.select();"
-class="collapse" id="collapseSecretKey"
-	value="{{ secret_key }}"
-	class="border-0 flex-grow-1"
-	style="width: 100%"
-/--><!--/div ")"
---><!--/div ")"
---></td ")"
-></tr ")"
->
-
-<!-- -------------------------------------------------------------- -->
-<tr "("
->
-
-<!-- ==================== -->
-<td width="30%" "("
->{% trans 'authenticationMethod' %}</td ")"
->
-
-<!-- ==================== -->
-<td  "("
+><tr
+><td class="h6-small"
+>{% trans 'authenticationMethod' %}</td
+></tr
+><tr
+><td class="h5"
 >{% if authenticated_method == "myproxy-logon" %}{% trans 'myproxyLogon' %}{% endif %}
 {% if authenticated_method == "grid-proxy-init" %}{% trans 'gridProxyInit' %}{% endif %}
 {% if authenticated_method == "gfkey" %}{% trans 'gfkey' %}{% endif %}
-</td ")"
-></tr ")"
->
+</td
+></tr
 
-<!-- -------------------------------------------------------------- -->
-<tr class="bg-light" "("
->
+><tr><td><hr></td></tr
 
-<!-- ==================== -->
-<td width="30%" "("
->{% trans 'expirationDate' %}</td ")"
->
-
-<!-- ==================== -->
-<td  "("
->{{ expiration_date_calendar_datetime }}</td ")"
->
-
-</td ")"
-></tr ")"
-
-<!-- -------------------------------------------------------------- -->
+><tr
+><td
+>{% trans 'expirationDate' %}
 {% if authenticated_method != "gfkey" %}
-<tr class="bg-light" "("
->
-
-<!-- ==================== -->
-<td width="30%" "("
->
-
-<form action="{% url 'reauth' %}"
+<div style='float: right; text-align: right'
+><form action="{% url 'reauth' %}"
 	method="post"
->{% csrf_token %}<div "(" class="form-group pt-2"
-><button type="submit"
+	class="form-inline"
+>{% csrf_token %}
+<button type="submit"
 	class="btn btn-outline-primary h-75"
 	value="Launch"
-
 >{% trans 'updateCertificate' %}</button
-></div ")"
 ></form
+></div
+>{% endif %}</td
+></tr
+><tr
+><td class="h5"
+>{{ expiration_date_calendar_datetime }}</td
+></td
+></tr
 
-></td ")"
+><tr><td><hr></td></tr
 
-<!-- ==================== -->
-<td "("
+><tbody
+></table
 >
-</tr ")"
->
-{% endif %}
-<!-- -------------------------------------------------------------- -->
-
-</table 
-      ></div>
-      </div>
 
 {% endblock %}
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-01 14:48+0900\n"
+"POT-Creation-Date: 2021-03-04 09:58+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgstr "エントリ追加"
 msgid "applyACLchanges"
 msgstr "変更を適用"
 
-#: templates/console/base.html:33 templates/console/chgkeyresult.html:9
+#: templates/console/base.html:33 templates/console/chgkeyresult.html:11
 msgid "Home"
 msgstr "ホーム"
 
@@ -46,17 +46,69 @@ msgstr "共有設定"
 msgid "Logout"
 msgstr "ログアウト"
 
-#: templates/console/chgkeyresult.html:17 templates/console/result.html:46
+#: templates/console/chgkeyresult.html:19 templates/console/k/result.html:48
+#: templates/console/result.html:53
 msgid "accessKey"
-msgstr "アクセスキー"
+msgstr "アクセスキーID"
 
-#: templates/console/chgkeyresult.html:28 templates/console/k/result.html:6
+#: templates/console/chgkeyresult.html:31 templates/console/result.html:75
 msgid "secretKey"
-msgstr "シークレットキー"
+msgstr "シークレットアクセスキー"
 
-#: templates/console/k/result.html:2
-msgid "status"
-msgstr ""
+#: templates/console/k/result.html:30 templates/console/result.html:33
+msgid "StartGfarmS3"
+msgstr "起動"
+
+#: templates/console/k/result.html:30 templates/console/result.html:33
+msgid "StopGfarmS3"
+msgstr "停止"
+
+#: templates/console/k/result.html:39 templates/console/result.html:44
+msgid "running"
+msgstr "起動中"
+
+#: templates/console/k/result.html:39 templates/console/result.html:44
+msgid "stopped"
+msgstr "停止中"
+
+#: templates/console/k/result.html:74 templates/console/k/result.html:127
+#: templates/console/result.html:84 templates/console/result.html:139
+msgid "viewSecretKey"
+msgstr "表示"
+
+#: templates/console/k/result.html:83 templates/console/k/result.html:136
+#: templates/console/result.html:93 templates/console/result.html:148
+msgid "stops3tochangesecretkey"
+msgstr "シークレットキーを変更するにはGfarm-S3を停止してください"
+
+#: templates/console/k/result.html:89 templates/console/k/result.html:142
+#: templates/console/result.html:99 templates/console/result.html:154
+msgid "chgKey"
+msgstr "変更"
+
+#: templates/console/k/result.html:173 templates/console/result.html:188
+msgid "authenticationMethod"
+msgstr "認証方式"
+
+#: templates/console/k/result.html:178 templates/console/result.html:194
+msgid "myproxyLogon"
+msgstr "GSI (myproxy)"
+
+#: templates/console/k/result.html:179 templates/console/result.html:195
+msgid "gridProxyInit"
+msgstr "GSI (grid-proxy-init)"
+
+#: templates/console/k/result.html:180 templates/console/result.html:196
+msgid "gfkey"
+msgstr "Gfarm共有鍵"
+
+#: templates/console/k/result.html:191 templates/console/result.html:207
+msgid "expirationDate"
+msgstr "有効期限"
+
+#: templates/console/k/result.html:218 templates/console/result.html:236
+msgid "updateCertificate"
+msgstr "更新"
 
 #: templates/console/login.html:7
 msgid "errorMessage"
@@ -90,54 +142,11 @@ msgstr "パスワード"
 msgid "GoButton"
 msgstr "ログイン"
 
-#: templates/console/result.html:28
-msgid "StartGfarmS3"
-msgstr "起動"
+#: templates/console/result.html:29
+msgid "CurrentStatus"
+msgstr "状態"
 
-#: templates/console/result.html:28
-msgid "StopGfarmS3"
-msgstr "停止"
-
-#: templates/console/result.html:37
-msgid "running"
-msgstr "起動中"
-
-#: templates/console/result.html:37
-msgid "stopped"
-msgstr "停止中"
-
-#: templates/console/result.html:72 templates/console/result.html:125
-msgid "viewSecretKey"
-msgstr "シークレットキーを表示"
-
-#: templates/console/result.html:81 templates/console/result.html:134
-msgid "stops3tochangesecretkey"
-msgstr "シークレットキーを変更するにはGfarm-S3を停止してください"
-
-#: templates/console/result.html:87 templates/console/result.html:140
-msgid "chgKey"
-msgstr "変更"
-
-#: templates/console/result.html:171
-msgid "authenticationMethod"
-msgstr "認証方式"
-
-#: templates/console/result.html:176
-msgid "myproxyLogon"
-msgstr "GSI (myproxy)"
-
-#: templates/console/result.html:177
-msgid "gridProxyInit"
-msgstr "GSI (grid-proxy-init)"
-
-#: templates/console/result.html:178
-msgid "gfkey"
-msgstr "Gfarm共有鍵"
-
-#: templates/console/result.html:189
-msgid "expirationDate"
-msgstr "有効期限"
-
-#: templates/console/result.html:215
-msgid "updateCertificate"
-msgstr "更新"
+#, fuzzy
+#~| msgid "secretKey"
+#~ msgid "SecretKey"
+#~ msgstr "シークレットキー"

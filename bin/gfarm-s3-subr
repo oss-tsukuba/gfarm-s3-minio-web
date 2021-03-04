@@ -880,7 +880,7 @@ try_start_a_server() {
 
 ###	case 0
 
-	rm -f $tmpfile
+	#rm -f $tmpfile
 	if ! mymc_init; then
 		rm -f $pidfile
 ### case M: mc_init failed
