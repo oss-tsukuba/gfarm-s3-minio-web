@@ -1,92 +1,79 @@
 {% extends "console/base.html" %}
 {% load i18n %}
 {% block content1 %}
-<!-- ( 
--->
-
-<div "("
-><div "(" class="col-md-12 h3"
->{{ bucket }}</div ")"
-></div ")"
-
-><div "("
-><td "("
-></td ")"
-><td "("
-><div "("
->owner: {{ bucket_owner }} group: {{ bucket_group }} {{ date }}</div ")"
+<div
+><div class="col-md-12 h3"
 ><span id="msg"
->{% if cmd_status %}
-<div "(" class="alert alert-success" role="alert">{% trans 'updated' %}</div ")"
+>{% if cmd_status %}<span class="alert alert-success"
+>{% trans 'updated' %}&nbsp;</span
 >{% endif %}</span
-><div></div></td ")"
-></div ")"
-
-
-><form "(" action="{% url 'aclfile' %}?bucket={{ bucket }}"
-	method="post"
->{% csrf_token %}<table "[" class="table-responsive table-striped border-0"
-
-<th "("
-><td "(" style="width: 50px"
-><button type="button" class="btn btn-link btn-sm text-secondary disabled">&nbsp;</button
-></td ")"
-><td "(" style="width: 300px"
-><div "(" class="col-10">user/group</div ")"
-></td ")"
-><td "(" style="width: 40px align-middle pl-2 pr-2"
-><div "(" class="">read</div ")"
-></td ")"
-><td "(" style="width: 40px align-middle pl-2 pr-2"
-><div "(" class="">write</div ")"
-></td ")"
-></th ")">
-
-{% for e in acl_modifiable_entries %}{{ e.entry|safe }}{% endfor %}
-
-<tr "(" id="acl_list_anchor"
-><td "("
-></td ")"
-><input type="hidden"
-	name="bucket"
-	value="{{ bucket }}"
-/><input type="hidden"
-	name="acl_original_string"
-	value="{{ acl_original_string }}"
-><td "("
-></td ")"
-><td "("
-></td ")"
-><td "("
-></td ")"
-/></tr ")"
-
-><tr "("
-><td colspan="4" "("
-><div class="btn-group pt-2" "["
-><div><button type="button"
-	id="add_entry"
-	class="btn btn-outline-primary">{% trans 'addEntry' %}</button
-></div><div><button type="submit"
-	id="apl"
-	class="btn btn-outline-primary"
-	disabled
-	value="apply-settings">{% trans 'applyACLchanges' %}</button
-></div></div "]"
+>{{ bucket }}</div
+></div
+><div
+><div class="col-md-12 h6"
+><div
+>owner: {{ bucket_owner }} group: {{ bucket_group }} {{ date }}</div
+><div
+></div
+></div
+></div
+><form action="{% url 'aclfile' %}?bucket={{ bucket }}" method="post"
+>{% csrf_token %}<table class="table-responsive table-striped border-0"
+><thead
+><tr
+><th style="width: 50px"
+><button type="button" class="btn btn-link btn-sm text-secondary disabled"
+>&nbsp;</button
+></th
+><th style="width: 300px"
+><div class="col-10"
+>user/group</div
+></th
+><th style="width: 40px align-middle pl-2 pr-2"
+><div class=""
+>read</div
+></th
+><th style="width: 40px align-middle pl-2 pr-2"
+><div class=""
+>write</div
+></th
+></tr
+></thead
+><tbody
+>{% for e in acl_modifiable_entries %}{{ e.entry|safe }}{% endfor %}<tr id="acl_list_anchor"
+><td
 ></td
-></tr ")"
-
-
-></table "]"
-
-></form ")"
-
-><script>
-var seq = {{ seq }};
+><input type="hidden" name="bucket" value="{{ bucket }}"
+ /><input type="hidden" name="acl_original_string" value="{{ acl_original_string }}"
+ /><td
+></td
+><td
+></td
+><td
+></td
+></tr
+><tr
+><td colspan="4"
+><div class="btn-group pt-2"
+><div
+><button type="button" id="add_entry" class="btn btn-outline-primary"
+>{% trans 'addEntry' %}</button
+></div
+><div
+><button type="submit" id="apl" class="btn btn-outline-primary" disabled value="apply-settings"
+>{% trans 'applyACLchanges' %}</button
+></div
+></div
+></td
+></tr
+></tbody
+></table
+></form
+><script
+>var seq = {{ seq }};
 var data_groups_and_users = [
 { id: 0, text: "" },
 {% for e in groups_users %}{ id: "{{ e.id }}", text: "{{ e.text }}" },{% endfor %}
 ];
-</script>
-<!-- ) -->
-{% endblock %}
+</script
+>{% endblock %}
