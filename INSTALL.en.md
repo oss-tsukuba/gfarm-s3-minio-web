@@ -74,7 +74,7 @@ sudo yum install -y httpd mod_ssl uuid myproxy \
 ```
 
 ```
-sudo python3 -m pip install 'Django<2.2'
+sudo python3 -m pip install Django
 sudo python3 -m pip install gunicorn
 sudo python3 -m pip install boto3
 ```

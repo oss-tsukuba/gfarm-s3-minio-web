@@ -78,8 +78,7 @@ WSGI_APPLICATION = 'gfarms3.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'var', 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.dummy',
     }
 }
 
