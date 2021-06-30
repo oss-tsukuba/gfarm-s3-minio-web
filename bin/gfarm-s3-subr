@@ -704,6 +704,21 @@ generate_apache_conf() {
 	rm $local_user_map_tmp $user_port_map_tmp
 }
 
+generate_reverse_proxy_routes() {
+	local local_user_map_tmp=$(mktemp $GFARM_S3_TMP/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
+	local user_port_map_tmp=$(mktemp $GFARM_S3_TMP/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
+	grep -v "^#" "$GFARMS3_LOCAL_USER_MAP" | sort_usermap_by_local_username >$local_user_map_tmp
+	grep -v "^#" "$GFARMS3_USER_PORT_MAP" | sort_portmap_by_local_username >$user_port_map_tmp
+	join -t: -1"$USERMAP_FIELD_LOCAL_USERNAME" -2"$PORTMAP_FIELD_LOCAL_USERNAME" \
+		-o "1.$USERMAP_FIELD_ACCESS_KEY,2.$PORTMAP_FIELD_PORT" \
+		$local_user_map_tmp $user_port_map_tmp | awk \
+		-F : \
+		'! /^#/ {
+			printf("%s\thttp://127.0.0.1:%s\n", $1, $2)
+		}'
+	rm $local_user_map_tmp $user_port_map_tmp
+}
+
 generate_nginx_conf() {
 	return 0
 }
@@ -734,6 +749,21 @@ update_reverse_proxy() {
 			status=1
 		fi
 	fi
+
+	local tmpfile=$(mktemp "$GFARMS3_REVERSE_PROXY_ROUTES.XXXXXX") || return 1
+
+	if ! generate_reverse_proxy_routes > "$tmpfile"; then
+		return 1
+	fi
+
+	if cmp "$tmpfile" "$GFARMS3_REVERSE_PROXY_ROUTES" >/dev/null; then
+		echo "no change" 1>&2
+		rm "$tmpfile"
+	else
+		mv "$tmpfile" "$GFARMS3_REVERSE_PROXY_ROUTES"
+		chmod og+r "$GFARMS3_REVERSE_PROXY_ROUTES"
+	fi
+
 	return $status
 }
 
