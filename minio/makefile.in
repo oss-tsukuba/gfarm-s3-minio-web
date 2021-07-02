@@ -1,5 +1,5 @@
 PREFIX=@prefix@
-WITH_GFARM=/usr/local
+WITH_GFARM=@with_gfarm@
 MINIO_BUILDDIR=@with_minio_builddir@
 GOPATH=$(MINIO_BUILDDIR)/minio/work/go
 GOBIN=$(GOPATH)/bin
