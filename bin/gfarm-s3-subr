@@ -782,17 +782,23 @@ mymc_finish() {
 
 mymc() {
 	if [ -z "$MC_CONFIG_DIR" ]; then return 1; fi
-	$MC_PATH --config-dir "$MC_CONFIG_DIR" "$@"
+
+	r=$($MC_PATH --config-dir "$MC_CONFIG_DIR" "$@" 2>&1)
+	status=$?
+	logger -i -p local7.debug -t gfarm-s3-minio-web:mymc "[$r]"
+
+	return $status
 }
 
 mc_config() {
 	local address="$1"
 	local ENDPOINT_URL="http://$address"
+
 	mymc config host add \
 		"$MC_PROFILE" \
 		"$ENDPOINT_URL" \
-		"$MINIO_ACCESS_KEY" \
-		"$MINIO_SECRET_KEY" 1>&2
+		"$MINIO_ROOT_USER" \
+		"$MINIO_ROOT_PASSWORD" 1>&2
 }
 
 mc_stop() {
@@ -837,11 +843,13 @@ try_start_a_server() {
 
 	if ! mymc_init; then
 ### case M: mc_init failed
+		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[M] mc_init failed"
 		return $ABORT
 	fi
 	if mc_config $address; then
 		## MinIO is already running
 		## success with empty stdout
+		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[S] minio is already running"
 		return $SUCCESS
 	fi
 	mymc_finish
@@ -891,6 +899,7 @@ try_start_a_server() {
 			rm -f $tmpfile
 			rm -f $pidfile
 ###			case 2
+			logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[2] port is in use"
 			return $ABORT
 		fi
 
@@ -905,6 +914,7 @@ try_start_a_server() {
 		rm -f $tmpfile
 		rm -f $pidfile
 ###		case 3
+		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[3] fatal error (another minio may running)"
 		return $ABORT	## fatal error (minio may still running)
 	fi
 
@@ -914,6 +924,7 @@ try_start_a_server() {
 	if ! mymc_init; then
 		rm -f $pidfile
 ### case M: mc_init failed
+		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[M] mc_init failed"
 		return $ABORT
 	fi
 	if ! mc_config $address; then
@@ -921,11 +932,13 @@ try_start_a_server() {
 		kill -KILL $(< $pidfile)
 		rm -f $pidfile
 ###		case 0 => case 4
+		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[4] fatal error (another minio is running)"
 		return $ABORT	## fatal error (minio still running)
 	fi
 	mymc_finish
 	cat $pidfile
 	rm -f $pidfile
+	logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[5] minio started"
 ###	case 0 => case 5:
 	return $SUCCESS
 }
