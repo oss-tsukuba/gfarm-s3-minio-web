@@ -1,80 +1,177 @@
+from http.client import HTTPResponse
+from logging import getLogger, DEBUG, INFO, WARNING
+from logging.handlers import SysLogHandler
+import threading
 import os
-import sys
+import socket
 from subprocess import Popen, PIPE
-import urllib.request
 import time
+from urllib.request import Request, urlopen
+
+handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
+logger = getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(DEBUG)
 
 gfarm_s3_conf = "/usr/local/etc/gfarm-s3.conf"
 
 
-def myformat(t):
-    i = time.strftime('%Y%m%dT%H%M%S', time.gmtime(t))
+def myformat(t=None):
+    if t is None:
+        t = time.time()
+    i = time.strftime("%Y%m%dT%H%M%S", time.gmtime(t))
     f = (int)((t % 1) * 1000000)
     return "{}.{:06d}Z".format(i, f)
 
 
 def app(environ, start_response):
-    now = time.time()
-    #sys.stderr.write(f"@@@ ACCEPT {myformat(now)}\n")
-    headers = [(h[5:].replace('_', '-'), environ.get(h))
-                  for h in environ if h.startswith("HTTP_")]
-    headers = dict(headers)
-    #for k in headers:
-        #sys.stderr.write(f"@@@ >>> {k}: {headers[k]}\n")
-    content_length = environ.get("CONTENT_LENGTH")
-    if content_length is not None:
-        headers["CONTENT-LENGTH"] = content_length
+    (method, path, request_hdr, input, file_wrapper) = accept_request(environ)
 
-    destURL = getDestURL(headers)
+    destURL = getDestURL(request_hdr)
     if isinstance(destURL, int):
-        sys.stderr.write(f"@@@ app: {destURL}\n")
+#        logger.debug(f"@@@ -- START_RESPONSE {destURL}")
         start_response(f"{destURL}", [])
         return []
-
-    path = environ.get("RAW_URI")
     url = destURL + path
 
-    #sys.stderr.write(f"@@@ getDestURL => {destURL}\n")
-    #sys.stderr.write(f"@@@ path = {path}\n")
-    #sys.stderr.write(f"@@@ url = {url}\n")
+#    logger.debug(f"@@@ METHOD {method}")
+    #logger.debug(f"@@@ {method} {url} {input}")
+
+    (response, status, response_hdr) = \
+	send_request(method, url, request_hdr, input)
+
+    if response is None:
+        logger.debug(f"@@@ {myformat()} START_RESPONSE {status}")
+        start_response(f"{status}", [])
+        return []
+
+#    logger.debug(f"@@@ RESPONSE {response}")
+#    logger.debug(f"@@@ RESPONSE FP = {response.fp}")
+
+    (chunked, xAccelBuffering) = parse_response_hdr(response_hdr)
+    logger.debug(f"@@@ {myformat()} START_RESPONSE {status}")
+    write = start_response(status, response_hdr)
+
+    respiter = \
+        gen_respiter(response, write, chunked, xAccelBuffering, file_wrapper)
+    logger.debug(f"@@@ respiter = {respiter}")
+    return respiter
+
+        #write = start_response(status, xxxheaders)
+            # (void)write
+        #return rawRelay(write, response)
+
+
+def accept_request(environ):
+    logger.debug(f"@@@ ACCEPT {myformat()}")
+    method = environ.get("REQUEST_METHOD")
+    path = environ.get("RAW_URI")
+    request_hdr = [(h[5:].replace('_', '-'), environ.get(h))
+                      for h in environ if h.startswith("HTTP_")]
+    request_hdr = dict(request_hdr)
+#    for k in request_hdr:
+#        logger.debug(f"@@@ >> {k}: {request_hdr[k]}")
+
+    content_length = environ.get("CONTENT_LENGTH")
+    if content_length is not None:
+        request_hdr["CONTENT-LENGTH"] = content_length
+#        logger.debug(f"@@@ +++ CONTENT-LENGTH: {content_length}")
 
     input = environ.get("wsgi.input")
+    file_wrapper = environ["wsgi.file_wrapper"]
 
-    method = environ.get("REQUEST_METHOD")
+#    logger.debug(f"@@@ getDestURL => {destURL}")
+#    logger.debug(f"@@@ PATH => {path}")
+#    logger.debug(f"@@@ URL => {url}")
 
-    sys.stderr.write(f"{myformat(now)} {method} {path}\n")
+#    logger.debug(f"@@@ INPUT = {type(input)}")
 
-    req = urllib.request.Request(url, input, headers, method=method)
+    return (method, path, request_hdr, input, file_wrapper)
 
+
+def parse_response_hdr(response_hdr):
+    chunked = None
+    xAccelBuffering = None
+    for (k, v) in response_hdr:
+#        logger.debug(f"@@@ RESPONSE HEADER k = {k}, v = {v}")
+        if k.lower() == "transfer-encoding":
+            chunked = v.lower() == "chunked"
+        if k.lower() == "x-accel-buffering":
+            xAccelBuffering = v.lower() != "no"
+
+    logger.debug(f"@@@ RESPONSE X-Accel-Buffering: {xAccelBuffering}")
+    logger.debug(f"@@@ RESPONSE Transfer-Encoding: chunked = {chunked}")
+    return (chunked, xAccelBuffering)
+
+
+def send_request(method, url, request_hdr, input):
     try:
-        res = urllib.request.urlopen(req, timeout=86400)
-        status = f"{res.status}"
-        headers = res.getheaders()
-        sys.stderr.write(f"{myformat(now)} SUCCESS status = {status}\n")
+        req = Request(url, input, request_hdr, method=method)
+        response = urlopen(req, timeout=86400)
+        status = f"{response.status}"
+        response_hdr = response.getheaders()
+        logger.debug(f"@@@ SUCCESS {method} {url} STATUS {status}")
 
     except Exception as e:
-        res = None
+        response = None
         status = f"{e.status}"
-        headers = [(k, e.headers[k]) for k in e.headers]
-        sys.stderr.write(f"{myformat(now)} EXCEPT status = {status}\n")
+        response_hdr = [(k, e.response_hdr[k]) for k in e.response_hdr]
+        logger.debug(f"@@@ EXCEPT {method} {url} STATUS {status}")
 
-    #sys.stderr.write(f"@@@ res: {type(res)}\n")
+#    for (k, v) in response_hdr:
+#        logger.debug(f"@@@ << {k}: {v}")
 
-    start_response(status, headers)
-    now = time.time()
-    #sys.stderr.write(f"@@@ RESPONSE {myformat(now)}\n")
-    if res is None:
-        return []
-    return environ['wsgi.file_wrapper'](res)
+###    logger.debug(f"@@@ response: {type(response)}")
+###    response.__class__ = myHTTPResponse
+###    logger.debug(f"@@@ response: {type(response)}")
+
+    return (response, status, response_hdr)
 
 
-def getDestURL(headers):
-    #for key in headers:
-    #    sys.stderr.write(f"@@@ {key} => {headers[key]}\n")
-    AccessKeyID = getS3AccessKeyID(headers.get("AUTHORIZATION"))
+def gen_respiter(response, write, chunked, xAccelBuffering, file_wrapper):
+    if chunked or xAccelBuffering == False:
+        wsgi_response_obj = write.__self__
+#        logger.debug(f"@@@ UNBUFFERED READER")
+        respiter = unbufferedReader(response)
+        wsgi_response_obj.send_headers()
+        wsgi_response_obj.chunked = False
+    else:
+#        logger.debug(f"@@@ FILE_WRAPPER")
+        respiter = file_wrapper(response)
+    return respiter
+
+
+class unbufferedReader():
+    def __init__(self, response):
+        #logger.debug(f"@@@ UNBUFFERED READER __INIT__")
+        self.response = response	## keep response
+        amt = 8192			## buffer size
+        self.b = bytearray(amt)
+
+    def __iter__(self):
+        #logger.debug(f"@@@ UNBUFFERED READER __ITER__")
+        return self
+
+    def __next__(self):
+#        logger.debug(f"@@@ UNBUFFERED READER __NEXT__")
+        try:
+            n = self.response.fp.readinto1(self.b)
+        except:
+            raise StopIteration
+        if n == 0:
+            raise StopIteration
+        data = bytes(self.b[:n])
+        #logger.debug(f"@@@ UNBUFFERED READER n = {n} data = [{debug_dumps(data)}]")
+        return data
+
+
+def getDestURL(request_hdr):
+    #for key in request_hdr:
+    #    logger.debug(f"@@@ {key} => {request_hdr[key]}")
+    AccessKeyID = getS3AccessKeyID(request_hdr.get("AUTHORIZATION"))
     if AccessKeyID is None:
         return 401
-    #sys.stderr.write(f"@@@ getDestURL: AccessKeyID = {AccessKeyID}\n")
+    #logger.debug(f"@@@ getDestURL: AccessKeyID = {AccessKeyID}")
     return lookupRoutingTable(AccessKeyID)
 
 
@@ -91,15 +188,15 @@ def getS3AccessKeyID(Authorization):
 def lookupRoutingTable(AccessKeyID):
     key = AccessKeyID	## Access Key ID itself is used for DB Key
     r = getReverseProxyRoutesDict(gfarm_s3_conf).get(key)
-    #sys.stderr.write(f"@@@ lookupRoutingTable: {AccessKeyID} => {r}\n")
+    #logger.debug(f"@@@ lookupRoutingTable: {AccessKeyID} => {r}")
     if r is None:
         return 503
-    url = r[0]	## extract URL part
-    #sys.stderr.write(f"@@@ lookupRoutingTable: url = {url}\n")
-    if url is None:
+    destURL = r[0]	## extract URL part
+    #logger.debug(f"@@@ lookupRoutingTable: destURL = {destURL}")
+    if destURL is None:
         return 503
-    #sys.stderr.write(f"@@@ {AccessKeyID} => {url}\n")
-    return url
+    #logger.debug(f"@@@ {AccessKeyID} => {destURL}")
+    return destURL
 
 
 reverseProxyRoutes = dict({
@@ -107,29 +204,38 @@ reverseProxyRoutes = dict({
     "path": None,
     "timestamp": 0,
     "lastchecked": 0,
+    "statInterval": 1,
+    "lock": threading.Lock(),
     })
+
 
 def getReverseProxyRoutesDict(gfarm_s3_conf):
     global reverseProxyRoutes
-    statInterval = 1
     path = reverseProxyRoutes["path"] 
     if path is None:
-        path = get_gfarms3_env(gfarm_s3_conf, "GFARMS3_REVERSE_PROXY_ROUTES")
-        reverseProxyRoutes["path"] = path 
-        #sys.stderr.write(f"@@@ getReverseProxyRoutesDict: path = {path}\n")
+        with reverseProxyRoutes["lock"]:
+            path = get_gfarms3_env(gfarm_s3_conf, "GFARMS3_REVERSE_PROXY_ROUTES")
+            reverseProxyRoutes["path"] = path 
+            #logger.debug(f"@@@ getReverseProxyRoutesDict: path = {path}")
     dict = reverseProxyRoutes["dict"]
     timestamp = reverseProxyRoutes["timestamp"]
     timestamp_file = timestamp
     now = time.time()
-    if reverseProxyRoutes["lastchecked"] + statInterval < now:
-        #sys.stderr.write(f"@@@ getReverseProxyRoutesDict: STAT elapsed = {now - reverseProxyRoutes['lastchecked']}\n")
-        reverseProxyRoutes["lastchecked"] = now
+    if (reverseProxyRoutes["lastchecked"] + 
+        reverseProxyRoutes["statInterval"]) < now:
+        #logger.debug(f"@@@ getReverseProxyRoutesDict: STAT elapsed = {now - reverseProxyRoutes["lastchecked"]}")
+        with reverseProxyRoutes["lock"]:
+            reverseProxyRoutes["lastchecked"] = now
         timestamp_file = os.stat(path).st_mtime
     if dict is None or timestamp < timestamp_file:
         dict = loadReverseProxyRoutesDict(path)
-        reverseProxyRoutes["dict"] = dict
-        reverseProxyRoutes["timestamp"] = timestamp_file  
-    #sys.stderr.write(f"@@@ getReverseProxyRoutesDict: dict = {dict}\n")
+        logger.debug(f"@@@ WITH LOCK")
+        with reverseProxyRoutes["lock"]:
+            ## although timestamp_file is calculated before obtaining current
+            ## lock, this operation is still safe.  probably....
+            reverseProxyRoutes["dict"] = dict
+            reverseProxyRoutes["timestamp"] = timestamp_file  
+    #logger.debug(f"@@@ getReverseProxyRoutesDict: dict = {dict}")
     return dict
 
 
@@ -147,3 +253,21 @@ def get_gfarms3_env(gfarm_s3_conf , key):
         (out, err) = p.communicate()
         p.wait()
     return out.decode()
+
+
+#def debug_dumps(s):
+#    r = ""
+#    for c in s:
+#        if ord(' ') <= c and c <= ord('~'):
+#            r += f"{chr(c)}"
+#        elif c == ord('\t'):
+#            r += "\\t"
+#        elif c == ord('\n'):
+#            r += "\\n"
+#        elif c == ord('\r'):
+#            r += "\\r"
+#        elif c == ord('\\'):
+#            r += "\\\\"
+#        else:
+#            r += "\\{0:03o}".format(c)
+#    return r
