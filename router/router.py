@@ -6,7 +6,7 @@ import os
 import socket
 from subprocess import Popen, PIPE
 import time
-from urllib.request import Request, urlopen
+from myurllib import myUrllib
 
 handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
 logger = getLogger(__name__)
@@ -27,6 +27,8 @@ def myformat(t=None):
 def app(environ, start_response):
     (method, path, request_hdr, input, file_wrapper) = accept_request(environ)
 
+    myurllib = myUrllib()
+
     destURL = getDestURL(request_hdr)
     if isinstance(destURL, int):
 #        logger.debug(f"@@@ -- START_RESPONSE {destURL}")
@@ -38,7 +40,7 @@ def app(environ, start_response):
     #logger.debug(f"@@@ {method} {url} {input}")
 
     (response, status, response_hdr) = \
-	send_request(method, url, request_hdr, input)
+	myurllib.send_request(method, url, request_hdr, input)
 
     if response is None:
         logger.debug(f"@@@ {myformat()} START_RESPONSE {status}")
@@ -53,7 +55,7 @@ def app(environ, start_response):
     write = start_response(status, response_hdr)
 
     respiter = \
-        gen_respiter(response, write, chunked, xAccelBuffering, file_wrapper)
+        myurllib.gen_respiter(response, write, chunked, xAccelBuffering, file_wrapper)
     logger.debug(f"@@@ respiter = {respiter}")
     return respiter
 
@@ -102,67 +104,6 @@ def parse_response_hdr(response_hdr):
     logger.debug(f"@@@ RESPONSE X-Accel-Buffering: {xAccelBuffering}")
     logger.debug(f"@@@ RESPONSE Transfer-Encoding: chunked = {chunked}")
     return (chunked, xAccelBuffering)
-
-
-def send_request(method, url, request_hdr, input):
-    try:
-        req = Request(url, input, request_hdr, method=method)
-        response = urlopen(req, timeout=86400)
-        status = f"{response.status}"
-        response_hdr = response.getheaders()
-        logger.debug(f"@@@ SUCCESS {method} {url} STATUS {status}")
-
-    except Exception as e:
-        response = None
-        status = f"{e.status}"
-        response_hdr = [(k, e.response_hdr[k]) for k in e.response_hdr]
-        logger.debug(f"@@@ EXCEPT {method} {url} STATUS {status}")
-
-#    for (k, v) in response_hdr:
-#        logger.debug(f"@@@ << {k}: {v}")
-
-###    logger.debug(f"@@@ response: {type(response)}")
-###    response.__class__ = myHTTPResponse
-###    logger.debug(f"@@@ response: {type(response)}")
-
-    return (response, status, response_hdr)
-
-
-def gen_respiter(response, write, chunked, xAccelBuffering, file_wrapper):
-    if chunked or xAccelBuffering == False:
-        wsgi_response_obj = write.__self__
-#        logger.debug(f"@@@ UNBUFFERED READER")
-        respiter = unbufferedReader(response)
-        wsgi_response_obj.send_headers()
-        wsgi_response_obj.chunked = False
-    else:
-#        logger.debug(f"@@@ FILE_WRAPPER")
-        respiter = file_wrapper(response)
-    return respiter
-
-
-class unbufferedReader():
-    def __init__(self, response):
-        #logger.debug(f"@@@ UNBUFFERED READER __INIT__")
-        self.response = response	## keep response
-        amt = 8192			## buffer size
-        self.b = bytearray(amt)
-
-    def __iter__(self):
-        #logger.debug(f"@@@ UNBUFFERED READER __ITER__")
-        return self
-
-    def __next__(self):
-#        logger.debug(f"@@@ UNBUFFERED READER __NEXT__")
-        try:
-            n = self.response.fp.readinto1(self.b)
-        except:
-            raise StopIteration
-        if n == 0:
-            raise StopIteration
-        data = bytes(self.b[:n])
-        #logger.debug(f"@@@ UNBUFFERED READER n = {n} data = [{debug_dumps(data)}]")
-        return data
 
 
 def getDestURL(request_hdr):
@@ -253,21 +194,3 @@ def get_gfarms3_env(gfarm_s3_conf , key):
         (out, err) = p.communicate()
         p.wait()
     return out.decode()
-
-
-#def debug_dumps(s):
-#    r = ""
-#    for c in s:
-#        if ord(' ') <= c and c <= ord('~'):
-#            r += f"{chr(c)}"
-#        elif c == ord('\t'):
-#            r += "\\t"
-#        elif c == ord('\n'):
-#            r += "\\n"
-#        elif c == ord('\r'):
-#            r += "\\r"
-#        elif c == ord('\\'):
-#            r += "\\\\"
-#        else:
-#            r += "\\{0:03o}".format(c)
-#    return r
