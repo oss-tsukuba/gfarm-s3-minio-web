@@ -7,6 +7,7 @@ import socket
 from subprocess import Popen, PIPE
 import time
 from myurllib import myUrllib
+from myrequests import myRequests
 
 handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
 logger = getLogger(__name__)
@@ -28,27 +29,31 @@ def app(environ, start_response):
     (method, path, request_hdr, input, file_wrapper) = accept_request(environ)
 
     myurllib = myUrllib()
+    #myurllib = myRequests()
 
     destURL = getDestURL(request_hdr)
     if isinstance(destURL, int):
-#        logger.debug(f"@@@ -- START_RESPONSE {destURL}")
+        #logger.debug(f"@@@ -- START_RESPONSE {destURL}")
         start_response(f"{destURL}", [])
         return []
     url = destURL + path
 
-#    logger.debug(f"@@@ METHOD {method}")
+    #logger.debug(f"@@@ METHOD {method}")
     #logger.debug(f"@@@ {method} {url} {input}")
 
     (response, status, response_hdr) = \
 	myurllib.send_request(method, url, request_hdr, input)
+
+    #for (k, v) in response_hdr:
+        #logger.debug(f"@@@ << {k}: {v}")
 
     if response is None:
         logger.debug(f"@@@ {myformat()} START_RESPONSE {status}")
         start_response(f"{status}", [])
         return []
 
-#    logger.debug(f"@@@ RESPONSE {response}")
-#    logger.debug(f"@@@ RESPONSE FP = {response.fp}")
+    #logger.debug(f"@@@ RESPONSE {response}")
+    #logger.debug(f"@@@ RESPONSE FP = {response.fp}")
 
     (chunked, xAccelBuffering) = parse_response_hdr(response_hdr)
     logger.debug(f"@@@ {myformat()} START_RESPONSE {status}")
@@ -71,22 +76,22 @@ def accept_request(environ):
     request_hdr = [(h[5:].replace('_', '-'), environ.get(h))
                       for h in environ if h.startswith("HTTP_")]
     request_hdr = dict(request_hdr)
-#    for k in request_hdr:
-#        logger.debug(f"@@@ >> {k}: {request_hdr[k]}")
+    #for k in request_hdr:
+        #logger.debug(f"@@@ >> {k}: {request_hdr[k]}")
 
     content_length = environ.get("CONTENT_LENGTH")
     if content_length is not None:
         request_hdr["CONTENT-LENGTH"] = content_length
-#        logger.debug(f"@@@ +++ CONTENT-LENGTH: {content_length}")
+        #logger.debug(f"@@@ +++ CONTENT-LENGTH: {content_length}")
 
     input = environ.get("wsgi.input")
     file_wrapper = environ["wsgi.file_wrapper"]
 
-#    logger.debug(f"@@@ getDestURL => {destURL}")
-#    logger.debug(f"@@@ PATH => {path}")
-#    logger.debug(f"@@@ URL => {url}")
+    #logger.debug(f"@@@ getDestURL => {destURL}")
+    #logger.debug(f"@@@ PATH => {path}")
+    #logger.debug(f"@@@ URL => {url}")
 
-#    logger.debug(f"@@@ INPUT = {type(input)}")
+    #logger.debug(f"@@@ INPUT = {type(input)}")
 
     return (method, path, request_hdr, input, file_wrapper)
 
@@ -95,7 +100,7 @@ def parse_response_hdr(response_hdr):
     chunked = None
     xAccelBuffering = None
     for (k, v) in response_hdr:
-#        logger.debug(f"@@@ RESPONSE HEADER k = {k}, v = {v}")
+        #logger.debug(f"@@@ RESPONSE HEADER k = {k}, v = {v}")
         if k.lower() == "transfer-encoding":
             chunked = v.lower() == "chunked"
         if k.lower() == "x-accel-buffering":

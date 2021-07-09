@@ -27,13 +27,6 @@ class myUrllib():
             response_hdr = [(k, e.response_hdr[k]) for k in e.response_hdr]
             logger.debug(f"@@@ EXCEPT {method} {url} STATUS {status}")
 
-        #for (k, v) in response_hdr:
-            #logger.debug(f"@@@ << {k}: {v}")
-
-    ###    logger.debug(f"@@@ response: {type(response)}")
-    ###    response.__class__ = myHTTPResponse
-    ###    logger.debug(f"@@@ response: {type(response)}")
-
         return (response, status, response_hdr)
 
 
