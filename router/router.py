@@ -6,8 +6,7 @@ import os
 import socket
 from subprocess import Popen, PIPE
 import time
-from myurllib import myUrllib
-from myrequests import myRequests
+from urllib.request import Request, urlopen
 
 handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
 logger = getLogger(__name__)
@@ -28,12 +27,9 @@ def myformat(t=None):
 def app(environ, start_response):
     (method, path, request_hdr, input, file_wrapper) = accept_request(environ)
 
-    myurllib = myUrllib()
-    #myurllib = myRequests()
-
     destURL = getDestURL(request_hdr)
     if isinstance(destURL, int):
-        #logger.debug(f"@@@ -- START_RESPONSE {destURL}")
+        logger.debug(f"@@@ {myformat()} START_RESPONSE {destURL}")
         start_response(f"{destURL}", [])
         return []
     url = destURL + path
@@ -42,7 +38,7 @@ def app(environ, start_response):
     #logger.debug(f"@@@ {method} {url} {input}")
 
     (response, status, response_hdr) = \
-	myurllib.send_request(method, url, request_hdr, input)
+	send_request(method, url, request_hdr, input)
 
     #for (k, v) in response_hdr:
         #logger.debug(f"@@@ << {k}: {v}")
@@ -60,13 +56,9 @@ def app(environ, start_response):
     write = start_response(status, response_hdr)
 
     respiter = \
-        myurllib.gen_respiter(response, write, chunked, xAccelBuffering, file_wrapper)
+        gen_respiter(response, write, chunked, xAccelBuffering, file_wrapper)
     logger.debug(f"@@@ respiter = {respiter}")
     return respiter
-
-        #write = start_response(status, xxxheaders)
-            # (void)write
-        #return rawRelay(write, response)
 
 
 def accept_request(environ):
@@ -96,6 +88,23 @@ def accept_request(environ):
     return (method, path, request_hdr, input, file_wrapper)
 
 
+def send_request(method, url, request_hdr, input):
+    logger.debug(f"@@@ SEND REQUEST {method} {url} [request_hdr] {input}")
+    try:
+        req = Request(url, input, request_hdr, method=method)
+        response = urlopen(req, timeout=86400)
+        status = f"{response.status}"
+        response_hdr = response.getheaders()
+        logger.debug(f"@@@ SUCCESS {method} {url} STATUS {status}")
+    except Exception as e:
+        response = None
+        status = f"{e.status}"
+        response_hdr = [(k, e.response_hdr[k]) for k in e.response_hdr]
+        logger.debug(f"@@@ EXCEPT {e}")
+
+    return (response, status, response_hdr)
+
+
 def parse_response_hdr(response_hdr):
     chunked = None
     xAccelBuffering = None
@@ -111,9 +120,50 @@ def parse_response_hdr(response_hdr):
     return (chunked, xAccelBuffering)
 
 
+def gen_respiter(response, write, chunked, xAccelBuffering, file_wrapper):
+    if chunked or xAccelBuffering == False:
+        logger.debug(f"@@@ READ1READER")
+        respiter = read1Reader(response)
+    else:
+        logger.debug(f"@@@ FILE_WRAPPER")
+        respiter = file_wrapper(response)
+    return respiter
+
+
+class read1Reader():
+    def __init__(self, response):
+        logger.debug(f"@@@ READ1 READER __INIT__")
+        self.response = response
+
+    def __del__(self):
+        logger.debug(f"@@@ READ1 READER __DEL__")
+        try:
+            self.fp.close()
+        except:
+            pass
+
+    def __iter__(self):
+        logger.debug(f"@@@ READ1 READER __ITER__")
+        return self
+
+    def __next__(self):
+        logger.debug(f"@@@ READ1 READER __NEXT__")
+        amt = 8192	## same size with HTTPResponse.read()
+        try:
+            b = self.response.read1(amt)
+            logger.debug(f"@@@ READ1 READER b = [{debug_dumps(b)}]")
+        except Exception as e:
+            logger.debug(f"@@@ READ1 READER EXCEPTION {e}")
+            b = b''
+        if len(b) == 0:
+            logger.debug(f"@@@ READ1 READER @@@ StopIteration")
+            raise StopIteration
+        return b
+
+
 def getDestURL(request_hdr):
     #for key in request_hdr:
-    #    logger.debug(f"@@@ {key} => {request_hdr[key]}")
+        #logger.debug(f"@@@ {key} => {request_hdr[key]}")
     AccessKeyID = getS3AccessKeyID(request_hdr.get("AUTHORIZATION"))
     if AccessKeyID is None:
         return 401
@@ -199,3 +249,21 @@ def get_gfarms3_env(gfarm_s3_conf , key):
         (out, err) = p.communicate()
         p.wait()
     return out.decode()
+
+
+def debug_dumps(s):
+    r = ""
+    for c in s:
+        if ord(' ') <= c and c <= ord('~'):
+            r += f"{chr(c)}"
+        elif c == ord('\t'):
+            r += "\\t"
+        elif c == ord('\n'):
+            r += "\\n"
+        elif c == ord('\r'):
+            r += "\\r"
+        elif c == ord('\\'):
+            r += "\\\\"
+        else:
+            r += "\\{0:03o}".format(c)
+    return r
