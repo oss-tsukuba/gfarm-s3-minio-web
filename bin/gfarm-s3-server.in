@@ -118,7 +118,8 @@ fi
 
 export MINIO_ROOT_USER="$access_key"
 if [ ! -f "$GFARMS3_SECRET_KEY" ]; then regenerate_secret; fi
-export MINIO_ROOT_PASSWORD=${secret_key:-$(<"$GFARMS3_SECRET_KEY")}
+TMP_MINIO_ROOT_PASSWORD=`cat "$GFARMS3_SECRET_KEY"`
+export MINIO_ROOT_PASSWORD=${secret_key:-$TMP_MINIO_ROOT_PASSWORD}
 
 export MINIO_ACCESS_KEY="$MINIO_ROOT_USER"
 export MINIO_SECRET_KEY="$MINIO_ROOT_PASSWORD"
