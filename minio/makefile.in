@@ -5,7 +5,7 @@ GOPATH=$(MINIO_BUILDDIR)/minio/work/go
 GOBIN=$(GOPATH)/bin
 BUILDDIR=$(MINIO_BUILDDIR)/minio/work/build
 
-GO_ARCHIVE=go1.15.linux-amd64.tar.gz
+GO_ARCHIVE=@with_go_archive@
 GO_ARCHIVE_DIR=$$(dirname $(GOPATH))
 GO_ARCHIVE_PATH=$(GO_ARCHIVE_DIR)/$(GO_ARCHIVE)
 GO_URL=https://dl.google.com/go/$(GO_ARCHIVE)
@@ -24,6 +24,7 @@ CURL=curl
 TAR=tar
 RM=rm
 GIT=git
+INSTALL=install
 
 all::
 	[ -d $(BUILDDIR) ] || $(MKDIR) -p $(BUILDDIR)
@@ -40,8 +41,8 @@ install-go::
 	cd $$(dirname $(GOPATH)) && $(TAR) xfzp $(GO_ARCHIVE_PATH)
 
 install::
-	install -c -m 555 $(GOBIN)/mc "$(MC_PATH)"
-	install -c -m 555 $(GOBIN)/minio "$(MINIO_PATH)"
+	$(INSTALL) -D -c -m 555 $(GOBIN)/mc "$(MC_PATH)"
+	$(INSTALL) -D -c -m 555 $(GOBIN)/minio "$(MINIO_PATH)"
 
 clean::
 	$(RM) -rf $(BUILDDIR)
