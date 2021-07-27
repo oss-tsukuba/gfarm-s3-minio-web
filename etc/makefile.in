@@ -4,7 +4,7 @@ SYS_HTTPD_CONF=/etc/httpd/conf/httpd.conf
 SYS_HTTPD_CONF_D=/etc/httpd/conf.d
 WSGI_USER=@with_wsgi_user@
 
-GFARMS3_CONF=$(PREFIX)/etc/gfarm-s3.conf
+GFARMS3_CONF_DIR=$(PREFIX)/etc
 GFARMS3_LOCAL_USER_MAP=$(PREFIX)/etc/gfarm_s3_local_user_map
 GFARMS3_USER_PORT_MAP=$(GFARM_S3_VAR)/gfarm_s3_user_port_map
 GFARMS3_APACHE_REWRITE_CONF=$(GFARM_S3_VAR)/rewrite.conf
@@ -18,17 +18,23 @@ CHOWN=chown
 SUDO=sudo
 GROUPADD=groupadd
 RM=rm
+#SYSTEMD_SYSTEM=/etc/systemd/system
+SYSTEMD_SYSTEM=/usr/lib/systemd/system
 
 all: 
 
 install:
-	$(INSTALL) -c gfarm-s3.conf $(GFARMS3_CONF)
+	$(INSTALL) -D -c gfarm-s3.conf $(GFARMS3_CONF_DIR)/gfarm-s3.conf
 
 	$(TOUCH) $(GFARMS3_LOCAL_USER_MAP)
 	$(CHMOD) 644 $(GFARMS3_LOCAL_USER_MAP)
 
-	$(INSTALL) -c sudoers /etc/sudoers.d/gfarm-s3
+	$(INSTALL) -D -c sudoers /etc/sudoers.d/gfarm-s3
 	if ! grep -q '^gfarms3:' /etc/group; then $(SUDO) $(GROUPADD) gfarms3; fi
+
+	@echo "*** NOTICE *** The installer has created a group 'gfarms3'." 1>&2
+	@echo "*** NOTICE *** The installer has created a file '/etc/sudoers.d/gfarm-s3'." 1>&2
+	@echo "*** NOTICE *** Please confirm content of the file." 1>&2
 
 	$(MKDIR) -p $$(dirname $(GFARMS3_USER_PORT_MAP))
 	$(CHOWN) $(WSGI_USER) $$(dirname $(GFARMS3_USER_PORT_MAP))
@@ -40,10 +46,12 @@ install:
 	$(TOUCH) $(GFARMS3_APACHE_REWRITE_CONF)
 	$(CHOWN) $(WSGI_USER) $(GFARMS3_APACHE_REWRITE_CONF)
 
-	$(INSTALL) gunicorn.service /etc/systemd/system/gunicorn.service
+	$(INSTALL) -D gunicorn.service $(SYSTEMD_SYSTEM)/gunicorn.service
+	$(INSTALL) -D gfarm-s3-router.service $(SYSTEMD_SYSTEM)/gfarm-s3-router.service
 
 	@echo please add apache-gfarm-s3.conf content to your httpd.conf
 	@echo systemctl enable --now gunicorn.service
+	@echo systemctl enable --now gfarm-s3-router.service
 
 clean:
 
