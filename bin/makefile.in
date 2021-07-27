@@ -28,8 +28,8 @@ generated_scripts= \
 all:
 
 install:
-	for i in $(scripts); do $(INSTALL) -c -m 555 $$i $(BINDIR); done
-	$(INSTALL) -c -m 644 gfarm-s3-subr $(LIBDIR)
+	for i in $(scripts); do $(INSTALL) -D -c -m 555 $$i $(BINDIR)/$$i; done
+	$(INSTALL) -D -c -m 644 gfarm-s3-subr $(LIBDIR)/gfarm-s3-subr
 
 clean:
 
