@@ -7,7 +7,7 @@ import socket
 from subprocess import Popen, PIPE
 import time
 from urllib.request import Request, urlopen
-
+from urllib.error import HTTPError 
 handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
 logger = getLogger(__name__)
 logger.addHandler(handler)
@@ -16,20 +16,12 @@ logger.setLevel(DEBUG)
 gfarm_s3_conf = "/usr/local/etc/gfarm-s3.conf"
 
 
-def myformat(t=None):
-    if t is None:
-        t = time.time()
-    i = time.strftime("%Y%m%dT%H%M%S", time.gmtime(t))
-    f = (int)((t % 1) * 1000000)
-    return "{}.{:06d}Z".format(i, f)
-
-
 def app(environ, start_response):
     (method, path, request_hdr, input, file_wrapper) = accept_request(environ)
 
     destURL = getDestURL(request_hdr)
     if isinstance(destURL, int):
-        logger.debug(f"@@@ {myformat()} START_RESPONSE {destURL}")
+        logger.debug(f"@@@ {myformat()} [1] START_RESPONSE {destURL}")
         start_response(f"{destURL}", [])
         return []
     url = destURL + path
@@ -44,7 +36,7 @@ def app(environ, start_response):
         #logger.debug(f"@@@ << {k}: {v}")
 
     if response is None:
-        logger.debug(f"@@@ {myformat()} START_RESPONSE {status}")
+        logger.debug(f"@@@ {myformat()} [2] START_RESPONSE {status}")
         start_response(f"{status}", [])
         return []
 
@@ -52,11 +44,11 @@ def app(environ, start_response):
     #logger.debug(f"@@@ RESPONSE FP = {response.fp}")
 
     (chunked, xAccelBuffering) = parse_response_hdr(response_hdr)
-    logger.debug(f"@@@ {myformat()} START_RESPONSE {status}")
-    write = start_response(status, response_hdr)
+    logger.debug(f"@@@ {myformat()} [3] START_RESPONSE {status}")
+    start_response(status, response_hdr)
 
     respiter = \
-        gen_respiter(response, write, chunked, xAccelBuffering, file_wrapper)
+        gen_respiter(response, chunked, xAccelBuffering, file_wrapper)
     logger.debug(f"@@@ respiter = {respiter}")
     return respiter
 
@@ -96,11 +88,22 @@ def send_request(method, url, request_hdr, input):
         status = f"{response.status}"
         response_hdr = response.getheaders()
         logger.debug(f"@@@ SUCCESS {method} {url} STATUS {status}")
+    except HTTPError as e:
+        logger.debug(f"@@@ EXCEPT {e}")
+        #logger.debug(f"@@@ EXCEPT code = {e.code}")
+        #logger.debug(f"@@@ EXCEPT reason = {e.reason}")
+        #logger.debug(f"@@@ EXCEPT headers = {e.headers}")
+        #logger.debug(f"@@@ EXCEPT body = {e.read()}")
+        response = e
+        status = f"{e.status}"
+        response_hdr = [(k, e.headers[k]) for k in e.headers]
+        #logger.debug(f"@@@ EXCEPT response_hdr = {response_hdr}")
     except Exception as e:
+        logger.debug(f"@@@ EXCEPT {e}")
+        #logger.debug(f"@@@ EXCEPT response = {response}")
         response = None
         status = f"{e.status}"
-        response_hdr = [(k, e.response_hdr[k]) for k in e.response_hdr]
-        logger.debug(f"@@@ EXCEPT {e}")
+        response_hdr = []
 
     return (response, status, response_hdr)
 
@@ -120,7 +123,7 @@ def parse_response_hdr(response_hdr):
     return (chunked, xAccelBuffering)
 
 
-def gen_respiter(response, write, chunked, xAccelBuffering, file_wrapper):
+def gen_respiter(response, chunked, xAccelBuffering, file_wrapper):
     if chunked or xAccelBuffering == False:
         logger.debug(f"@@@ READ1READER")
         respiter = read1Reader(response)
@@ -151,7 +154,7 @@ class read1Reader():
         amt = 8192	## same size with HTTPResponse.read()
         try:
             b = self.response.read1(amt)
-            logger.debug(f"@@@ READ1 READER b = [{debug_dumps(b)}]")
+            #logger.debug(f"@@@ READ1 READER b = [{debug_dumps(b)}]")
         except Exception as e:
             logger.debug(f"@@@ READ1 READER EXCEPTION {e}")
             b = b''
@@ -251,19 +254,27 @@ def get_gfarms3_env(gfarm_s3_conf , key):
     return out.decode()
 
 
-def debug_dumps(s):
-    r = ""
-    for c in s:
-        if ord(' ') <= c and c <= ord('~'):
-            r += f"{chr(c)}"
-        elif c == ord('\t'):
-            r += "\\t"
-        elif c == ord('\n'):
-            r += "\\n"
-        elif c == ord('\r'):
-            r += "\\r"
-        elif c == ord('\\'):
-            r += "\\\\"
-        else:
-            r += "\\{0:03o}".format(c)
-    return r
+def myformat(t=None):
+    if t is None:
+        t = time.time()
+    i = time.strftime("%Y%m%dT%H%M%S", time.gmtime(t))
+    f = (int)((t % 1) * 1000000)
+    return "{}.{:06d}Z".format(i, f)
+
+
+#def debug_dumps(s):
+#    r = ""
+#    for c in s:
+#        if ord(' ') <= c and c <= ord('~'):
+#            r += f"{chr(c)}"
+#        elif c == ord('\t'):
+#            r += "\\t"
+#        elif c == ord('\n'):
+#            r += "\\n"
+#        elif c == ord('\r'):
+#            r += "\\r"
+#        elif c == ord('\\'):
+#            r += "\\\\"
+#        else:
+#            r += "\\{0:03o}".format(c)
+#    return r
