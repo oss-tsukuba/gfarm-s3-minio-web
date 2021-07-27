@@ -1,5 +1,5 @@
 [Unit]
-Description = gunicorn daemon for Gfarm-S3-Web (WebUI)
+Description = gfarm s3 router (gunicorn app)
 After = network.target
 
 [Service]
@@ -8,7 +8,8 @@ User = @with_wsgi_user@
 #Group = @with_wsgi_group@
 #RuntimeDirectory = gunicorn
 WorkingDirectory = /
-ExecStart = @with_gunicorn@/bin/gunicorn --error-logfile - -w 2 -b @with_wsgi_port@ --chdir @with_wsgi_homedir@/gfarm-s3 gfarms3.wsgi:application
+ExecStart = @with_gunicorn@/bin/gunicorn --error-logfile - --threads @router_nthreads@ --workers @router_nworkers@ -b @with_router_bind@ --chdir @with_router_homedir@/ --capture-output --timeout 180 --reload router:app
+
 #ExecReload = /bin/kill -s HUP $MAINPID
 #KillMode = mixed
 #TimeoutStopSec = 5
