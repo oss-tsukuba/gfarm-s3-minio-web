@@ -122,12 +122,62 @@ AC_SUBST(with_wsgi_group)
 ### --with-wsgi-port=WSGI_PORT
 AC_MSG_CHECKING([for WSGI port])
 AC_ARG_WITH([wsgi-port],
-  AC_HELP_STRING([--with-wsgi-port=WSGI_PORT], [wsgi port [[8000]]]))
+  AC_HELP_STRING([--with-wsgi-port=WSGI_PORT], [wsgi port [[127.0.0.1:8000]]]))
 case x$with_wsgi_port in
-  x|xyes|xno) with_wsgi_port=8000 ;;
+  x|xyes|xno) with_wsgi_port=127.0.0.1:8000 ;;
 esac
 AC_MSG_RESULT([$with_wsgi_port])
 AC_SUBST(with_wsgi_port)
+
+### --with-router-homedir=ROUTER_HOMEDIR
+AC_MSG_CHECKING([for ROUTER homedir])
+AC_ARG_WITH([router-homedir],
+  AC_HELP_STRING([--with-router-homedir=ROUTER_HOMEDIR], [router homedir [[/home/router]]]))
+case x$with_router_homedir in
+  x|xyes|xno) with_router_homedir=/home/router ;;
+esac
+AC_MSG_RESULT([$with_router_homedir])
+AC_SUBST(with_router_homedir)
+
+### --with-router-bind=ROUTER_PORT
+AC_MSG_CHECKING([for ROUTER bind])
+AC_ARG_WITH([router-bind],
+  AC_HELP_STRING([--with-router-bind=ROUTER_PORT], [router bind address [[127.0.0.1:8001]]]))
+case x$with_router_bind in
+  x|xyes|xno) with_router_bind=127.0.0.1:8001 ;;
+esac
+AC_MSG_RESULT([$with_router_bind])
+AC_SUBST(with_router_bind)
+
+### --router-nthreads=ROUTER_NTHREADS
+AC_MSG_CHECKING([number of router threads])
+AC_ARG_WITH([router-nthreads],
+  AC_HELP_STRING([--router-nthreads=ROUTER_NTHREADS], [number of threads [[10]]]))
+case x$router_nthreads in
+  x|xyes|xno) router_nthreads=10 ;;
+esac
+AC_MSG_RESULT([$router_nthreads])
+AC_SUBST(router_nthreads)
+
+### --router-nworkers=ROUTER_NWORKERS
+AC_MSG_CHECKING([number of router workers])
+AC_ARG_WITH([router-nworkers],
+  AC_HELP_STRING([--router-nworkers=ROUTER_NWORKERS], [number of workers [[10]]]))
+case x$router_nworkers in
+  x|xyes|xno) router_nworkers=10 ;;
+esac
+AC_MSG_RESULT([$router_nworkers])
+AC_SUBST(router_nworkers)
+
+### --with-go-archive=GO_ARCHIVE
+AC_MSG_CHECKING([go-archive that fetched from https://dl.google.com/go for build s3 server (MinIO)])
+AC_ARG_WITH([go-archive],
+  AC_HELP_STRING([--with-go-archive=GO_ARCHIVE], [go archive [[go1.16.linux-amd64.tar.gz]]]))
+case x$with_go_archive in
+  x|xyes|xno) with_go_archive=go1.16.linux-amd64.tar.gz ;;
+esac
+AC_MSG_RESULT([$with_go_archive])
+AC_SUBST(with_go_archive)
 
 ### --with-minio-builddir=MINIO_BUILDDIR
 AC_MSG_CHECKING([minio-builddir for build s3 server (MinIO)])
@@ -186,6 +236,7 @@ bin/gfarm-s3-viusermap
 bin/makefile
 etc/apache-gfarm-s3.conf
 etc/gfarm-s3.conf
+etc/gfarm-s3-router.service
 etc/gunicorn.service
 etc/makefile
 etc/sudoers

@@ -637,6 +637,11 @@ with_cache_size
 with_cache_basedir
 with_gfarm_shared_dir
 with_minio_builddir
+with_go_archive
+router_nworkers
+router_nthreads
+with_router_bind
+with_router_homedir
 with_wsgi_port
 with_wsgi_group
 with_wsgi_user
@@ -741,7 +746,6 @@ infodir
 docdir
 oldincludedir
 includedir
-runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -785,6 +789,11 @@ with_wsgi_homedir
 with_wsgi_user
 with_wsgi_group
 with_wsgi_port
+with_router_homedir
+with_router_bind
+with_router_nthreads
+with_router_nworkers
+with_go_archive
 with_minio_builddir
 with_gfarm_shared_dir
 with_cache_basedir
@@ -837,7 +846,6 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
-runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1090,15 +1098,6 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
-  -runstatedir | --runstatedir | --runstatedi | --runstated \
-  | --runstate | --runstat | --runsta | --runst | --runs \
-  | --run | --ru | --r)
-    ac_prev=runstatedir ;;
-  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
-  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
-  | --run=* | --ru=* | --r=*)
-    runstatedir=$ac_optarg ;;
-
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1236,7 +1235,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir runstatedir
+		libdir localedir mandir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1389,7 +1388,6 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1470,7 +1468,17 @@ Optional Packages:
   --with-wsgi-group=WSGI_GROUP
                           wsgi groupname [[wsgi]]
   --with-wsgi-port=WSGI_PORT
-                          wsgi port [[8000]]
+                          wsgi port [[127.0.0.1:8000]]
+  --with-router-homedir=ROUTER_HOMEDIR
+                          router homedir [[/home/router]]
+  --with-router-bind=ROUTER_PORT
+                          router bind address [[127.0.0.1:8001]]
+  --router-nthreads=ROUTER_NTHREADS
+                          number of threads [[10]]
+  --router-nworkers=ROUTER_NWORKERS
+                          number of workers [[10]]
+  --with-go-archive=GO_ARCHIVE
+                          go archive [[go1.16.linux-amd64.tar.gz]]
   --with-minio-builddir=MINIO_BUILDDIR
                           work directory [[$HOME/tmp]]
   --with-gfarm-shared-dir=SHARED_DIR
@@ -3758,7 +3766,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -3804,7 +3812,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -3828,7 +3836,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -3873,7 +3881,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -3897,7 +3905,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -12358,10 +12366,90 @@ if test "${with_wsgi_port+set}" = set; then :
 fi
 
 case x$with_wsgi_port in
-  x|xyes|xno) with_wsgi_port=8000 ;;
+  x|xyes|xno) with_wsgi_port=127.0.0.1:8000 ;;
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_wsgi_port" >&5
 $as_echo "$with_wsgi_port" >&6; }
+
+
+### --with-router-homedir=ROUTER_HOMEDIR
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ROUTER homedir" >&5
+$as_echo_n "checking for ROUTER homedir... " >&6; }
+
+# Check whether --with-router-homedir was given.
+if test "${with_router_homedir+set}" = set; then :
+  withval=$with_router_homedir;
+fi
+
+case x$with_router_homedir in
+  x|xyes|xno) with_router_homedir=/home/router ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_router_homedir" >&5
+$as_echo "$with_router_homedir" >&6; }
+
+
+### --with-router-bind=ROUTER_PORT
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ROUTER bind" >&5
+$as_echo_n "checking for ROUTER bind... " >&6; }
+
+# Check whether --with-router-bind was given.
+if test "${with_router_bind+set}" = set; then :
+  withval=$with_router_bind;
+fi
+
+case x$with_router_bind in
+  x|xyes|xno) with_router_bind=127.0.0.1:8001 ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_router_bind" >&5
+$as_echo "$with_router_bind" >&6; }
+
+
+### --router-nthreads=ROUTER_NTHREADS
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking number of router threads" >&5
+$as_echo_n "checking number of router threads... " >&6; }
+
+# Check whether --with-router-nthreads was given.
+if test "${with_router_nthreads+set}" = set; then :
+  withval=$with_router_nthreads;
+fi
+
+case x$router_nthreads in
+  x|xyes|xno) router_nthreads=10 ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $router_nthreads" >&5
+$as_echo "$router_nthreads" >&6; }
+
+
+### --router-nworkers=ROUTER_NWORKERS
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking number of router workers" >&5
+$as_echo_n "checking number of router workers... " >&6; }
+
+# Check whether --with-router-nworkers was given.
+if test "${with_router_nworkers+set}" = set; then :
+  withval=$with_router_nworkers;
+fi
+
+case x$router_nworkers in
+  x|xyes|xno) router_nworkers=10 ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $router_nworkers" >&5
+$as_echo "$router_nworkers" >&6; }
+
+
+### --with-go-archive=GO_ARCHIVE
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking go-archive that fetched from https://dl.google.com/go for build s3 server (MinIO)" >&5
+$as_echo_n "checking go-archive that fetched from https://dl.google.com/go for build s3 server (MinIO)... " >&6; }
+
+# Check whether --with-go-archive was given.
+if test "${with_go_archive+set}" = set; then :
+  withval=$with_go_archive;
+fi
+
+case x$with_go_archive in
+  x|xyes|xno) with_go_archive=go1.16.linux-amd64.tar.gz ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_go_archive" >&5
+$as_echo "$with_go_archive" >&6; }
 
 
 ### --with-minio-builddir=MINIO_BUILDDIR
@@ -12524,7 +12612,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gunicorn.service etc/makefile etc/sudoers minio/makefile web/makefile web/rungunicorn web/runserver"
+ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gfarm-s3-router.service etc/gunicorn.service etc/makefile etc/sudoers minio/makefile web/makefile web/rungunicorn web/runserver"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -13563,6 +13651,7 @@ do
     "bin/makefile") CONFIG_FILES="$CONFIG_FILES bin/makefile" ;;
     "etc/apache-gfarm-s3.conf") CONFIG_FILES="$CONFIG_FILES etc/apache-gfarm-s3.conf" ;;
     "etc/gfarm-s3.conf") CONFIG_FILES="$CONFIG_FILES etc/gfarm-s3.conf" ;;
+    "etc/gfarm-s3-router.service") CONFIG_FILES="$CONFIG_FILES etc/gfarm-s3-router.service" ;;
     "etc/gunicorn.service") CONFIG_FILES="$CONFIG_FILES etc/gunicorn.service" ;;
     "etc/makefile") CONFIG_FILES="$CONFIG_FILES etc/makefile" ;;
     "etc/sudoers") CONFIG_FILES="$CONFIG_FILES etc/sudoers" ;;
