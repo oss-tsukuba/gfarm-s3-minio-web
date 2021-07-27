@@ -67,10 +67,6 @@ get_access_key() {
 }
 
 
-gfkey_hash() {
-	openssl sha256 -r|awk '{ print $1 }'
-}
-
 filter_add_to_usermap() {
 	awk \
 		-v global_username="$1" \
@@ -471,22 +467,25 @@ challenge_auth() {
 	local global_username="$1"
 	local user_provided_key="$2"
 	local local_user="$3"
+	local res
 
 	export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
 
 	case $GFARMS3_LOGIN_METHOD in
 	*myproxy-logon*)
 		echo "$user_provided_key" |
-		mysudo "$local_user" $MYPROXY_LOGON -S \
+		res=$(mysudo "$local_user" $MYPROXY_LOGON -S \
 			${MYPROXY_SERVER:+-s "$MYPROXY_SERVER"} \
 			-l "$global_username" \
-			${PROXY_LIFETIME:+-t "$PROXY_LIFETIME"} 1>&2
+			${PROXY_LIFETIME:+-t "$PROXY_LIFETIME"} 2>&1)
 		if [ $? = 0 ]; then
 			echo SUCCESS $MYPROXY_LOGON 1>&2
+			logger -i -p local7.debug -t gfarm-s3-minio-web:challenge_auth "myproxy-logon: $local_user SUCCESS $res"
 			echo myproxy-logon
 			return 0
 		else
 			echo FAIL $MYPROXY_LOGON 1>&2
+			logger -i -p local7.debug -t gfarm-s3-minio-web:challenge_auth "myproxy-logon: $local_user FAIL $res"
 		fi
 		;;
 	esac
@@ -495,15 +494,18 @@ challenge_auth() {
 	*grid-proxy-init*)
 		if check_nopasswd "$local_user"; then
 			echo SKIP $GRID_PROXY_INIT 1>&2
+			logger -i -p local7.debug -t gfarm-s3-minio-web:challenge_auth "grid-proxy-init: $local_user SKIP"
 		else
-			echo "$user_provided_key" |
-			mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 1>&2
+			res=$(echo "$user_provided_key" |
+				mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 2>&1)
 			if [ $? = 0 ]; then
 				echo SUCCESS $GRID_PROXY_INIT 1>&2
+				logger -i -p local7.debug -t gfarm-s3-minio-web:challenge_auth "grid-proxy-init: $local_user SUCCESS $res"
 				echo grid-proxy-init
 				return 0
 			else
 				echo FAIL $GRID_PROXY_INIT 1>&2
+				logger -i -p local7.debug -t gfarm-s3-minio-web:challenge_auth "grid-proxy-init: $local_user FAIL $res"
 			fi
 		fi
 		;;
@@ -511,12 +513,18 @@ challenge_auth() {
 
 	case $GFARMS3_LOGIN_METHOD in
 	*gfarm-shared-key*)
-		if [ "$user_provided_key" = "$(mysudo "$local_user" $GFKEY -l|gfkey_hash)" ]; then
+		local tmpfile=$(mktemp) || return 1
+		user_key=$(mysudo "$local_user" $GFARM_S3_BIN/gfarm-s3-sharedsecret-password 2>$tmpfile)
+		res=$(cat $tmpfile)
+		rm $tmpfile
+		if [ "$user_provided_key" = "$user_key" ]; then
 			echo SUCCESS gfkey digest 1>&2
+			logger -i -p local7.debug -t gfarm-s3-minio-web:challenge_auth "gfarm-shared-key: $local_user SUCCESS $res"
 			echo gfkey
 			return 0
 		else
 			echo FAIL gfkey digest 1>&2
+			logger -i -p local7.debug -t gfarm-s3-minio-web:challenge_auth "gfarm-shared-key: $local_user FAIL $res"
 		fi
 		;;
 	esac
@@ -760,8 +768,8 @@ update_reverse_proxy() {
 		echo "no change" 1>&2
 		rm "$tmpfile"
 	else
+		chmod og+r "$tmpfile"
 		mv "$tmpfile" "$GFARMS3_REVERSE_PROXY_ROUTES"
-		chmod og+r "$GFARMS3_REVERSE_PROXY_ROUTES"
 	fi
 
 	return $status
@@ -910,7 +918,7 @@ try_start_a_server() {
 	fi
 
 	if ! grep -l "^Endpoint" $tmpfile 1>&2; then
-		kill -KILL $(< $pidfile)
+		kill -KILL $(cat $pidfile)
 		rm -f $tmpfile
 		rm -f $pidfile
 ###		case 3
@@ -929,7 +937,7 @@ try_start_a_server() {
 	fi
 	if ! mc_config $address; then
 		mymc_finish
-		kill -KILL $(< $pidfile)
+		kill -KILL $(cat $pidfile)
 		rm -f $pidfile
 ###		case 0 => case 4
 		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[4] fatal error (another minio is running)"

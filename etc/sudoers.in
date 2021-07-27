@@ -11,4 +11,5 @@ Runas_Alias GFARMS3 = %gfarms3
 @with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfls
 @with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfgetfacl
 @with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfsetfacl
+@with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @prefix@/bin/gfarm-s3-sharedsecret-password
 @with_wsgi_user@ ALL=(root) NOPASSWD: @with_apache@/sbin/apachectl
