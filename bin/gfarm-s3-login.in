@@ -52,6 +52,7 @@ esac
 usermap_entry=$(lookup_usermap_by_global_username "$global_username" "$GFARMS3_LOCAL_USER_MAP")
 if [ -z "$usermap_entry" ]; then
 	echo "user not found: $global_username"
+	logger -i -p local7.debug -t gfarm-s3-login "user not found: $global_username $remote_addr"
 	exit 1
 fi
 local_username=$(get_local_username "$usermap_entry")
