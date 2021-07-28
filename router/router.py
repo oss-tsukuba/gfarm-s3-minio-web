@@ -18,6 +18,7 @@ gfarm_s3_conf = "/usr/local/etc/gfarm-s3.conf"
 
 def app(environ, start_response):
     (method, path, request_hdr, input, file_wrapper) = accept_request(environ)
+    logger.debug(f"@@@ accept_request request_hdr = {request_hdr}")
 
     destURL = getDestURL(request_hdr)
     if isinstance(destURL, int):
@@ -202,39 +203,39 @@ reverseProxyRoutes = dict({
     "dict": None,
     "path": None,
     "timestamp": 0,
-    "lastchecked": 0,
-    "statInterval": 1,
     "lock": threading.Lock(),
     })
 
 
 def getReverseProxyRoutesDict(gfarm_s3_conf):
     global reverseProxyRoutes
-    path = reverseProxyRoutes["path"] 
+    with reverseProxyRoutes["lock"]:
+        path = reverseProxyRoutes["path"] 
     if path is None:
         with reverseProxyRoutes["lock"]:
             path = get_gfarms3_env(gfarm_s3_conf, "GFARMS3_REVERSE_PROXY_ROUTES")
             reverseProxyRoutes["path"] = path 
-            #logger.debug(f"@@@ getReverseProxyRoutesDict: path = {path}")
-    dict = reverseProxyRoutes["dict"]
-    timestamp = reverseProxyRoutes["timestamp"]
-    timestamp_file = timestamp
-    now = time.time()
-    if (reverseProxyRoutes["lastchecked"] + 
-        reverseProxyRoutes["statInterval"]) < now:
-        #logger.debug(f"@@@ getReverseProxyRoutesDict: STAT elapsed = {now - reverseProxyRoutes["lastchecked"]}")
-        with reverseProxyRoutes["lock"]:
-            reverseProxyRoutes["lastchecked"] = now
-        timestamp_file = os.stat(path).st_mtime
+            logger.debug(f"@@@ getReverseProxyRoutesDict: path = {path}")
+
+    with reverseProxyRoutes["lock"]:
+        dict = reverseProxyRoutes["dict"]
+        timestamp = reverseProxyRoutes["timestamp"]
+
+    timestamp_file = os.stat(path).st_mtime
     if dict is None or timestamp < timestamp_file:
+        logger.debug(f"@@@ getReverseProxyRoutesDict: loadReverseProxyRoutesDict()")
         dict = loadReverseProxyRoutesDict(path)
-        logger.debug(f"@@@ WITH LOCK")
         with reverseProxyRoutes["lock"]:
-            ## although timestamp_file is calculated before obtaining current
-            ## lock, this operation is still safe.  probably....
-            reverseProxyRoutes["dict"] = dict
-            reverseProxyRoutes["timestamp"] = timestamp_file  
-    #logger.debug(f"@@@ getReverseProxyRoutesDict: dict = {dict}")
+            if reverseProxyRoutes["timestamp"] >= timestamp_file:
+                # lose the race
+                logger.debug(f"@@@ getReverseProxyRoutesDict: lose")
+                dict = reverseProxyRoutes["timestamp"]
+            else:
+                logger.debug(f"@@@ getReverseProxyRoutesDict: update")
+                reverseProxyRoutes["dict"] = dict
+                reverseProxyRoutes["timestamp"] = timestamp_file  
+
+    logger.debug(f"@@@ getReverseProxyRoutesDict: dict = {dict}")
     return dict
 
 
