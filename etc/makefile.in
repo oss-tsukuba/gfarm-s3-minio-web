@@ -40,7 +40,7 @@ install:
 	$(TOUCH) $(GFARMS3_APACHE_REWRITE_CONF)
 	$(CHOWN) $(WSGI_USER) $(GFARMS3_APACHE_REWRITE_CONF)
 
-	$(INSTALL) gunicorn.service /etc/systemd/system/gunicorn.service
+	$(INSTALL) -m 644 gunicorn.service /etc/systemd/system/gunicorn.service
 
 	@echo please add apache-gfarm-s3.conf content to your httpd.conf
 	@echo systemctl enable --now gunicorn.service
