@@ -82,11 +82,11 @@ CACHE_SIZE=1024                 # 1ユーザあたりのキャッシュサイズ
 WSGI_USER=wsgi                  # wsgiを動かすユーザID
 WSGI_GROUP=wsgi                 # 同グループ
 WSGI_HOMEDIR=/home/wsgi         # 同ホームディレクトリ
-WSGI_PORT=8000                  # 同待ち受けポート
+WSGI_PORT=127.0.0.1:8000        # 同待ち受けポート
 MYPROXY_SERVER=                 # myproxy-logonを使用するば場合はサーバを指定する
 ```
 
-##### 依存パッケージをインストールする
+##### 依存パッケージをインストールする (centos)
 
 ```
 sudo yum update -y
@@ -98,6 +98,12 @@ sudo yum install -y httpd mod_ssl uuid myproxy \
 sudo python3 -m pip install Django
 sudo python3 -m pip install gunicorn
 sudo python3 -m pip install boto3
+```
+
+##### 依存パッケージをインストールする (ubuntu)
+
+```
+sudo apt-get install -y language-pack-ja language-pack-en
 ```
 
 ##### Apacheを設定する

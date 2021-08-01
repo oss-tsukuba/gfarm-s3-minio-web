@@ -61,12 +61,12 @@ CACHE_SIZE=1024                 # per user cache size (in MB)
 WSGI_USER=wsgi                  # userid for wsgi process
 WSGI_GROUP=wsgi                 # gropuid for wsgi process
 WSGI_HOMEDIR=/home/wsgi         # user wsgi's home directory
-WSGI_PORT=8000                  # wsgi port
+WSGI_PORT=127.0.0.1:8000        # wsgi port
 			        # (AF_UNIX is not available)
 MYPROXY_SERVER=                 # myporoxy server for myproxy-logon
 ```
 
-##### Install prerequisites
+##### Install prerequisites (centos)
 ```
 sudo yum update -y
 sudo yum install -y httpd mod_ssl uuid myproxy \
@@ -77,6 +77,11 @@ sudo yum install -y httpd mod_ssl uuid myproxy \
 sudo python3 -m pip install Django
 sudo python3 -m pip install gunicorn
 sudo python3 -m pip install boto3
+```
+
+##### Install prerequisites (ubuntu)
+```
+sudo apt-get install -y language-pack-ja language-pack-en
 ```
 
 ##### Site settings (Apache)
