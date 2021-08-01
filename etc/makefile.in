@@ -3,6 +3,7 @@ PREFIX=@prefix@
 SYS_HTTPD_CONF=/etc/httpd/conf/httpd.conf
 SYS_HTTPD_CONF_D=/etc/httpd/conf.d
 WSGI_USER=@with_wsgi_user@
+WITH_ROUTER_HOMEDIR=@with_router_homedir@
 
 GFARMS3_CONF_DIR=$(PREFIX)/etc
 GFARMS3_LOCAL_USER_MAP=$(PREFIX)/etc/gfarm_s3_local_user_map
@@ -48,6 +49,10 @@ install:
 
 	$(INSTALL) -D gunicorn.service $(SYSTEMD_SYSTEM)/gunicorn.service
 	$(INSTALL) -D gfarm-s3-router.service $(SYSTEMD_SYSTEM)/gfarm-s3-router.service
+	$(MKDIR) -p $(WITH_ROUTER_HOMEDIR)
+	$(CHOWN) $(WSGI_USER):$(WSGI_GROUP) $(WITH_ROUTER_HOMEDIR)
+	$(INSTALL) -D -c -m 644 ../router/router.py $(WITH_ROUTER_HOMEDIR)
+	$(CHOWN) $(WSGI_USER):$(WSGI_GROUP) $(WITH_ROUTER_HOMEDIR)/router.py
 
 	@echo please add apache-gfarm-s3.conf content to your httpd.conf
 	@echo systemctl enable --now gunicorn.service
