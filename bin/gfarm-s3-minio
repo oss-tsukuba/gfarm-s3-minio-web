@@ -1,0 +1,66 @@
+#! /bin/sh
+
+nflag=
+
+# run minio for current user
+# Options:
+#  -n num_workers : number of workers for CompleteMultipartUpload
+#                   (default: none)
+#  -a address     : bind address (default: 127.0.0.1:19000)
+#  -d shared_dir  : gfarm directory for S3 service (default: /share)
+#  -s size(MB)    : working directory size for CompleteMultipartUpload
+#                   (default: 1024)
+#
+# Enviroment variable:
+#  MINIO_ROOT_USER       : Access Key ID for the service (mandatory)
+#  MINIO_ROOT_PASSWORD   : Secret Access Key for the service (mandatory)
+
+USAGE="usage: $0 [-n num_workers]"
+
+address=127.0.0.1:19000 
+address=127.0.0.1:19000
+gfarm_shared_dir=/home/hp120273/hpci005858/share
+gfarm_shared_dir=/share
+cache_size=1024
+
+while getopts n:a:d: f; do
+	case $f in
+	n) nflag=$OPTARG;;
+	a) address=$OPTARG;;
+	d) gfarm_shared_dir=$OPTARG;;
+	s) cache_size=$OPTARG;;
+	\?) echo $USAGE 1>&2; exit 1;;
+	esac
+done
+shift $(expr $OPTIND - 1)
+
+if [ $# != 0 ]; then
+	echo $USAGE 1>&2; exit 1
+fi
+
+#. /usr/local/etc/gfarm-s3.conf
+
+export MINIO_GFARMS3_NUM_WORKERS=$nflag
+
+export MINIO_GFARMS3_CACHEDIR=$(mktemp -d /tmp/gfarm-s3-cachedir-XXXXXX)
+export MINIO_GFARMS3_CACHEDIR_SIZE_MB=$cache_size
+
+cleanup() {
+	rm -rf "$MINIO_GFARMS3_CACHEDIR"
+	exit 0
+}
+
+trap cleanup 0 1 2 3 15
+
+export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
+
+if [ -z "$MINIO_ROOT_USER" ]; then
+	export MINIO_ROOT_USER=K4XcKzocrUhrnCAKrx2Z
+fi
+if [ -z "$MINIO_ROOT_PASSWORD" ]; then
+	export MINIO_ROOT_PASSWORD=xNMOFbCLhu+FKz1VmIDgHwPUQad0h1arCpdJAiN1oih1gNUx
+fi
+
+minio=/usr/local/bin/minio
+
+exec $minio gateway gfarm --address "$address" "$gfarm_shared_dir"
