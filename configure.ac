@@ -119,14 +119,16 @@ esac
 AC_MSG_RESULT([$with_wsgi_group])
 AC_SUBST(with_wsgi_group)
 
-### --with-wsgi-port=WSGI_PORT
-AC_MSG_CHECKING([for WSGI port])
-AC_ARG_WITH([wsgi-port],
-  AC_HELP_STRING([--with-wsgi-port=WSGI_PORT], [wsgi port [[127.0.0.1:8000]]]))
-case x$with_wsgi_port in
-  x|xyes|xno) with_wsgi_port=127.0.0.1:8000 ;;
+### --with-wsgi-addr=WSGI_ADDR
+AC_MSG_CHECKING([for WSGI addr])
+AC_ARG_WITH([wsgi-addr],
+  AC_HELP_STRING([--with-wsgi-addr=WSGI_ADDR], [wsgi addr [[127.0.0.1:8000]]]))
+case x$with_wsgi_addr in
+  x|xyes|xno) with_wsgi_addr=127.0.0.1:8000 ;;
 esac
-AC_MSG_RESULT([$with_wsgi_port])
+AC_MSG_RESULT([$with_wsgi_addr])
+AC_SUBST(with_wsgi_addr)
+with_wsgi_port=${with_wsgi_addr#*:}
 AC_SUBST(with_wsgi_port)
 
 ### --with-router-homedir=ROUTER_HOMEDIR
@@ -139,15 +141,17 @@ esac
 AC_MSG_RESULT([$with_router_homedir])
 AC_SUBST(with_router_homedir)
 
-### --with-router-bind=ROUTER_PORT
-AC_MSG_CHECKING([for ROUTER bind])
-AC_ARG_WITH([router-bind],
-  AC_HELP_STRING([--with-router-bind=ROUTER_PORT], [router bind address [[127.0.0.1:8001]]]))
-case x$with_router_bind in
-  x|xyes|xno) with_router_bind=127.0.0.1:8001 ;;
+### --with-router-addr=ROUTER_ADDR
+AC_MSG_CHECKING([for ROUTER addr])
+AC_ARG_WITH([router-addr],
+  AC_HELP_STRING([--with-router-addr=ROUTER_ADDR], [router bind address [[127.0.0.1:8001]]]))
+case x$with_router_addr in
+  x|xyes|xno) with_router_addr=127.0.0.1:8001 ;;
 esac
-AC_MSG_RESULT([$with_router_bind])
-AC_SUBST(with_router_bind)
+AC_MSG_RESULT([$with_router_addr])
+AC_SUBST(with_router_addr)
+with_router_port=${with_router_addr#*:}
+AC_SUBST(with_router_port)
 
 ### --router-nthreads=ROUTER_NTHREADS
 AC_MSG_CHECKING([number of router threads])
@@ -239,6 +243,7 @@ etc/gfarm-s3.conf
 etc/gfarm-s3-router.service
 etc/gunicorn.service
 etc/makefile
+etc/nginx.conf
 etc/sudoers
 minio/makefile
 web/makefile
