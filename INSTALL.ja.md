@@ -82,7 +82,9 @@ CACHE_SIZE=1024                 # 1ユーザあたりのキャッシュサイズ
 WSGI_USER=wsgi                  # wsgiを動かすユーザID
 WSGI_GROUP=wsgi                 # 同グループ
 WSGI_HOMEDIR=/home/wsgi         # 同ホームディレクトリ
-WSGI_PORT=127.0.0.1:8000        # 同待ち受けポート
+WSGI_ADDR=127.0.0.1:8000        # 同待ち受けアドレス
+ROUTER_HOMEDIR=/home/wsgi       # ルーターのホームディレクトリ
+ROUTER_ADDR=127.0.0.1:8001      # 同待ち受けアドレス
 MYPROXY_SERVER=                 # myproxy-logonを使用するば場合はサーバを指定する
 ```
 
@@ -177,7 +179,9 @@ with-apache, with-gunicornはそれぞれのインストール
 	--with-wsgi-homedir=$WSGI_HOMEDIR \
 	--with-wsgi-user=$WSGI_USER \
 	--with-wsgi-group=$WSGI_GROUP \
-	--with-wsgi-port=$WSGI_PORT \
+	--with-wsgi-addr=$WSGI_ADDR \
+	--with-router-homedir=$ROUTER_HOMEDIR \
+	--with-router-addr=$ROUTER_ADDR \
 	--with-cache-basedir=$CACHE_BASEDIR \
 	--with-cache-size=$CACHE_SIZE \
 	--with-myproxy-server=$MYPROXY_SERVER \

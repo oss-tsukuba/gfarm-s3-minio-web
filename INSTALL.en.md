@@ -61,8 +61,10 @@ CACHE_SIZE=1024                 # per user cache size (in MB)
 WSGI_USER=wsgi                  # userid for wsgi process
 WSGI_GROUP=wsgi                 # gropuid for wsgi process
 WSGI_HOMEDIR=/home/wsgi         # user wsgi's home directory
-WSGI_PORT=127.0.0.1:8000        # wsgi port
+WSGI_ADDR=127.0.0.1:8000        # wsgi bind address
 			        # (AF_UNIX is not available)
+ROUTER_HOMEDIR=/home/wsgi       # router's home directory
+ROUTER_ADDR=127.0.0.1:8001      # router bind address
 MYPROXY_SERVER=                 # myporoxy server for myproxy-logon
 ```
 
@@ -151,7 +153,9 @@ id $WSGI_USER || sudo useradd $WSGI_USER -g $WSGI_GROUP -d $WSGI_HOMEDIR
 	--with-wsgi-homedir=$WSGI_HOMEDIR \
 	--with-wsgi-user=$WSGI_USER \
 	--with-wsgi-group=$WSGI_GROUP \
-	--with-wsgi-port=$WSGI_PORT \
+	--with-wsgi-addr=$WSGI_ADDR \
+	--with-router-homedir=$ROUTER_HOMEDIR \
+	--with-router-addr=$ROUTER_ADDR \
 	--with-cache-basedir=$CACHE_BASEDIR \
 	--with-cache-size=$CACHE_SIZE \
 	--with-myproxy-server=$MYPROXY_SERVER \
