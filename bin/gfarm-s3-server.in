@@ -70,6 +70,7 @@ while [ $# -gt 0 ]; do
 	--start) action="START";;
 	--stop) action="STOP";;
 	--status) action="STATUS";;
+	--status-quick) action="STATUS";;
 	--show-secret-key) action="SECRET_SHOW";;
 	--show-secret-key-file) action="SECRET_SHOW_FILENAME";;
 	--regenerate-secret-key) action="SECRET_REGENERATE";;
@@ -81,6 +82,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ $# != 0 ]; then
+	echo "gfarm-s3-server: argment number:" "$@" 1>&2
 	echo "$USAGE" 1>&2
 	exit 1
 fi

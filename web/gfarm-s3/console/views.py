@@ -3,16 +3,23 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 import time
-import logging
+#import logging
+from logging import getLogger, DEBUG, INFO, WARNING
+from logging.handlers import SysLogHandler
 from . import cmd
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+#logger = logging.getLogger(__name__)
+#logger.setLevel(logging.DEBUG)
+#ch = logging.StreamHandler()
+#ch.setLevel(logging.DEBUG)
+#formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+#ch.setFormatter(formatter)
+#logger.addHandler(ch)
+
+handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
+logger = getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(DEBUG)
 
 ### session["global_username"]:
 ###   "non-empty"  login succeeded
@@ -34,12 +41,15 @@ def login(request):
         isLoginFailed = is_login_failed(request.session)
         isReauth = not need_login(request.session)
         username = None
+        reason = None
         if request.session is not None:
             username = request.session.get("global_username", None)
+            reason = request.session.get("reason", None)
         render_dict = {"isLoginFailed": isLoginFailed,
                        "showLogoutButton": isReauth,
                        "showReauthMsg": isReauth,
-                       "username": username}
+                       "username": username,
+                       "reason": f"{reason}"}
         return render(request, "console/login.html", render_dict)
     elif request.method == "POST":
         username = request.POST["username"]
@@ -51,6 +61,9 @@ def login(request):
             remote_addr = request.META.get("REMOTE_ADDR", None)
         ### challenge authenticateion
         cmd_result = cmd.cmd("info", username, passwd, remote_addr = remote_addr)
+        ### logger.debug(f"@@@ cmd_result = {cmd_result}")
+        if cmd_result is not None:
+            request.session["reason"] = cmd_result.get("reason")
         if cmd_result is None or cmd_result["status"] != "success":
             request.session["global_username"] = ""
             return HttpResponseRedirect(reverse("login"))

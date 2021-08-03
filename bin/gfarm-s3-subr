@@ -440,10 +440,10 @@ mysudo() {
 	local local_user=$1
 	shift
 	if [ -z "$local_user" ]; then
-		echo sudo $iflag "$@" 1>&2
+		#echo sudo $iflag "$@" 1>&2
 		sudo $iflag "$@"
 	else
-		echo sudo $iflag -u "$local_user" "$@" 1>&2
+		#echo sudo $iflag -u "$local_user" "$@" 1>&2
 		sudo $iflag -u "$local_user" "$@"
 	fi
 }
@@ -470,6 +470,8 @@ challenge_auth() {
 	local res
 
 	export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
+
+#	echo challenge_auth "$@" 1>&2
 
 	case $GFARMS3_LOGIN_METHOD in
 	*myproxy-logon*)
@@ -611,7 +613,7 @@ get_s3_server_status_quick() {	# local_username
 	## assert $user == $local_username
 	local access_key=$(get_access_key "$usermap_entry")
 	status_server_quick "$user"
-	mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --status-quick --access_key "$access_key"
+	#mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --status-quick --access_key "$access_key"
 }
 
 get_per_user_secret_key() {
