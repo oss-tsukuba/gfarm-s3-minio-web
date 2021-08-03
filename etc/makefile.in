@@ -47,8 +47,8 @@ install:
 	$(TOUCH) $(GFARMS3_APACHE_REWRITE_CONF)
 	$(CHOWN) $(WSGI_USER) $(GFARMS3_APACHE_REWRITE_CONF)
 
-	$(INSTALL) -D gunicorn.service $(SYSTEMD_SYSTEM)/gunicorn.service
-	$(INSTALL) -D gfarm-s3-router.service $(SYSTEMD_SYSTEM)/gfarm-s3-router.service
+	$(INSTALL) -D -m 644 gunicorn.service $(SYSTEMD_SYSTEM)/gunicorn.service
+	$(INSTALL) -D -m 644 gfarm-s3-router.service $(SYSTEMD_SYSTEM)/gfarm-s3-router.service
 	$(MKDIR) -p $(WITH_ROUTER_HOMEDIR)
 	$(CHOWN) $(WSGI_USER):$(WSGI_GROUP) $(WITH_ROUTER_HOMEDIR)
 	$(INSTALL) -D -c -m 644 ../router/router.py $(WITH_ROUTER_HOMEDIR)
