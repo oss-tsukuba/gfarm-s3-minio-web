@@ -18,14 +18,17 @@ gfarm_s3_conf = "/usr/local/etc/gfarm-s3.conf"
 
 def app(environ, start_response):
     (method, path, request_hdr, input, file_wrapper) = accept_request(environ)
-    logger.debug(f"@@@ accept_request request_hdr = {request_hdr}")
+#    logger.debug(f"@@@ accept_request request_hdr = {request_hdr}")
 
     destURL = getDestURL(request_hdr)
     if isinstance(destURL, int):
-        logger.debug(f"@@@ {myformat()} [1] START_RESPONSE {destURL}")
+#        logger.debug(f"@@@ {myformat()} [1] START_RESPONSE {destURL}")
         start_response(f"{destURL}", [])
         return []
     url = destURL + path
+
+    #### debug
+    #### end debug
 
     #logger.debug(f"@@@ METHOD {method}")
     #logger.debug(f"@@@ {method} {url} {input}")
@@ -37,29 +40,33 @@ def app(environ, start_response):
         #logger.debug(f"@@@ << {k}: {v}")
 
     if response is None:
-        logger.debug(f"@@@ {myformat()} [2] START_RESPONSE {status}")
+#        logger.debug(f"@@@ {myformat()} [2] START_RESPONSE {status}")
         start_response(f"{status}", [])
         return []
 
     #logger.debug(f"@@@ RESPONSE {response}")
     #logger.debug(f"@@@ RESPONSE FP = {response.fp}")
 
-    (chunked, xAccelBuffering) = parse_response_hdr(response_hdr)
-    logger.debug(f"@@@ {myformat()} [3] START_RESPONSE {status}")
+    #(chunked, xAccelBuffering) = check_xAccelBuffering(response_hdr)
+    xAccelBuffering = check_xAccelBuffering(response_hdr)
+###    logger.debug(f"@@@ V {method} {xAccelBuffering} {path}")
+#    logger.debug(f"@@@ {myformat()} [3] START_RESPONSE {status}")
     start_response(status, response_hdr)
 
     respiter = \
-        gen_respiter(response, chunked, xAccelBuffering, file_wrapper)
-    logger.debug(f"@@@ respiter = {respiter}")
+        gen_respiter(response, xAccelBuffering, file_wrapper)
+        #gen_respiter(response, chunked, xAccelBuffering, file_wrapper)
+#    logger.debug(f"@@@ respiter = {respiter}")
     return respiter
 
 
 def accept_request(environ):
-    logger.debug(f"@@@ ACCEPT {myformat()}")
+#    logger.debug(f"@@@ ACCEPT {myformat()}")
     method = environ.get("REQUEST_METHOD")
     path = environ.get("RAW_URI")
     request_hdr = [(h[5:].replace('_', '-'), environ.get(h))
                       for h in environ if h.startswith("HTTP_")]
+###    logger.debug(f"@@@ ^ {method} {check_xAccelBuffering(request_hdr)} {path}")
     request_hdr = dict(request_hdr)
     #for k in request_hdr:
         #logger.debug(f"@@@ >> {k}: {request_hdr[k]}")
@@ -82,15 +89,16 @@ def accept_request(environ):
 
 
 def send_request(method, url, request_hdr, input):
-    logger.debug(f"@@@ SEND REQUEST {method} {url} [request_hdr] {input}")
+#    logger.debug(f"@@@ SEND REQUEST {method} {url} [request_hdr] {input}")
     try:
         req = Request(url, input, request_hdr, method=method)
+#        logger.debug(f"@@@ SEND_REQUEST {type(input)}")
         response = urlopen(req, timeout=86400)
         status = f"{response.status}"
         response_hdr = response.getheaders()
-        logger.debug(f"@@@ SUCCESS {method} {url} STATUS {status}")
+#        logger.debug(f"@@@ SUCCESS {method} {url} STATUS {status}")
     except HTTPError as e:
-        logger.debug(f"@@@ EXCEPT {e}")
+#        logger.debug(f"@@@ EXCEPT {e}")
         #logger.debug(f"@@@ EXCEPT code = {e.code}")
         #logger.debug(f"@@@ EXCEPT reason = {e.reason}")
         #logger.debug(f"@@@ EXCEPT headers = {e.headers}")
@@ -100,7 +108,7 @@ def send_request(method, url, request_hdr, input):
         response_hdr = [(k, e.headers[k]) for k in e.headers]
         #logger.debug(f"@@@ EXCEPT response_hdr = {response_hdr}")
     except Exception as e:
-        logger.debug(f"@@@ EXCEPT {e}")
+#        logger.debug(f"@@@ EXCEPT {e}")
         #logger.debug(f"@@@ EXCEPT response = {response}")
         response = None
         status = f"{e.status}"
@@ -109,58 +117,61 @@ def send_request(method, url, request_hdr, input):
     return (response, status, response_hdr)
 
 
-def parse_response_hdr(response_hdr):
-    chunked = None
+def check_xAccelBuffering(hdr):
+    #chunked = None
     xAccelBuffering = None
-    for (k, v) in response_hdr:
+    for (k, v) in hdr:
         #logger.debug(f"@@@ RESPONSE HEADER k = {k}, v = {v}")
-        if k.lower() == "transfer-encoding":
-            chunked = v.lower() == "chunked"
+        #if k.lower() == "transfer-encoding":
+            #chunked = v.lower() == "chunked"
         if k.lower() == "x-accel-buffering":
             xAccelBuffering = v.lower() != "no"
 
-    logger.debug(f"@@@ RESPONSE X-Accel-Buffering: {xAccelBuffering}")
-    logger.debug(f"@@@ RESPONSE Transfer-Encoding: chunked = {chunked}")
-    return (chunked, xAccelBuffering)
+#    logger.debug(f"@@@ RESPONSE X-Accel-Buffering: {xAccelBuffering}")
+    #logger.debug(f"@@@ RESPONSE Transfer-Encoding: chunked = {chunked}")
+    #return (chunked, xAccelBuffering)
+    return xAccelBuffering
 
 
-def gen_respiter(response, chunked, xAccelBuffering, file_wrapper):
-    if chunked or xAccelBuffering == False:
-        logger.debug(f"@@@ READ1READER")
+#def gen_respiter(response, chunked, xAccelBuffering, file_wrapper):
+def gen_respiter(response, xAccelBuffering, file_wrapper):
+    #if chunked or xAccelBuffering == False:
+    if xAccelBuffering == False:
+#        logger.debug(f"@@@ READ1READER")
         respiter = read1Reader(response)
     else:
-        logger.debug(f"@@@ FILE_WRAPPER")
+#        logger.debug(f"@@@ FILE_WRAPPER")
         respiter = file_wrapper(response)
     return respiter
 
 
 class read1Reader():
     def __init__(self, response):
-        logger.debug(f"@@@ READ1 READER __INIT__")
+#        logger.debug(f"@@@ READ1 READER __INIT__")
         self.response = response
 
-    def __del__(self):
-        logger.debug(f"@@@ READ1 READER __DEL__")
-        try:
-            self.fp.close()
-        except:
-            pass
+#    def __del__(self):
+#        logger.debug(f"@@@ READ1 READER __DEL__")
+#        try:
+#            self.fp.close()
+#        except:
+#            pass
 
     def __iter__(self):
-        logger.debug(f"@@@ READ1 READER __ITER__")
+#        logger.debug(f"@@@ READ1 READER __ITER__")
         return self
 
     def __next__(self):
-        logger.debug(f"@@@ READ1 READER __NEXT__")
+#        logger.debug(f"@@@ READ1 READER __NEXT__")
         amt = 8192	## same size with HTTPResponse.read()
         try:
             b = self.response.read1(amt)
             #logger.debug(f"@@@ READ1 READER b = [{debug_dumps(b)}]")
         except Exception as e:
-            logger.debug(f"@@@ READ1 READER EXCEPTION {e}")
+#            logger.debug(f"@@@ READ1 READER EXCEPTION {e}")
             b = b''
         if len(b) == 0:
-            logger.debug(f"@@@ READ1 READER @@@ StopIteration")
+#            logger.debug(f"@@@ READ1 READER @@@ StopIteration")
             raise StopIteration
         return b
 
@@ -215,7 +226,7 @@ def getReverseProxyRoutesDict(gfarm_s3_conf):
         with reverseProxyRoutes["lock"]:
             path = get_gfarms3_env(gfarm_s3_conf, "GFARMS3_REVERSE_PROXY_ROUTES")
             reverseProxyRoutes["path"] = path 
-            logger.debug(f"@@@ getReverseProxyRoutesDict: path = {path}")
+#            logger.debug(f"@@@ getReverseProxyRoutesDict: path = {path}")
 
     with reverseProxyRoutes["lock"]:
         dict = reverseProxyRoutes["dict"]
@@ -223,19 +234,19 @@ def getReverseProxyRoutesDict(gfarm_s3_conf):
 
     timestamp_file = os.stat(path).st_mtime
     if dict is None or timestamp < timestamp_file:
-        logger.debug(f"@@@ getReverseProxyRoutesDict: loadReverseProxyRoutesDict()")
+#        logger.debug(f"@@@ getReverseProxyRoutesDict: loadReverseProxyRoutesDict()")
         dict = loadReverseProxyRoutesDict(path)
         with reverseProxyRoutes["lock"]:
             if reverseProxyRoutes["timestamp"] >= timestamp_file:
                 # lose the race
-                logger.debug(f"@@@ getReverseProxyRoutesDict: lose")
+#                logger.debug(f"@@@ getReverseProxyRoutesDict: lose")
                 dict = reverseProxyRoutes["timestamp"]
             else:
-                logger.debug(f"@@@ getReverseProxyRoutesDict: update")
+#                logger.debug(f"@@@ getReverseProxyRoutesDict: update")
                 reverseProxyRoutes["dict"] = dict
                 reverseProxyRoutes["timestamp"] = timestamp_file  
 
-    logger.debug(f"@@@ getReverseProxyRoutesDict: dict = {dict}")
+#    logger.debug(f"@@@ getReverseProxyRoutesDict: dict = {dict}")
     return dict
 
 
