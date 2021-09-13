@@ -1,13 +1,13 @@
-from http.client import HTTPResponse
+#from http.client import HTTPResponse
 from logging import getLogger, DEBUG, INFO, WARNING
 from logging.handlers import SysLogHandler
 import threading
 import os
-import socket
+#import socket
 from subprocess import Popen, PIPE
 import time
 from urllib.request import Request, urlopen
-from urllib.error import HTTPError 
+from urllib.error import HTTPError
 handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
 logger = getLogger(__name__)
 logger.addHandler(handler)
@@ -221,11 +221,11 @@ reverseProxyRoutes = dict({
 def getReverseProxyRoutesDict(gfarm_s3_conf):
     global reverseProxyRoutes
     with reverseProxyRoutes["lock"]:
-        path = reverseProxyRoutes["path"] 
+        path = reverseProxyRoutes["path"]
     if path is None:
         with reverseProxyRoutes["lock"]:
             path = get_gfarms3_env(gfarm_s3_conf, "GFARMS3_REVERSE_PROXY_ROUTES")
-            reverseProxyRoutes["path"] = path 
+            reverseProxyRoutes["path"] = path
 #            logger.debug(f"@@@ getReverseProxyRoutesDict: path = {path}")
 
     with reverseProxyRoutes["lock"]:
@@ -244,7 +244,7 @@ def getReverseProxyRoutesDict(gfarm_s3_conf):
             else:
 #                logger.debug(f"@@@ getReverseProxyRoutesDict: update")
                 reverseProxyRoutes["dict"] = dict
-                reverseProxyRoutes["timestamp"] = timestamp_file  
+                reverseProxyRoutes["timestamp"] = timestamp_file
 
 #    logger.debug(f"@@@ getReverseProxyRoutesDict: dict = {dict}")
     return dict
