@@ -187,6 +187,9 @@ def getDestURL(request_hdr):
 
 
 def getS3AccessKeyID(Authorization):
+    """
+    see blelow for more strict implementation
+    """
     if Authorization is None:
         return None
     lead = "AWS4-HMAC-SHA256 Credential="
@@ -194,6 +197,20 @@ def getS3AccessKeyID(Authorization):
     if Authorization.startswith(lead) and end is not None:
         return Authorization[len(lead):end]
     return None
+
+"""
+def parse_s3_auth(authorization):
+    components = authorization.split(' ')
+    if "AWS4-HMAC-SHA256" not in components:
+        return None
+    for e in components:
+        if e.startswith("Credential="):
+            end = e.find('/')
+            if end == -1:  
+                return None
+            return e[len("Credential="):end]
+    return None
+"""
 
 
 def lookupRoutingTable(AccessKeyID):
