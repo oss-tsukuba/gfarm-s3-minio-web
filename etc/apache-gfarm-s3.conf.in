@@ -3,7 +3,12 @@ RewriteEngine on
 ProxyPass /gfarm http://127.0.0.1:@with_wsgi_port@/gfarm
 ProxyPreserveHost on
 
-Include @prefix@/var/gfarm-s3/rewrite.conf
+### Use router/router.py
+RewriteCond "%{HTTP:Authorization}" "AWS4-HMAC-SHA256.*"
+RewriteRule "^/(.*)$" "http://127.0.0.1:@with_router_port@/$1" [P]
+
+### Use generated RewriteRule
+#Include @prefix@/var/gfarm-s3/rewrite.conf
 
 Alias /static/ @with_wsgi_homedir@/static/
 
