@@ -4,51 +4,50 @@
 
 Gfarm S3 is a S3 compatible object server for Gfarm.
 
-Gfarm S3は、以下のコンポーネントから構成される
+Gfarm S3は、以下のコンポーネントから構成される。
 
-* S3 互換サーバ (MinIO),
-* リバースプロキシ (Apache),
-* wsgi サーバ (gunicorn),
-* WebUI フレームワーク (Django).
+* Gfarm 対応 S3 互換サーバ (MinIO)
+* リバースプロキシ (Apache など)
+* wsgi サーバ (gunicorn) (WebUI, router の 2ポート使用)
+* WebUI フレームワーク (Django)
 
-※ nginxはサポートされてません
+※ wsgiの設定について: CentoOS標準のApacheではwsgiとの通信にAF_UNIXが
+使用できないため、本文書ではAF_INETを使用する手順を示しています。
 
-※ wsgiの設定について: Centos7標準のApacheではwsgiとの通信にAF_UNIXが
-使用できないため、本文書ではAF_INETを使用する手順を示しています
-
-インストール手順は、以下のとおり
+インストール手順の概要は以下の通り。
 
 0. 事前準備
   * 依存パッケージのインストール
-  * Apacheのインストール
+  * リバースプロキシの設定
   * WebUIフレームワークを動作させるユーザを作成
 
 1. Gfarm S3のソースコードから以下のコンポーネントをインストール
   * WebUI フレームワーク (Django)
-  * S3 互換サーバ (MinIO)
+  * Gfarm 対応 S3 互換サーバ (MinIO)
   * gunicorn用のsystemdファイル
 
-2. ApacheにGfarm S3用の設定を追加
+2. リバースプロキシにGfarm S3用の設定を追加
 
-3. guniconサービスを起動
+3. gunicornサービスを起動
 
+4. Gfarmファイルシステム上に必要なディレクトリを作成
 
 ### 1.1 Quick Installation
 
-本節ではインストール手順を簡単に説明する
-本手順はCentos7およびCentos8で動作確認している
+本節ではインストール手順を簡単に説明する。
+本手順はCentOS 7およびCentOS8で動作確認している。
 
-【重要】インストールは、Gfarm 2.7 (以降) がインストール
-されている環境で行う。ホストの管理権限 (root) および
+【重要】インストールは、Gfarm 2.7 (以降) のクライアントがインストール
+・設定されている環境で行う。ホストの管理権限 (root) および
 Gfarmの管理者権限 (gfarmadm) が必要となる。
 
 ##### Gfarm-S3をビルドするための作業ディレクトリを作成
 (インストール後は削除して構わないのでどこでもよい)
 
 ```
-export WORK=$HOME/tmp
-mkdir -p $WORK
-export MINIO_BUILDDIR=$HOME/tmp
+WORKDIR=$HOME/tmp
+mkdir -p $WORKDIR
+MINIO_BUILDDIR=$HOME/tmp
 mkdir -p $MINIO_BUILDDIR/minio/work/build
 ```
 
@@ -76,24 +75,24 @@ mkdir -p $MINIO_BUILDDIR/minio/work/build
 
 ```
 GFARM_S3_PREFIX=/usr/local      # Gfarm-S3をインストールする場所
-SHARED_DIR=/share               # Gfarm上のGfarm-S3に使用するディレクトリ
-CACHE_BASEDIR=/mnt/cache        # キャッシュ用ディレクトリ
+SHARED_DIR=/share               # Gfarm-S3に使用するGfarm上のディレクトリ
+CACHE_BASEDIR=/mnt/cache        # マルチパート作業用キャッシュディレクトリ
 CACHE_SIZE=1024                 # 1ユーザあたりのキャッシュサイズ(MB)
-WSGI_USER=wsgi                  # wsgiを動かすユーザID
-WSGI_GROUP=wsgi                 # 同グループ
-WSGI_HOMEDIR=/home/wsgi         # 同ホームディレクトリ
-WSGI_ADDR=127.0.0.1:8000        # 同待ち受けアドレス
+WSGI_USER=wsgi                  # WebUI,ルーターを実行するローカルユーザ名
+WSGI_GROUP=wsgi                 # そのグループ
+WSGI_HOMEDIR=/home/wsgi         # そのホームディレクトリ
+WSGI_ADDR=127.0.0.1:8000        # WebUIの待ち受けアドレス
 ROUTER_HOMEDIR=/home/wsgi       # ルーターのホームディレクトリ
-ROUTER_ADDR=127.0.0.1:8001      # 同待ち受けアドレス
-MYPROXY_SERVER=                 # myproxy-logonを使用するば場合はサーバを指定する
+ROUTER_ADDR=127.0.0.1:8001      # その待ち受けアドレス
+MYPROXY_SERVER=                 # myproxy-logon使用時にサーバ名を指定
 ```
 
-##### 依存パッケージをインストールする (centos)
+##### 依存パッケージをインストールする (CentOS 7 の例)
 
 ```
 sudo yum update -y
 sudo yum install -y httpd mod_ssl uuid myproxy \
-         python3-devel python3-pip nodejs 
+         python3-devel python3-pip nodejs
 ```
 
 ```
@@ -102,13 +101,17 @@ sudo python3 -m pip install gunicorn
 sudo python3 -m pip install boto3
 ```
 
-##### 依存パッケージをインストールする (ubuntu)
+##### 依存パッケージをインストールする (Ubuntu の例)
 
 ```
 sudo apt-get install -y language-pack-ja language-pack-en
 ```
 
-##### Apacheを設定する
+##### リバースプロキシとしてNGINXの設定例
+
+XXX TODO
+
+##### リバースプロキシとしてApacheの設定例
 
 既にインストールされていれば本作業は不要
 
@@ -163,8 +166,8 @@ id $WSGI_USER || sudo useradd $WSGI_USER -g $WSGI_GROUP -d $WSGI_HOMEDIR
 
 ##### 作業ディレクトリに移動し configure
 
-パラメータは上で決定したものを使用
-with-gfarm, with-globus, with-myproxy, 
+パラメータは上で決定したものを使用し、
+with-gfarm, with-globus, with-myproxy,
 with-apache, with-gunicornはそれぞれのインストール
 プレフィックスを指定する。
 
@@ -204,9 +207,15 @@ with-apache, with-gunicornはそれぞれのインストール
 (cd $WORK/gfarm-s3-minio-web && sudo make install)
 ```
 
+インストールすると /etc/sudoers.d/gfarm-s3 が作られることに注意する。
+
 #### Gfarm-S3の設定
 
 ##### キャッシュディレクトリを作成する
+
+S3 マルチパートアップロードの際、分割されたファイルを一時的に置く
+ディレクトリを用意する。
+
 ```
 sudo mkdir -p $CACHE_BASEDIR
 sudo chmod 1777 $CACHE_BASEDIR
@@ -248,11 +257,15 @@ cp $WORK/gfarm-s3-minio-web/etc/e403.html $HTTPD_DocumentRoot/e403.html
 ```
 
 ###### メインインデックスにWebUIへのリンクを追加
+
+WebUIにアクセスするには、/gfarm/console にブラウザでアクセスする。
+以下はそのためのリンクを作成する設定例。
+
 ```
 echo '<a href="/gfarm/console">gfarm-s3</a>' |
 sudo sh -c "cat >> $HTTPD_DocumentRoot/index.html"
 ```
-(gfarm以外にするには、 $WORK/gfarm-s3-minio-web/web/gfarm-s3/gfarms3/urls.py の``gfarm''も変更
+(gfarm以外にするには、 $WORK/gfarm-s3-minio-web/web/gfarm-s3/gfarms3/urls.py の``gfarm''も変更する。
     path('gfarm/console/', include('console.urls')),
 )
 
@@ -261,13 +274,15 @@ sudo sh -c "cat >> $HTTPD_DocumentRoot/index.html"
 sudo apachectl start
 ```
 
-##### gunicorn serviceを起動する
-(gunicorn.serviceはGfarm-S3のmake installでコピーされている)
+##### serviceを登録・起動する
+(gunicorn.service, gfarm-s3-router.serviceはGfarm-S3のmake installでコ
+ピーされている)
 ```
 sudo systemctl enable --now gunicorn.service
+sudo systemctl enable --now gfarm-s3-router.service
 ```
 
-##### cleanup
+##### 作業ディレクトリのcleanup
 ```
 (cd $WORK/gfarm-s3-minio-web && sudo make clean)
 (cd $WORK/gfarm-s3-minio-web && sudo make distclean)
@@ -276,11 +291,10 @@ sudo systemctl enable --now gunicorn.service
 以降、入手したソースコード、作業ディレクトリを削除してもOK
 
 #### ユーザ(user0001)用のパスワードを表示する
-パスワードの表示は、local user (localuser1) 権限で 
+パスワードの表示は、local user (localuser1) 権限で
 gfarm-s3-sharedsecret-passwordを実行する。
-WebUIにアクセスし、global username (user0001)と、このパスワードでログインする
+WebUIにアクセスし、global username (user0001)と、このパスワードでログインする。
 myproxy-logon, grid-proxy-init の場合には代理証明書のパスワードでログインする。
-
 
 ```
 sudo -u localuser1 $GFARM_S3_PREFIX/bin/gfarm-s3-sharedsecret-password
@@ -291,17 +305,33 @@ sudo -u localuser1 $GFARM_S3_PREFIX/bin/gfarm-s3-sharedsecret-password
 Gfarm S3で共通に必要なディレクトリ $SHARED_DIR と、
 各ユーザに必要なディレクトリ$SHARED_DIR/global-username を作成する。
 
-ここに$SHARED_dirは「準備」セクションで決定したディレクトリである。
-上記の例で追加した user0001 というユーザであれば、以下の例のようになる。
+$SHARED_DIRは「準備」セクションで決定したディレクトリである。
+上記の例で追加した user0001 というユーザ名のディレクトリを作るには、以
+下のように実行する。
 
 ```
 gfsudo gfmkdir -p ${SHARED_DIR#/}
-gfsudo gfchmod 1777 ${SHARED_DIR#/}
+gfsudo gfchmod 0755 ${SHARED_DIR#/}
 
 gfsudo gfmkdir ${SHARED_DIR#/}/user0001
 gfsudo gfchown user0001 ${SHARED_DIR#/}/user0001
 ```
 
-上記の操作は、Gfarm管理者に依頼して実行する。
+上記の操作をGfarm管理者(gfsudo実行可能)に依頼して実行する。
+
+全GfarmユーザのGfarm S3用ディレクトリを作る場合の実行例:
+
+```
+SHARED_DIR=/share
+gfsudo gfmkdir -p ${SHARED_DIR#/}
+gfsudo gfchmod 0755 ${SHARED_DIR#/}
+
+for u in $(gfuser); do
+  NAME=$SHARED_DIR/$u
+  gfsudo gfmkdir -p $NAME
+  gfsudo gfchmod 0755 $NAME
+  gfsudo gfchown $u:gfarmadm $NAME
+done
+```
 
 以上
