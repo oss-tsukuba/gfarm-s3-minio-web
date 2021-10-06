@@ -25,6 +25,8 @@ Gfarm S3は、以下のコンポーネントから構成される。
   * WebUI フレームワーク (Django)
   * Gfarm 対応 S3 互換サーバ (MinIO)
   * gunicorn用のsystemdファイル
+  * sudo の設定
+  * gfarms3 グループを追加
 
 2. リバースプロキシにGfarm S3用の設定を追加
 
@@ -54,9 +56,9 @@ mkdir -p $MINIO_BUILDDIR/minio/work/build
 #### Gfarm S3のソースコードを入手する
 
 ```
-(cd $WORK &&
+(cd $WORKDIR &&
  git clone git@github.com:oss-tsukuba/gfarm-s3-minio-web.git)
-(cd $WORK/gfarm-s3-minio-web &&
+(cd $WORKDIR/gfarm-s3-minio-web &&
  git checkout develop)
 
 (cd $MINIO_BUILDDIR/minio/work/build &&
@@ -91,20 +93,29 @@ MYPROXY_SERVER=                 # myproxy-logon使用時にサーバ名を指定
 
 ```
 sudo yum update -y
-sudo yum install -y httpd mod_ssl uuid myproxy \
+sudo yum install -y uuid myproxy \
          python3-devel python3-pip nodejs
-```
-
-```
+### フロントエンドに Apache を使用する場合
+sudo yum install -y httpd mod_ssl
+### フロントエンドに NGINX を使用する場合
+sudo yum install -y nginx
 sudo python3 -m pip install Django
 sudo python3 -m pip install gunicorn
+```
+
+テスト実行時に必要
+```
 sudo python3 -m pip install boto3
 ```
 
 ##### 依存パッケージをインストールする (Ubuntu の例)
 
 ```
-sudo apt-get install -y language-pack-ja language-pack-en
+sudo apt-get install -y uuid myproxy python3 python3-pip python3-dev npm
+### フロントエンドに Apache を使用する場合
+sudo apt-get install -y apache2
+### フロントエンドに NGINX を使用する場合
+sudo apt-get install -y nginx
 ```
 
 ##### リバースプロキシとしてNGINXの設定例
@@ -115,33 +126,46 @@ XXX TODO
 
 既にインストールされていれば本作業は不要
 
-###### Apacheのインストール場所を決める
+###### Apacheの設定ファイルを置く場所を決める
 ```
 HTTPD_CONF=/etc/httpd/conf.d/myserver.conf
+HTTPD_COMMON_CONF=/etc/httpd/conf.d/myserver-common.conf
 HTTPD_DocumentRoot=/usr/local/share/www
 ```
 
 ###### Apacheの設定ファイルを作成
+
+設定例
+
 ```
 cat <<EOF | sudo dd of=$HTTPD_CONF
-ServerName ${GFDOCKER_SUBNET%.0/24}.$GFDOCKER_START_HOST_ADDR
-<VirtualHost *:443>
-	SSLEngine on
-	SSLCertificateFile /etc/pki/tls/certs/localhost.crt
-	SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
-	DocumentRoot $HTTPD_DocumentRoot
-	ServerAdmin root@localhost
-	CustomLog logs/access_log common
-	ErrorLog logs/error_log
-
-	<Directory "$HTTPD_DocumentRoot">
-		AllowOverride FileInfo AuthConfig Limit Indexes
-		Options MultiViews Indexes SymLinksIfOwnerMatch Includes
-		AllowOverride All
-		Require all granted
-	</Directory>
-
+ServerName client1
+<VirtualHost *:80>
+        Include /etc/apache2/sites-available/myserver-common.conf
 </VirtualHost>
+
+<VirtualHost *:443>
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/server/server.crt
+        SSLCertificateKeyFile /etc/ssl/server/server.key
+        Include /etc/apache2/sites-available/myserver-common.conf
+</VirtualHost>
+EOF
+```
+
+```
+cat <<EOF | sudo dd of=$HTTPD_COMMON_CONF
+DocumentRoot /usr/local/share/www
+ServerAdmin root@localhost
+CustomLog /var/log/apache2/access_log common
+ErrorLog /var/log/apache2/error_log
+
+<Directory "/usr/local/share/www">
+        AllowOverride FileInfo AuthConfig Limit Indexes
+        Options MultiViews Indexes SymLinksIfOwnerMatch Includes
+        AllowOverride All
+        Require all granted
+</Directory>
 EOF
 ```
 
@@ -172,7 +196,7 @@ with-apache, with-gunicornはそれぞれのインストール
 プレフィックスを指定する。
 
 ```
-(cd $WORK/gfarm-s3-minio-web && ./configure \
+(cd $WORKDIR/gfarm-s3-minio-web && ./configure \
 	--prefix=$GFARM_S3_PREFIX \
 	--with-gfarm=/usr/local \
 	--with-globus=/usr \
@@ -194,32 +218,39 @@ with-apache, with-gunicornはそれぞれのインストール
 
 ##### Go を作業ディレクトリにインストールする
 ```
-(cd $WORK/gfarm-s3-minio-web/minio && make install-go)
+(cd $WORKDIR/gfarm-s3-minio-web/minio && make install-go)
 ```
 
 ##### Gfarm-S3をビルドする
 ```
-(cd $WORK/gfarm-s3-minio-web && make)
+(cd $WORKDIR/gfarm-s3-minio-web && make)
 ```
 
 ##### Gfarm-S3をインストールする
 ```
-(cd $WORK/gfarm-s3-minio-web && sudo make install)
+(cd $WORKDIR/gfarm-s3-minio-web && sudo make install)
 ```
 
-インストールすると /etc/sudoers.d/gfarm-s3 が作られることに注意する。
+GFARM_S3_PREFIX ディレクトリ以下のファイル以外に、下記が追加される。
+
+* gfarms3 グループ
+* /etc/sudoers.d/gfarm-s3
+* gunicorn.service, gfarm-s3-router.service (systemd 用)
+* /home/wsgi/ 以下にファイル
 
 #### Gfarm-S3の設定
 
-##### キャッシュディレクトリを作成する
+##### マルチパート用キャッシュディレクトリを作成する
 
-S3 マルチパートアップロードの際、分割されたファイルを一時的に置く
+マルチパートアップロードの際、分割されたファイルを一時的に置く
 ディレクトリを用意する。
 
 ```
 sudo mkdir -p $CACHE_BASEDIR
 sudo chmod 1777 $CACHE_BASEDIR
 ```
+
+Gfarm 側に結合しながらアップロード後、一時ファイルは削除される。
 
 ##### ユーザを登録する
 
@@ -245,15 +276,16 @@ sudo usermod -a -G gfarms3 localuser1
 sudo apachectl stop
 ```
 
-###### apache-gfarm-s3.confの内容を、httpd.confの適当な場所に追加する
-以下は、上述の$HTTPD_CONFに追加する例
-```
-sudo vi $WORK/gfarm-s3-minio-web/etc/apache-gfarm-s3.conf $HTTPD_CONF
-```
+###### apache-gfarm-s3.confの内容を、Apache設定の適切な場所に追加
+
+上記Apache設定例の場合は、
+configure 時に生成された
+$WORKDIR/gfarm-s3-minio-web/etc/apache-gfarm-s3.conf
+を$HTTPD_COMMON_CONFに追記する。
 
 ###### 403 error message file を配備する
 ```
-cp $WORK/gfarm-s3-minio-web/etc/e403.html $HTTPD_DocumentRoot/e403.html
+cp $WORKDIR/gfarm-s3-minio-web/etc/e403.html $HTTPD_DocumentRoot/e403.html
 ```
 
 ###### メインインデックスにWebUIへのリンクを追加
@@ -265,7 +297,9 @@ WebUIにアクセスするには、/gfarm/console にブラウザでアクセス
 echo '<a href="/gfarm/console">gfarm-s3</a>' |
 sudo sh -c "cat >> $HTTPD_DocumentRoot/index.html"
 ```
-(gfarm以外にするには、 $WORK/gfarm-s3-minio-web/web/gfarm-s3/gfarms3/urls.py の``gfarm''も変更する。
+(URLパス名をgfarm以外に変更するには、
+ $WORKDIR/gfarm-s3-minio-web/web/gfarm-s3/gfarms3/urls.py
+ の``gfarm''も変更する。
     path('gfarm/console/', include('console.urls')),
 )
 
@@ -275,8 +309,6 @@ sudo apachectl start
 ```
 
 ##### serviceを登録・起動する
-(gunicorn.service, gfarm-s3-router.serviceはGfarm-S3のmake installでコ
-ピーされている)
 ```
 sudo systemctl enable --now gunicorn.service
 sudo systemctl enable --now gfarm-s3-router.service
@@ -284,8 +316,8 @@ sudo systemctl enable --now gfarm-s3-router.service
 
 ##### 作業ディレクトリのcleanup
 ```
-(cd $WORK/gfarm-s3-minio-web && sudo make clean)
-(cd $WORK/gfarm-s3-minio-web && sudo make distclean)
+(cd $WORKDIR/gfarm-s3-minio-web && sudo make clean)
+(cd $WORKDIR/gfarm-s3-minio-web && sudo make distclean)
 ```
 
 以降、入手したソースコード、作業ディレクトリを削除してもOK
