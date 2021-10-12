@@ -2,12 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([etc/gfarm-s3.conf.in], [0.0.0])
-#AM_MAINTAINER_MODE
+AC_INIT([etc/gfarm-s3.conf.in], [1.0.0])
 AC_CONFIG_SRCDIR([etc/gfarm-s3.conf.in])
-#AC_CONFIG_HEADER([config.h])
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_MACRO_DIR([m4])
 AC_SYS_LARGEFILE
 
@@ -233,6 +230,7 @@ bin/gfarm-s3-diff-local-usermap
 bin/gfarm-s3-generate-usermap-hpci
 bin/gfarm-s3-login
 bin/gfarm-s3-server
+bin/gfarm-s3-minio
 bin/gfarm-s3-sharedsecret-password
 bin/gfarm-s3-update-reverse-proxy
 bin/gfarm-s3-useradd

@@ -35,6 +35,8 @@ all::
 
 	cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(GOPATH)/bin/go install
 
+	#cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) PATH=$(GOBIN):$${PATH} make
+
 install-go::
 	-$(MKDIR) -p $$(dirname $(GOPATH))
 	[ -f $(GO_ARCHIVE_PATH) ] || $(CURL) -o $(GO_ARCHIVE_PATH) $(GO_URL)

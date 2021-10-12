@@ -10,6 +10,7 @@ scripts= \
 	gfarm-s3-generate-usermap-hpci \
 	gfarm-s3-login \
 	gfarm-s3-server \
+	gfarm-s3-minio \
 	gfarm-s3-sharedsecret-password \
 	gfarm-s3-update-reverse-proxy \
 	gfarm-s3-useradd \
@@ -20,6 +21,7 @@ generated_scripts= \
 	gfarm-s3-diff-local-usermap \
 	gfarm-s3-login \
 	gfarm-s3-server \
+	gfarm-s3-minio \
 	gfarm-s3-sharedsecret-password \
 	gfarm-s3-update-reverse-proxy \
 	gfarm-s3-useradd \
