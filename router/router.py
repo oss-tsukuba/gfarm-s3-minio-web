@@ -76,8 +76,8 @@ def accept_request(environ):
         request_hdr["CONTENT-LENGTH"] = content_length
         #logger.debug(f"@@@ +++ CONTENT-LENGTH: {content_length}")
 
-    input = environ.get("wsgi.input")
-    file_wrapper = environ["wsgi.file_wrapper"]
+    input = environ["wsgi.input"]
+    file_wrapper = environ.get("wsgi.file_wrapper", None)
 
     #logger.debug(f"@@@ getDestURL => {destURL}")
     #logger.debug(f"@@@ PATH => {path}")
@@ -135,8 +135,7 @@ def check_xAccelBuffering(hdr):
 
 #def gen_respiter(response, chunked, xAccelBuffering, file_wrapper):
 def gen_respiter(response, xAccelBuffering, file_wrapper):
-    #if chunked or xAccelBuffering == False:
-    if xAccelBuffering == False:
+    if file_wrapper is None or xAccelBuffering == False:
 #        logger.debug(f"@@@ READ1READER")
         respiter = read1Reader(response)
     else:
