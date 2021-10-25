@@ -26,6 +26,9 @@ RM=rm
 GIT=git
 INSTALL=install
 
+#RACE=-race
+RACE=
+
 all::
 	[ -d $(BUILDDIR) ] || $(MKDIR) -p $(BUILDDIR)
 	[ -d $(BUILDDIR)/mc ] || (cd $(BUILDDIR) && $(GIT) clone $(mc_git))
@@ -33,7 +36,7 @@ all::
 
 	cd $(BUILDDIR)/mc && GOPATH=$(GOPATH) $(GOPATH)/bin/go install
 
-	cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(GOPATH)/bin/go install
+	cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(GOPATH)/bin/go install $(RACE)
 
 	#cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) PATH=$(GOBIN):$${PATH} make
 
