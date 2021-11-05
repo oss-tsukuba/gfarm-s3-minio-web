@@ -1,0 +1,41 @@
+version: '3.4'
+
+services:
+  gfminio:
+    hostname: gfminio
+    build:
+      context: ../
+      dockerfile: ./docker/gfminio/Dockerfile
+      args:
+        GFARM_SRC_URL: https://github.com/oss-tsukuba/gfarm/archive/refs/tags/2.7.19.tar.gz
+        GFARM2FS_SRC_URL: https://github.com/oss-tsukuba/gfarm2fs/archive/refs/tags/1.2.15.tar.gz
+        SHARED_DIR: /share
+        MYPROXY_SERVER:
+    volumes:
+      #TODO supervisord
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+      - /home:/host_home:ro
+      - ./gfarm2.conf:/usr/local/etc/gfarm2.conf:ro
+      - ./certificates:/etc/grid-security/certificates:ro
+      - ./gfarm-s3-usermap.conf:/gfarm-s3-usermap.conf:ro
+
+      - s3secret:/s3secret:rw
+      - build_cache:/build_cache:rw
+      - ./mnt:/mnt:rw
+
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse:/dev/fuse
+    privileged: false
+    ports:
+      - 61080:80
+      - 61443:443
+
+volumes:
+  s3secret:
+  build_cache:
