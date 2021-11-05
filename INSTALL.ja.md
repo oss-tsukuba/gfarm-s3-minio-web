@@ -11,8 +11,10 @@ Gfarm S3は、以下のコンポーネントから構成される。
 * wsgi サーバ (gunicorn) (WebUI, router の 2ポート使用)
 * WebUI フレームワーク (Django)
 
-※ wsgiの設定について: CentoOS標準のApacheではwsgiとの通信にAF_UNIXが
-使用できないため、本文書ではAF_INETを使用する手順を示しています。
+以下の前提・制限事項がある。
+
+* myproxy server を使用する場合、Gfarm ユーザ名と myproxy ユーザ名が一
+  致していること
 
 インストール手順の概要は以下の通り。
 
