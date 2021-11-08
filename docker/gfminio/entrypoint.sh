@@ -7,6 +7,7 @@ set -eux -o pipefail
 : GFARM_S3_MINIO_WEB_HOST=${GFARM_S3_MINIO_WEB_HOST}
 : WORKDIR=${WORKDIR}
 : MINIO_BUILD_DIR=${MINIO_BUILD_DIR}
+#TODO $GFARMS3_USERNAME $GFARMS3_GROUPNAME
 : WSGI_USER=${WSGI_USER}
 : WSGI_GROUP=${WSGI_USER}
 : WSGI_HOMEDIR=${WSGI_HOMEDIR}
@@ -119,8 +120,8 @@ for line in $(cat "${USERMAP}"); do
         useradd -m -s /bin/bash -g ${USER_GID} -b "${HOME_BASE}" -u "${USER_UID}" "${LOCAL_USERNAME}"
         echo "INFO: create ${HOMEDIR}" >&2
     fi
-    #TODO _gfarm_s3
-    sudo usermod -a -G gfarms3 "${LOCAL_USERNAME}"
+    #TODO $GFARMS3_GROUPNAME
+    sudo usermod -a -G "${WSGI_GROUP}" "${LOCAL_USERNAME}"
 
     ### .globus
     DOTGLOBUS="${HOMEDIR}/.globus"

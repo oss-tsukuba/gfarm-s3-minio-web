@@ -17,9 +17,6 @@ TOUCH=touch
 CHMOD=chmod
 CHOWN=chown
 SUDO=sudo
-#USER_GFARMS3=_gfarm_s3
-#UID_MIN=100
-GID_MIN=100
 GROUPADD=groupadd
 RM=rm
 #SYSTEMD_SYSTEM=/etc/systemd/system
@@ -34,9 +31,6 @@ install:
 	$(CHMOD) 644 $(GFARMS3_LOCAL_USER_MAP)
 
 	$(INSTALL) -D -c sudoers /etc/sudoers.d/gfarm-s3
-	if ! grep -q '^gfarms3:' /etc/group; then $(SUDO) $(GROUPADD) -K GID_MIN=$(GID_MIN) gfarms3; fi
-
-	@echo "*** NOTICE *** The installer has created a group 'gfarms3'." 1>&2
 	@echo "*** NOTICE *** The installer has created a file '/etc/sudoers.d/gfarm-s3'." 1>&2
 	@echo "*** NOTICE *** Please confirm content of the file." 1>&2
 

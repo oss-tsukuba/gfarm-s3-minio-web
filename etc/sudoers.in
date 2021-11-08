@@ -1,5 +1,5 @@
 ### Runas_Alias GFARMS3 = ALL, !root
-Runas_Alias GFARMS3 = %gfarms3
+Runas_Alias GFARMS3 = %@with_wsgi_group@
 
 @with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @prefix@/bin/gfarm-s3-server
 @with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_globus@/bin/grid-proxy-info
@@ -12,4 +12,3 @@ Runas_Alias GFARMS3 = %gfarms3
 @with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfgetfacl
 @with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfsetfacl
 @with_wsgi_user@ ALL=(GFARMS3) NOPASSWD: @prefix@/bin/gfarm-s3-sharedsecret-password
-@with_wsgi_user@ ALL=(root) NOPASSWD: @with_apache@/sbin/apachectl
