@@ -2,8 +2,9 @@ PREFIX=@prefix@
 
 SYS_HTTPD_CONF=/etc/httpd/conf/httpd.conf
 SYS_HTTPD_CONF_D=/etc/httpd/conf.d
-WSGI_USER=@with_wsgi_user@
-WITH_ROUTER_HOMEDIR=@with_router_homedir@
+GFARM_S3_USERNAME=@with_gfarm_s3_user@
+GFARM_S3_GROUPNAME=@with_gfarm_s3_group@
+ROUTER_HOMEDIR=@with_gfarm_s3_homedir@
 
 GFARMS3_CONF_DIR=$(PREFIX)/etc
 GFARMS3_LOCAL_USER_MAP=$(PREFIX)/etc/gfarm_s3_local_user_map
@@ -35,23 +36,23 @@ install:
 	@echo "*** NOTICE *** Please confirm content of the file." 1>&2
 
 	$(MKDIR) -p $$(dirname $(GFARMS3_USER_PORT_MAP))
-	$(CHOWN) $(WSGI_USER) $$(dirname $(GFARMS3_USER_PORT_MAP))
+	$(CHOWN) $(GFARM_S3_USERNAME) $$(dirname $(GFARMS3_USER_PORT_MAP))
 	$(TOUCH) $(GFARMS3_USER_PORT_MAP)
-	$(CHOWN) $(WSGI_USER) $(GFARMS3_USER_PORT_MAP)
+	$(CHOWN) $(GFARM_S3_USERNAME) $(GFARMS3_USER_PORT_MAP)
 
 	$(MKDIR) -p $$(dirname $(GFARMS3_APACHE_REWRITE_CONF))
-	$(CHOWN) $(WSGI_USER) $$(dirname $(GFARMS3_APACHE_REWRITE_CONF))
+	$(CHOWN) $(GFARM_S3_USERNAME) $$(dirname $(GFARMS3_APACHE_REWRITE_CONF))
 	$(TOUCH) $(GFARMS3_APACHE_REWRITE_CONF)
-	$(CHOWN) $(WSGI_USER) $(GFARMS3_APACHE_REWRITE_CONF)
+	$(CHOWN) $(GFARM_S3_USERNAME) $(GFARMS3_APACHE_REWRITE_CONF)
 
 	$(INSTALL) -D -m 644 gunicorn.service $(SYSTEMD_SYSTEM)/gunicorn.service
 	$(INSTALL) -D -m 644 gfarm-s3-router.service $(SYSTEMD_SYSTEM)/gfarm-s3-router.service
-	$(MKDIR) -p $(WITH_ROUTER_HOMEDIR)
-	$(CHOWN) $(WSGI_USER):$(WSGI_GROUP) $(WITH_ROUTER_HOMEDIR)
-	$(INSTALL) -D -c -m 644 ../router/router.py $(WITH_ROUTER_HOMEDIR)
-	$(CHOWN) $(WSGI_USER):$(WSGI_GROUP) $(WITH_ROUTER_HOMEDIR)/router.py
+	#$(MKDIR) -p $(ROUTER_HOMEDIR)
+	#$(CHOWN) $(GFARM_S3_USERNAME):$(GFARM_S3_GROUPNAME) $(ROUTER_HOMEDIR)
+	$(INSTALL) -D -c -m 644 ../router/router.py $(ROUTER_HOMEDIR)
+	$(CHOWN) $(GFARM_S3_USERNAME):$(GFARM_S3_GROUPNAME) $(ROUTER_HOMEDIR)/router.py
 
-	@echo please add apache-gfarm-s3.conf content to your httpd.conf
+	#@echo please add apache-gfarm-s3.conf content to your httpd.conf
 	@echo systemctl enable --now gunicorn.service
 	@echo systemctl enable --now gfarm-s3-router.service
 

@@ -86,60 +86,50 @@ esac
 AC_MSG_RESULT([$with_gunicorn])
 AC_SUBST(with_gunicorn)
 
-### --with-wsgi-homedir=WSGI_HOMEDIR
-AC_MSG_CHECKING([for WSGI homedir])
-AC_ARG_WITH([wsgi-homedir],
-  AC_HELP_STRING([--with-wsgi-homedir=WSGI_HOMEDIR], [wsgi homedir [[/home/wsgi]]]))
-case x$with_wsgi_homedir in
-  x|xyes|xno) with_wsgi_homedir=/home/wsgi ;;
+### --with-gfarm-s3-homedir=GFARM_S3_HOMEDIR
+AC_MSG_CHECKING([for GFARM_S3 homedir])
+AC_ARG_WITH([gfarm-s3-homedir],
+  AC_HELP_STRING([--with-gfarm-s3-homedir=GFARM_S3_HOMEDIR], [Gfarm S3 homedir [[/home/_gfarm_s3]]]))
+case x$with_gfarm_s3_homedir in
+  x|xyes|xno) with_gfarm_s3_homedir=/home/_gfarm_s3 ;;
 esac
-AC_MSG_RESULT([$with_wsgi_homedir])
-AC_SUBST(with_wsgi_homedir)
+AC_MSG_RESULT([$with_gfarm_s3_homedir])
+AC_SUBST(with_gfarm_s3_homedir)
 
-### --with-wsgi-user=WSGI_USER
-AC_MSG_CHECKING([for WSGI user])
-AC_ARG_WITH([wsgi-user],
-  AC_HELP_STRING([--with-wsgi-user=WSGI_USER], [wsgi username [[wsgi]]]))
-case x$with_wsgi_user in
-  x|xyes|xno) with_wsgi_user=wsgi ;;
+### --with-gfarm-s3-user=GFARM_S3_USER
+AC_MSG_CHECKING([for Gfarm S3 user])
+AC_ARG_WITH([gfarm-s3-user],
+  AC_HELP_STRING([--with-gfarm-s3-user=GFARM_S3_USER], [Gfarm S3 username [[_gfarm_s3]]]))
+case x$with_gfarm_s3_user in
+  x|xyes|xno) with_gfarm_s3_user=_gfarm_s3 ;;
 esac
-AC_MSG_RESULT([$with_wsgi_user])
-AC_SUBST(with_wsgi_user)
+AC_MSG_RESULT([$with_gfarm_s3_user])
+AC_SUBST(with_gfarm_s3_user)
 
-### --with-wsgi-group=WSGI_GROUP
-AC_MSG_CHECKING([for WSGI group])
-AC_ARG_WITH([wsgi-group],
-  AC_HELP_STRING([--with-wsgi-group=WSGI_GROUP], [wsgi groupname [[wsgi]]]))
-case x$with_wsgi_group in
-  x|xyes|xno) with_wsgi_group=wsgi ;;
+### --with-gfarm-s3-group=GFARM_S3_GROUP
+AC_MSG_CHECKING([for Gfarm S3 group])
+AC_ARG_WITH([gfarm-s3-group],
+  AC_HELP_STRING([--with-gfarm-s3-group=GFARM_S3_GROUP], [Gfarm S3 groupname [[_gfarm_s3]]]))
+case x$with_gfarm_s3_group in
+  x|xyes|xno) with_gfarm_s3_group=_gfarm_s3 ;;
 esac
-AC_MSG_RESULT([$with_wsgi_group])
-AC_SUBST(with_wsgi_group)
+AC_MSG_RESULT([$with_gfarm_s3_group])
+AC_SUBST(with_gfarm_s3_group)
 
-### --with-wsgi-addr=WSGI_ADDR
-AC_MSG_CHECKING([for WSGI addr])
-AC_ARG_WITH([wsgi-addr],
-  AC_HELP_STRING([--with-wsgi-addr=WSGI_ADDR], [wsgi addr [[127.0.0.1:8000]]]))
-case x$with_wsgi_addr in
-  x|xyes|xno) with_wsgi_addr=127.0.0.1:8000 ;;
+### --with-webui-addr=WEBUI_ADDR
+AC_MSG_CHECKING([for Gfarm S3 WebUI addr])
+AC_ARG_WITH([webui-addr],
+  AC_HELP_STRING([--with-webui-addr=WEBUI_ADDR], [Gfarm S3 WebUI addr [[127.0.0.1:8000]]]))
+case x$with_webui_addr in
+  x|xyes|xno) with_webui_addr=127.0.0.1:8000 ;;
 esac
-AC_MSG_RESULT([$with_wsgi_addr])
-AC_SUBST(with_wsgi_addr)
-with_wsgi_port=${with_wsgi_addr#*:}
-AC_SUBST(with_wsgi_port)
-
-### --with-router-homedir=ROUTER_HOMEDIR
-AC_MSG_CHECKING([for ROUTER homedir])
-AC_ARG_WITH([router-homedir],
-  AC_HELP_STRING([--with-router-homedir=ROUTER_HOMEDIR], [router homedir [[/home/router]]]))
-case x$with_router_homedir in
-  x|xyes|xno) with_router_homedir=/home/router ;;
-esac
-AC_MSG_RESULT([$with_router_homedir])
-AC_SUBST(with_router_homedir)
+AC_MSG_RESULT([$with_webui_addr])
+AC_SUBST(with_webui_addr)
+with_webui_port=${with_webui_addr#*:}
+AC_SUBST(with_webui_port)
 
 ### --with-router-addr=ROUTER_ADDR
-AC_MSG_CHECKING([for ROUTER addr])
+AC_MSG_CHECKING([for Gfarm S3 ROUTER addr])
 AC_ARG_WITH([router-addr],
   AC_HELP_STRING([--with-router-addr=ROUTER_ADDR], [router bind address [[127.0.0.1:8001]]]))
 case x$with_router_addr in

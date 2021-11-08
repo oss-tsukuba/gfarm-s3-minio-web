@@ -18,7 +18,7 @@
 
 	RewriteEngine on
 
-	ProxyPass /gfarm http://127.0.0.1:@with_wsgi_port@/gfarm
+	ProxyPass /gfarm http://127.0.0.1:@with_webui_port@/gfarm
 	ProxyPreserveHost on
 
 	Alias /static/ /home/wsgi/static/
@@ -62,8 +62,8 @@
 	RewriteCond "%{HTTP:Authorization}" "AWS4-HMAC-SHA256"
 	RewriteRule ^/(.*) http://127.0.0.1:@with_router_port@/$1 [QSA,P,L]
 
-	ProxyPass /gfarm http://127.0.0.1:@with_wsgi_port@/gfarm
+	ProxyPass /gfarm http://127.0.0.1:@with_webui_port@/gfarm
 
-	ProxyPassReverse / http://127.0.0.1:@with_wsgi_port@/
+	ProxyPassReverse / http://127.0.0.1:@with_webui_port@/
 	ProxyPassReverse / http://127.0.0.1:@with_router_port@/
 	ProxyPreserveHost on

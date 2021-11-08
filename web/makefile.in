@@ -1,8 +1,9 @@
 PREFIX=@prefix@
-WSGI_USER=@with_wsgi_user@
-MKDIR=mkdir
-WSGI_HOMEDIR=@with_wsgi_homedir@
+GFARM_S3_USER=@with_gfarm_s3_user@
+GFARM_S3_GROUP=@with_gfarm_s3_group@
+GFARM_S3_HOMEDIR=@with_gfarm_s3_homedir@
 
+MKDIR=mkdir
 TAR=tar
 RM=rm
 CHOWN=chown
@@ -13,12 +14,12 @@ all::
 	cd gfarm-s3/console/static/console && $(NPM) install
 
 install:
-	$(TAR) cf - gfarm-s3 rungunicorn runserver | (cd $(WSGI_HOMEDIR) && $(TAR) xfp -)
-	(cd gfarm-s3/console && $(TAR) cf - static) | (cd $(WSGI_HOMEDIR) && $(TAR) xfp -)
-	$(CHOWN) -R $(WSGI_USER):$(WSGI_GROUP) $(WSGI_HOMEDIR)/gfarm-s3 $(WSGI_HOMEDIR)/rungunicorn $(WSGI_HOMEDIR)/runserver $(WSGI_HOMEDIR)/static
-	$(CHMOD) +x $(WSGI_HOMEDIR)/rungunicorn $(WSGI_HOMEDIR)/runserver
-	$(CHMOD) og+rX $(WSGI_HOMEDIR)
-	$(CHMOD) -R og+rX $(WSGI_HOMEDIR)/static
+	$(TAR) cf - gfarm-s3 rungunicorn runserver | (cd $(GFARM_S3_HOMEDIR) && $(TAR) xfp -)
+	(cd gfarm-s3/console && $(TAR) cf - static) | (cd $(GFARM_S3_HOMEDIR) && $(TAR) xfp -)
+	$(CHOWN) -R $(GFARM_S3_USER):$(GFARM_S3_GROUP) $(GFARM_S3_HOMEDIR)/gfarm-s3 $(GFARM_S3_HOMEDIR)/rungunicorn $(GFARM_S3_HOMEDIR)/runserver $(GFARM_S3_HOMEDIR)/static
+	$(CHMOD) +x $(GFARM_S3_HOMEDIR)/rungunicorn $(GFARM_S3_HOMEDIR)/runserver
+	$(CHMOD) og+rX $(GFARM_S3_HOMEDIR)
+	$(CHMOD) -R og+rX $(GFARM_S3_HOMEDIR)/static
 
 clean:
 	$(RM) -fr gfarm-s3/console/static/console/node_modules

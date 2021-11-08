@@ -4,11 +4,11 @@ After = network.target
 
 [Service]
 #Type = notify
-User = @with_wsgi_user@
-Group = @with_wsgi_group@
+User = @with_gfarm_s3_user@
+Group = @with_gfarm_s3_group@
 #RuntimeDirectory = gunicorn
 WorkingDirectory = /
-Environment = workers=2 bind=@with_wsgi_addr@ chdir=@with_wsgi_homedir@/gfarm-s3
+Environment = workers=2 bind=@with_webui_addr@ chdir=@with_gfarm_s3_homedir@/gfarm-s3
 ExecStart = @with_gunicorn@/bin/gunicorn --error-logfile - --workers $workers --bind $bind --chdir $chdir gfarms3.wsgi:application
 #ExecReload = /bin/kill -s HUP $MAINPID
 #KillMode = mixed

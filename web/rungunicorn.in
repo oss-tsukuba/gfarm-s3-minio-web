@@ -6,6 +6,6 @@ cd /
 	--error-logfile /tmp/gunicorn.err \
 	--log-file /tmp/gunicorn.log \
 	-w 2 \
-	-b 0.0.0.0:@with_wsgi_port@ \
-	--chdir @with_wsgi_homedir@/gfarm-s3 \
+	-b 0.0.0.0:@with_webui_port@ \
+	--chdir @with_gfarm_s3_homedir@/gfarm-s3 \
 	gfarms3.wsgi:application

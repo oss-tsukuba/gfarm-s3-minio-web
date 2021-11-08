@@ -13,10 +13,10 @@
     }
 
     location /gfarm/ {
-        proxy_pass http://127.0.0.1:@with_wsgi_port@;
+        proxy_pass http://127.0.0.1:@with_webui_port@;
     }
 
     location /static/ {
-        alias /home/wsgi/static/;
+        alias @with_gfarm_s3_homedir@/static/;
         autoindex off;
     }

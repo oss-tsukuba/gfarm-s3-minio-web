@@ -640,12 +640,11 @@ router_nworkers
 router_nthreads
 with_router_port
 with_router_addr
-with_router_homedir
-with_wsgi_port
-with_wsgi_addr
-with_wsgi_group
-with_wsgi_user
-with_wsgi_homedir
+with_webui_port
+with_webui_addr
+with_gfarm_s3_group
+with_gfarm_s3_user
+with_gfarm_s3_homedir
 with_gunicorn
 with_apache
 with_proxy_lifetime
@@ -749,11 +748,10 @@ with_myproxy_server
 with_proxy_lifetime
 with_apache
 with_gunicorn
-with_wsgi_homedir
-with_wsgi_user
-with_wsgi_group
-with_wsgi_addr
-with_router_homedir
+with_gfarm_s3_homedir
+with_gfarm_s3_user
+with_gfarm_s3_group
+with_webui_addr
 with_router_addr
 with_router_nthreads
 with_router_nworkers
@@ -1425,16 +1423,14 @@ Optional Packages:
                           Apache root directory [[/usr]]
   --with-gunicorn=GUNICORN_ROOT
                           gunicorn root directory [[/usr]]
-  --with-wsgi-homedir=WSGI_HOMEDIR
-                          wsgi homedir [[/home/wsgi]]
-  --with-wsgi-user=WSGI_USER
-                          wsgi username [[wsgi]]
-  --with-wsgi-group=WSGI_GROUP
-                          wsgi groupname [[wsgi]]
-  --with-wsgi-addr=WSGI_ADDR
-                          wsgi addr [[127.0.0.1:8000]]
-  --with-router-homedir=ROUTER_HOMEDIR
-                          router homedir [[/home/router]]
+  --with-gfarm-s3-homedir=GFARM_S3_HOMEDIR
+                          Gfarm S3 homedir [[/home/_gfarm_s3]]
+  --with-gfarm-s3-user=GFARM_S3_USER
+                          Gfarm S3 username [[_gfarm_s3]]
+  --with-gfarm-s3-group=GFARM_S3_GROUP
+                          Gfarm S3 groupname [[_gfarm_s3]]
+  --with-webui-addr=WEBUI_ADDR
+                          Gfarm S3 WebUI addr [[127.0.0.1:8000]]
   --with-router-addr=ROUTER_ADDR
                           router bind address [[127.0.0.1:8001]]
   --router-nthreads=ROUTER_NTHREADS
@@ -11460,91 +11456,75 @@ esac
 $as_echo "$with_gunicorn" >&6; }
 
 
-### --with-wsgi-homedir=WSGI_HOMEDIR
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for WSGI homedir" >&5
-$as_echo_n "checking for WSGI homedir... " >&6; }
+### --with-gfarm-s3-homedir=GFARM_S3_HOMEDIR
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GFARM_S3 homedir" >&5
+$as_echo_n "checking for GFARM_S3 homedir... " >&6; }
 
-# Check whether --with-wsgi-homedir was given.
-if test "${with_wsgi_homedir+set}" = set; then :
-  withval=$with_wsgi_homedir;
+# Check whether --with-gfarm-s3-homedir was given.
+if test "${with_gfarm_s3_homedir+set}" = set; then :
+  withval=$with_gfarm_s3_homedir;
 fi
 
-case x$with_wsgi_homedir in
-  x|xyes|xno) with_wsgi_homedir=/home/wsgi ;;
+case x$with_gfarm_s3_homedir in
+  x|xyes|xno) with_gfarm_s3_homedir=/home/_gfarm_s3 ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_wsgi_homedir" >&5
-$as_echo "$with_wsgi_homedir" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gfarm_s3_homedir" >&5
+$as_echo "$with_gfarm_s3_homedir" >&6; }
 
 
-### --with-wsgi-user=WSGI_USER
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for WSGI user" >&5
-$as_echo_n "checking for WSGI user... " >&6; }
+### --with-gfarm-s3-user=GFARM_S3_USER
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Gfarm S3 user" >&5
+$as_echo_n "checking for Gfarm S3 user... " >&6; }
 
-# Check whether --with-wsgi-user was given.
-if test "${with_wsgi_user+set}" = set; then :
-  withval=$with_wsgi_user;
+# Check whether --with-gfarm-s3-user was given.
+if test "${with_gfarm_s3_user+set}" = set; then :
+  withval=$with_gfarm_s3_user;
 fi
 
-case x$with_wsgi_user in
-  x|xyes|xno) with_wsgi_user=wsgi ;;
+case x$with_gfarm_s3_user in
+  x|xyes|xno) with_gfarm_s3_user=_gfarm_s3 ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_wsgi_user" >&5
-$as_echo "$with_wsgi_user" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gfarm_s3_user" >&5
+$as_echo "$with_gfarm_s3_user" >&6; }
 
 
-### --with-wsgi-group=WSGI_GROUP
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for WSGI group" >&5
-$as_echo_n "checking for WSGI group... " >&6; }
+### --with-gfarm-s3-group=GFARM_S3_GROUP
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Gfarm S3 group" >&5
+$as_echo_n "checking for Gfarm S3 group... " >&6; }
 
-# Check whether --with-wsgi-group was given.
-if test "${with_wsgi_group+set}" = set; then :
-  withval=$with_wsgi_group;
+# Check whether --with-gfarm-s3-group was given.
+if test "${with_gfarm_s3_group+set}" = set; then :
+  withval=$with_gfarm_s3_group;
 fi
 
-case x$with_wsgi_group in
-  x|xyes|xno) with_wsgi_group=wsgi ;;
+case x$with_gfarm_s3_group in
+  x|xyes|xno) with_gfarm_s3_group=_gfarm_s3 ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_wsgi_group" >&5
-$as_echo "$with_wsgi_group" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gfarm_s3_group" >&5
+$as_echo "$with_gfarm_s3_group" >&6; }
 
 
-### --with-wsgi-addr=WSGI_ADDR
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for WSGI addr" >&5
-$as_echo_n "checking for WSGI addr... " >&6; }
+### --with-webui-addr=WEBUI_ADDR
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Gfarm S3 WebUI addr" >&5
+$as_echo_n "checking for Gfarm S3 WebUI addr... " >&6; }
 
-# Check whether --with-wsgi-addr was given.
-if test "${with_wsgi_addr+set}" = set; then :
-  withval=$with_wsgi_addr;
+# Check whether --with-webui-addr was given.
+if test "${with_webui_addr+set}" = set; then :
+  withval=$with_webui_addr;
 fi
 
-case x$with_wsgi_addr in
-  x|xyes|xno) with_wsgi_addr=127.0.0.1:8000 ;;
+case x$with_webui_addr in
+  x|xyes|xno) with_webui_addr=127.0.0.1:8000 ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_wsgi_addr" >&5
-$as_echo "$with_wsgi_addr" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_webui_addr" >&5
+$as_echo "$with_webui_addr" >&6; }
 
-with_wsgi_port=${with_wsgi_addr#*:}
-
-
-### --with-router-homedir=ROUTER_HOMEDIR
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ROUTER homedir" >&5
-$as_echo_n "checking for ROUTER homedir... " >&6; }
-
-# Check whether --with-router-homedir was given.
-if test "${with_router_homedir+set}" = set; then :
-  withval=$with_router_homedir;
-fi
-
-case x$with_router_homedir in
-  x|xyes|xno) with_router_homedir=/home/router ;;
-esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_router_homedir" >&5
-$as_echo "$with_router_homedir" >&6; }
+with_webui_port=${with_webui_addr#*:}
 
 
 ### --with-router-addr=ROUTER_ADDR
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ROUTER addr" >&5
-$as_echo_n "checking for ROUTER addr... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Gfarm S3 ROUTER addr" >&5
+$as_echo_n "checking for Gfarm S3 ROUTER addr... " >&6; }
 
 # Check whether --with-router-addr was given.
 if test "${with_router_addr+set}" = set; then :

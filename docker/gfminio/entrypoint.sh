@@ -7,11 +7,9 @@ set -eux -o pipefail
 : GFARM_S3_MINIO_WEB_HOST=${GFARM_S3_MINIO_WEB_HOST}
 : WORKDIR=${WORKDIR}
 : MINIO_BUILD_DIR=${MINIO_BUILD_DIR}
-#TODO $GFARMS3_USERNAME $GFARMS3_GROUPNAME
-: WSGI_USER=${WSGI_USER}
-: WSGI_GROUP=${WSGI_USER}
-: WSGI_HOMEDIR=${WSGI_HOMEDIR}
-: WSGI_PORT=${WSGI_PORT}
+: GFARM_S3_USERNAME=${GFARM_S3_USERNAME}
+: GFARM_S3_GROUPNAME=${GFARM_S3_USERNAME}
+: GFARM_S3_HOMEDIR=${GFARM_S3_HOMEDIR}
 : CACHE_DIR=${CACHE_DIR}
 : CACHE_SIZE=${CACHE_SIZE}
 
@@ -25,8 +23,8 @@ GFARM_S3_MINIO_BRANCH=gfarmmerge
 
 ### cache files in MINIO_BUILD_DIR to build.
 install_gf_s3() {
-    groupadd -K GID_MIN=100 ${WSGI_GROUP} && \
-    useradd -K UID_MIN=100 -m ${WSGI_USER} -g ${WSGI_GROUP} -d ${WSGI_HOMEDIR}
+    groupadd -K GID_MIN=100 ${GFARM_S3_GROUPNAME} && \
+    useradd -K UID_MIN=100 -m ${GFARM_S3_USERNAME} -g ${GFARM_S3_GROUPNAME} -d ${GFARM_S3_HOMEDIR}
 
     MINIO_WORKDIR=${MINIO_BUILD_DIR}/minio/work/build
     GFARM_S3_MINIO_DIR=${MINIO_WORKDIR}/gfarm-s3-minio
@@ -44,12 +42,10 @@ install_gf_s3() {
     --with-gfarm=/usr/local \
     --with-globus=/usr \
     --with-myproxy=/usr \
-    --with-apache=/usr \
     --with-gunicorn=/usr/local \
-    --with-wsgi-homedir=${WSGI_HOMEDIR} \
-    --with-wsgi-user=${WSGI_USER} \
-    --with-wsgi-group=${WSGI_GROUP} \
-    --with-wsgi-port=${WSGI_PORT} \
+    --with-gfarm-s3-homedir=${GFARM_S3_HOMEDIR} \
+    --with-gfarm-s3--user=${GFARM_S3_USERNAME} \
+    --with-gfarm-s3-group=${GFARM_S3_GROUPNAME} \
     --with-cache-basedir=${CACHE_DIR} \
     --with-cache-size=${CACHE_SIZE} \
     --with-myproxy-server=${MYPROXY_SERVER} \
@@ -120,8 +116,7 @@ for line in $(cat "${USERMAP}"); do
         useradd -m -s /bin/bash -g ${USER_GID} -b "${HOME_BASE}" -u "${USER_UID}" "${LOCAL_USERNAME}"
         echo "INFO: create ${HOMEDIR}" >&2
     fi
-    #TODO $GFARMS3_GROUPNAME
-    sudo usermod -a -G "${WSGI_GROUP}" "${LOCAL_USERNAME}"
+    sudo usermod -a -G "${GFARM_S3_GROUPNAME}" "${LOCAL_USERNAME}"
 
     ### .globus
     DOTGLOBUS="${HOMEDIR}/.globus"

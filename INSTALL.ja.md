@@ -86,17 +86,16 @@ mkdir -p $MINIO_BUILDDIR/minio/work/build
 に反映させる。
 
 ```
-GFARM_S3_PREFIX=/usr/local      # Gfarm-S3をインストールする場所
-SHARED_DIR=/share               # Gfarm-S3に使用するGfarm上のディレクトリ
-CACHE_BASEDIR=/mnt/cache        # マルチパート作業用キャッシュディレクトリ
-CACHE_SIZE=1024                 # 1ユーザあたりのキャッシュサイズ(MB)
-WSGI_USER=_gfarm_s3             # WebUI,ルーターを実行するローカルユーザ名
-WSGI_GROUP=_gfarm_s3            # そのグループ
-WSGI_HOMEDIR=/home/_gfarm_s3    # そのホームディレクトリ
-WSGI_ADDR=127.0.0.1:8000        # WebUIの待ち受けアドレス
-ROUTER_HOMEDIR=/home/_gfarm_s3  # ルーターのホームディレクトリ
-ROUTER_ADDR=127.0.0.1:8001      # その待ち受けアドレス
-MYPROXY_SERVER=                 # myproxy-logon使用時にサーバ名を指定
+GFARM_S3_PREFIX=/usr/local        # Gfarm-S3をインストールする場所
+SHARED_DIR=/share                 # Gfarm-S3に使用するGfarm上のディレクトリ
+CACHE_BASEDIR=/mnt/cache          # マルチパート作業用キャッシュディレクトリ
+CACHE_SIZE=1024                   # 1ユーザあたりのキャッシュサイズ(MB)
+GFARM_S3_USERNAME=_gfarm_s3       # WebUI,ルーターを実行するローカルユーザ名
+GFARM_S3_GROUPNAME=_gfarm_s3      # そのグループ
+GFARM_S3_HOMEDIR=/home/_gfarm_s3  # そのホームディレクトリ
+WEBUI_ADDR=127.0.0.1:8000         # WebUIの待ち受けアドレス
+ROUTER_ADDR=127.0.0.1:8001        # その待ち受けアドレス
+MYPROXY_SERVER=                   # myproxy-logon使用時にサーバ名を指定
 ```
 
 #### 依存パッケージをインストールする (CentOS 7 の例)
@@ -205,13 +204,11 @@ with-apache, with-gunicornはそれぞれのインストール
 	--with-gfarm=/usr/local \
 	--with-globus=/usr \
 	--with-myproxy=/usr \
-	--with-apache=/usr \
 	--with-gunicorn=/usr/local \
-	--with-wsgi-homedir=$WSGI_HOMEDIR \
-	--with-wsgi-user=$WSGI_USER \
-	--with-wsgi-group=$WSGI_GROUP \
-	--with-wsgi-addr=$WSGI_ADDR \
-	--with-router-homedir=$ROUTER_HOMEDIR \
+	--with-gfarm-s3-homedir=$GFARM_S3_HOMEDIR \
+	--with-gfarm-s3-user=$GFARM_S3_USERNAME \
+	--with-gfarm-s3-group=$GFARM_S3_GROUPNAME \
+	--with-webui-addr=$WEBUI_ADDR \
 	--with-router-addr=$ROUTER_ADDR \
 	--with-cache-basedir=$CACHE_BASEDIR \
 	--with-cache-size=$CACHE_SIZE \
