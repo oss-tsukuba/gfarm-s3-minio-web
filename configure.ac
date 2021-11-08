@@ -49,9 +49,9 @@ AC_SUBST(with_myproxy)
 ### --with-myproxy-server=MYPROXY_SERVER
 AC_MSG_CHECKING([for myproxy server])
 AC_ARG_WITH([myproxy-server],
-  AC_HELP_STRING([--with-myproxy-server=MYPROXY_SERVER], [myproxy servername [[portal.hpci.nii.ac.jp]]]))
+  AC_HELP_STRING([--with-myproxy-server=MYPROXY_SERVER(host:port)], [myproxy servername [[<not specified>]]]))
 case x$with_myproxy_server in
-  x|xyes|xno) with_myproxy_server=portal.hpci.nii.ac.jp ;;
+  x|xyes|xno) with_myproxy_server= ;;
 esac
 AC_MSG_RESULT([$with_myproxy_server])
 AC_SUBST(with_myproxy_server)

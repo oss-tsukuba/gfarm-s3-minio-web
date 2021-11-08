@@ -473,6 +473,7 @@ challenge_auth() {
 
 #	echo challenge_auth "$@" 1>&2
 
+	if [ -n "$MYPROXY_SERVER" ]; then
 	case $GFARMS3_LOGIN_METHOD in
 	*myproxy-logon*)
 		echo "$user_provided_key" |
@@ -491,6 +492,7 @@ challenge_auth() {
 		fi
 		;;
 	esac
+	fi
 
 	case $GFARMS3_LOGIN_METHOD in
 	*grid-proxy-init*)

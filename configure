@@ -1415,8 +1415,8 @@ Optional Packages:
                           Globus root directory [[/usr]]
   --with-myproxy=MYPROXY_ROOT
                           Myproxy root directory [[/usr]]
-  --with-myproxy-server=MYPROXY_SERVER
-                          myproxy servername [[portal.hpci.nii.ac.jp]]
+  --with-myproxy-server=MYPROXY_SERVER(host:port)
+                          myproxy servername [[<not specified>]]
   --with-proxy-lifetime=PROXY_LIFETIME
                           proxy lifetime [[168]]
   --with-apache=APACHE_ROOT
@@ -11402,7 +11402,7 @@ if test "${with_myproxy_server+set}" = set; then :
 fi
 
 case x$with_myproxy_server in
-  x|xyes|xno) with_myproxy_server=portal.hpci.nii.ac.jp ;;
+  x|xyes|xno) with_myproxy_server= ;;
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_myproxy_server" >&5
 $as_echo "$with_myproxy_server" >&6; }
