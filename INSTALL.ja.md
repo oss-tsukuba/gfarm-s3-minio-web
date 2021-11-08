@@ -1,6 +1,6 @@
 # Gfarm S3 インストール手順書
 
-## 1. Overview
+## 概要
 
 Gfarm S3 is a S3 compatible object server for Gfarm.
 
@@ -8,7 +8,7 @@ Gfarm S3は、以下のコンポーネントから構成される。
 
 * Gfarm 対応 S3 互換サーバ (MinIO)
 * リバースプロキシ (Apache など)
-* wsgi サーバ (gunicorn) (WebUI, router の 2ポート使用)
+* wsgi サーバ (gunicorn) (WebUI, Router で 2 個のポートを使用)
 * WebUI フレームワーク (Django)
 
 以下の前提・制限事項がある。
@@ -19,33 +19,41 @@ Gfarm S3は、以下のコンポーネントから構成される。
 インストール手順の概要は以下の通り。
 
 0. 事前準備
+  * _gfarm_s3 ユーザ・グループ作成
   * 依存パッケージのインストール
   * リバースプロキシの設定
   * WebUIフレームワークを動作させるユーザを作成
 
-1. Gfarm S3のソースコードから以下のコンポーネントをインストール
-  * WebUI フレームワーク (Django)
+1. Gfarm S3のソースコードから以下のコンポーネントを自動インストール
+  * WebUI フレームワーク (Django) を利用したページ
   * Gfarm 対応 S3 互換サーバ (MinIO)
   * gunicorn用のsystemdファイル
   * sudo の設定
-  * gfarms3 グループを追加
 
 2. リバースプロキシにGfarm S3用の設定を追加
 
-3. gunicornサービスを起動
+3. gunicornサービス(2種)を起動
 
 4. Gfarmファイルシステム上に必要なディレクトリを作成
 
-### 1.1 Quick Installation
+### インストール手順
 
-本節ではインストール手順を簡単に説明する。
-本手順はCentOS 7およびCentOS8で動作確認している。
+本手順はCentOS 7およびCentOS8で動作を確認した。
 
-【重要】インストールは、Gfarm 2.7 (以降) のクライアントがインストール
-・設定されている環境で行う。ホストの管理権限 (root) および
-Gfarmの管理者権限 (gfarmadm) が必要となる。
+インストールは、Gfarm 2.7 (以降) のクライアントがインストール・設定さ
+れている環境で行う。ホストの管理権限 (root) およびGfarmの管理者権限
+(gfarmadm) が必要となる。
 
-##### Gfarm-S3をビルドするための作業ディレクトリを作成
+#### _gfarm_s3 ユーザ・グループを作成
+
+実行例
+
+```
+groupadd -K GID_MIN=100 _gfarm_s3
+useradd -K UID_MIN=100 -m _gfarm_s3 -g _gfarm_s3 -d /home/_gfarm_s3
+```
+
+#### Gfarm-S3をビルドするための作業ディレクトリを作成
 (インストール後は削除して構わないのでどこでもよい)
 
 ```
@@ -82,16 +90,16 @@ GFARM_S3_PREFIX=/usr/local      # Gfarm-S3をインストールする場所
 SHARED_DIR=/share               # Gfarm-S3に使用するGfarm上のディレクトリ
 CACHE_BASEDIR=/mnt/cache        # マルチパート作業用キャッシュディレクトリ
 CACHE_SIZE=1024                 # 1ユーザあたりのキャッシュサイズ(MB)
-WSGI_USER=wsgi                  # WebUI,ルーターを実行するローカルユーザ名
-WSGI_GROUP=wsgi                 # そのグループ
-WSGI_HOMEDIR=/home/wsgi         # そのホームディレクトリ
+WSGI_USER=_gfarm_s3             # WebUI,ルーターを実行するローカルユーザ名
+WSGI_GROUP=_gfarm_s3            # そのグループ
+WSGI_HOMEDIR=/home/_gfarm_s3    # そのホームディレクトリ
 WSGI_ADDR=127.0.0.1:8000        # WebUIの待ち受けアドレス
-ROUTER_HOMEDIR=/home/wsgi       # ルーターのホームディレクトリ
+ROUTER_HOMEDIR=/home/_gfarm_s3  # ルーターのホームディレクトリ
 ROUTER_ADDR=127.0.0.1:8001      # その待ち受けアドレス
 MYPROXY_SERVER=                 # myproxy-logon使用時にサーバ名を指定
 ```
 
-##### 依存パッケージをインストールする (CentOS 7 の例)
+#### 依存パッケージをインストールする (CentOS 7 の例)
 
 ```
 sudo yum update -y
@@ -110,7 +118,7 @@ sudo python3 -m pip install gunicorn
 sudo python3 -m pip install boto3
 ```
 
-##### 依存パッケージをインストールする (Ubuntu の例)
+#### 依存パッケージをインストールする (Ubuntu の例)
 
 ```
 sudo apt-get install -y uuid myproxy python3 python3-pip python3-dev npm
@@ -120,22 +128,22 @@ sudo apt-get install -y apache2
 sudo apt-get install -y nginx
 ```
 
-##### リバースプロキシとしてNGINXの設定例
+#### リバースプロキシとしてNGINXの設定例
 
 XXX TODO
 
-##### リバースプロキシとしてApacheの設定例
+#### リバースプロキシとしてApacheの設定例
 
 既にインストールされていれば本作業は不要
 
-###### Apacheの設定ファイルを置く場所を決める
+##### Apacheの設定ファイルを置く場所を決める
 ```
 HTTPD_CONF=/etc/httpd/conf.d/myserver.conf
 HTTPD_COMMON_CONF=/etc/httpd/conf.d/myserver-common.conf
 HTTPD_DocumentRoot=/usr/local/share/www
 ```
 
-###### Apacheの設定ファイルを作成
+##### Apacheの設定ファイルを作成
 
 設定例
 
@@ -171,24 +179,18 @@ ErrorLog /var/log/apache2/error_log
 EOF
 ```
 
-###### Apacheのメインインデックスを作成
+##### Apacheのメインインデックスを作成
 ```
 sudo mkdir -p $HTTPD_DocumentRoot
 echo "gfarm -- $(date)" | sudo dd of=$HTTPD_DocumentRoot/index.html
 ```
 
-###### Apacheを有効化する
+##### Apacheを有効化する
 ```
 sudo systemctl enable httpd
 ```
 
-##### wsgi用のグループとユーザを作成する
-```
-sudo groupadd $WSGI_GROUP
-id $WSGI_USER || sudo useradd $WSGI_USER -g $WSGI_GROUP -d $WSGI_HOMEDIR
-```
-
-#### install gfarm-s3
+#### インストール
 
 ##### 作業ディレクトリに移動し configure
 
@@ -235,10 +237,9 @@ with-apache, with-gunicornはそれぞれのインストール
 
 GFARM_S3_PREFIX ディレクトリ以下のファイル以外に、下記が追加される。
 
-* gfarms3 グループ
 * /etc/sudoers.d/gfarm-s3
 * gunicorn.service, gfarm-s3-router.service (systemd 用)
-* /home/wsgi/ 以下にファイル
+* /home/_gfarm_s3/ 以下にファイル
 
 #### Gfarm-S3の設定
 
@@ -336,19 +337,19 @@ sudo -u localuser1 $GFARM_S3_PREFIX/bin/gfarm-s3-sharedsecret-password
 
 ##### Gfarmファイルシステム上に必要なディレクトリを作成する
 
-Gfarm S3で共通に必要なディレクトリ $SHARED_DIR と、
-各ユーザに必要なディレクトリ$SHARED_DIR/global-username を作成する。
+Gfarm S3を使用するために、各ユーザに必要なディレクトリ
+$SHARED_DIR/global-username を作成する。
 
 $SHARED_DIRは「準備」セクションで決定したディレクトリである。
 上記の例で追加した user0001 というユーザ名のディレクトリを作るには、以
 下のように実行する。
 
 ```
-gfsudo gfmkdir -p ${SHARED_DIR#/}
-gfsudo gfchmod 0755 ${SHARED_DIR#/}
+gfsudo gfmkdir -p "${SHARED_DIR}"
+gfsudo gfchmod 0755 "${SHARED_DIR}"
 
-gfsudo gfmkdir ${SHARED_DIR#/}/user0001
-gfsudo gfchown user0001 ${SHARED_DIR#/}/user0001
+gfsudo gfmkdir "${SHARED_DIR}/user0001"
+gfsudo gfchown user0001 "${SHARED_DIR}/user0001"
 ```
 
 上記の操作をGfarm管理者(gfsudo実行可能)に依頼して実行する。
@@ -357,14 +358,14 @@ gfsudo gfchown user0001 ${SHARED_DIR#/}/user0001
 
 ```
 SHARED_DIR=/share
-gfsudo gfmkdir -p ${SHARED_DIR#/}
-gfsudo gfchmod 0755 ${SHARED_DIR#/}
+gfsudo gfmkdir -p "${SHARED_DIR}"
+gfsudo gfchmod 0755 "${SHARED_DIR}"
 
 for u in $(gfuser); do
-  NAME=$SHARED_DIR/$u
-  gfsudo gfmkdir -p $NAME
-  gfsudo gfchmod 0755 $NAME
-  gfsudo gfchown $u:gfarmadm $NAME
+  NAME="$SHARED_DIR/$u"
+  gfsudo gfmkdir -p "$NAME"
+  gfsudo gfchmod 0755 "$NAME"
+  gfsudo gfchown $u:gfarmadm "$NAME"
 done
 ```
 
