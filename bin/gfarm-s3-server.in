@@ -15,8 +15,11 @@ show_secret_key_file() {
 }
 
 regenerate_secret() {
-	mkdir -p $(dirname "$GFARMS3_SECRET_KEY")
+	GFARMS3_DIR="$(dirname "$GFARMS3_SECRET_KEY")"
+	mkdir -p "$GFARMS3_DIR"
+	chmod 700 "$GFARMS3_DIR"
 	generate_secret_key > "$GFARMS3_SECRET_KEY"
+	chmod 600 "$GFARMS3_SECRET_KEY"
 }
 
 variables_overridable="MINIO_PATH \
