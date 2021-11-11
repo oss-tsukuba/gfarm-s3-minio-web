@@ -1,4 +1,6 @@
-#! /bin/sh
+#! /bin/bash
+
+set -eux -o pipefail
 
 export LANG=C
 export LC_CTYPE=C
@@ -33,15 +35,20 @@ variables_overridable="MINIO_PATH \
 ### $GFARMS3_LOCAL_USER_MAP may not be overrided
 
 for var in $variables_overridable; do
-	eval SAVED_$var=\$$var
+	eval SAVED_$var=\${$var:-}
 done
 
 prefix=@prefix@
 . @sysconfdir@/gfarm-s3.conf
 . $GFARM_S3_LIB/gfarm-s3-subr
 
+GFARMS3_SECRET_KEY="$(get_user_metadir $USER)/secret_key"
+
 for var in $variables_overridable; do
-	eval $var=\${SAVED_$var:-\$$var}
+	eval sv=\${SAVED_$var}
+	if [ -n "$sv" ]; then
+		eval $var=$sv
+	fi
 done
 
 USAGE="\
@@ -57,10 +64,12 @@ common options:
           [--port port]
 "
 
+global_username=
 access_key=
 secret_key=
 action=START
 uport=
+resume=0
 
 gfarm_shared_dir=
 
@@ -70,6 +79,7 @@ while [ $# -gt 0 ]; do
 	--access_key) access_key="$2"; shift;;
 	--secret_key) secret_key="$2"; shift;;
 	--global_username) global_username="$2"; shift;;
+	--resume) resume=1;;
 	--start) action="START";;
 	--stop) action="STOP";;
 	--status) action="STATUS";;
@@ -134,7 +144,7 @@ if [ -z "$MINIO_ROOT_PASSWORD" ]; then exit 1; fi
 export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
 
 case $action in
-START) start_server "$gfarm_shared_dir";;
+START) start_server "$gfarm_shared_dir" "$resume";;
 STOP) stop_server;;
 STATUS) status_server;;
 SECRET_SHOW) show_secret_key;;

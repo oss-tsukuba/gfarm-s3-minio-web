@@ -1,4 +1,4 @@
-### Runas_Alias GFARMS3 = ALL, !root
+Defaults env_keep += "X509_USER_PROXY"
 Runas_Alias GFARMS3 = %@with_gfarm_s3_group@
 
 @with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @prefix@/bin/gfarm-s3-server

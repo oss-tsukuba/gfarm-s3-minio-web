@@ -428,7 +428,7 @@ users_subject_to_be_stopped() {
 }
 
 #################################################
-### gfarm-s3-login
+### gfarm-s3-login (before sudo)
 #################################################
 
 mysudo() {
@@ -463,11 +463,22 @@ check_nopasswd() {
 	return 0
 }
 
+get_user_metadir() {
+	local local_user="$1"
+	echo "$HOMEDIR_BASE/$local_user/$GFARMS3_METADIR_NAME"
+}
+
+get_x509_user_proxy() {
+	local user_metadir=$(get_user_metadir "$1")
+	echo "$user_metadir/x509_user_proxy"
+}
+
 challenge_auth() {
 	local global_username="$1"
 	local user_provided_key="$2"
 	local local_user="$3"
-	local res
+	local res=""
+	local x509_user_proxy="$(get_x509_user_proxy $local_user)"
 
 	export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
 
@@ -480,6 +491,7 @@ challenge_auth() {
 		res=$(mysudo "$local_user" $MYPROXY_LOGON -S \
 			${MYPROXY_SERVER:+-s "$MYPROXY_SERVER"} \
 			-l "$global_username" \
+			-o "$x509_user_proxy" \
 			${PROXY_LIFETIME:+-t "$PROXY_LIFETIME"} 2>&1)
 		if [ $? = 0 ]; then
 			echo SUCCESS $MYPROXY_LOGON 1>&2
@@ -501,7 +513,9 @@ challenge_auth() {
 			logger -i -p local7.debug -t gfarm-s3-minio-web:challenge_auth "grid-proxy-init: $local_user SKIP"
 		else
 			res=$(echo "$user_provided_key" |
-				mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 2>&1)
+				mysudo "$local_user" $GRID_PROXY_INIT \
+				-out "$x509_user_proxy" \
+				-pwstdin 2>&1)
 			if [ $? = 0 ]; then
 				echo SUCCESS $GRID_PROXY_INIT 1>&2
 				logger -i -p local7.debug -t gfarm-s3-minio-web:challenge_auth "grid-proxy-init: $local_user SUCCESS $res"
@@ -536,9 +550,10 @@ challenge_auth() {
 	return 1
 }
 
-spawn_per_user_server() {	# local_username
+spawn_per_user_server_common() {
 	local user="$1"
 	local gfarm_shared_dir="$2"
+	local resume="$3"
 	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
 	if [ -z "$usermap_entry" ]; then
 		echo "user not found: $user" 1>&2
@@ -546,18 +561,27 @@ spawn_per_user_server() {	# local_username
 	fi
 	local local_username=$(get_local_username "$usermap_entry")
 	local access_key=$(get_access_key "$usermap_entry")
+	local resume_opt=""
+	if [ $resume -eq 1 ]; then
+		resume_opt="--resume"
+	fi
 	## assert $user == $local_username
-	if ! local port=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --start --access_key "$access_key" --gfarm_shared_dir "$gfarm_shared_dir"); then
+	if ! local port_pid=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --start ${resume_opt} --access_key "$access_key" --gfarm_shared_dir "$gfarm_shared_dir"); then
 		retrun 1
 	fi
+
 	local status=0
 
-	if [ -n "$port" ]; then
+	if [ "$port_pid" = "$NOT_STARTED" ]; then
+		echo "MinIO (for $user) is not enabled" 1>&2
+	elif [ -n "$port_pid" ]; then
+		local port="${port_pid%:*}"
+		local pid="${port_pid#*:}"
 		echo "MinIO started" 1>&2
 		## No need to check `port' confliction,
 		## as a port # that returned by gfarm-s3-server is
 		## actually allocated for current user.
-		if ! add_to_portmap "$local_username" "${port%:*}" "${port#*:}"; then
+		if ! add_to_portmap "$local_username" "$port" "$pid"; then
 			status=3
 		fi
 		if ! update_reverse_proxy; then
@@ -569,7 +593,15 @@ spawn_per_user_server() {	# local_username
 	return $status
 }
 
-stop_per_user_server() {	# local_username
+resume_per_user_server() {
+	spawn_per_user_server_common "$1" "$2" 1
+}
+
+spawn_per_user_server() {
+	spawn_per_user_server_common "$1" "$2" 0
+}
+
+stop_per_user_server() {
 	local user="$1"
 	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
 	if [ -z "$usermap_entry" ]; then
@@ -646,7 +678,11 @@ certificate_timeleft_grid_proxy_info() {
 	local expiration_date=-1
 	local timeleft
 	local local_username="$1"
-	if ! timeleft=$(mysudo "$local_username" $GRID_PROXY_INFO -timeleft); then
+	local x509_user_proxy="$(get_x509_user_proxy $local_username)"
+
+	if ! timeleft=$(mysudo "$local_username" $GRID_PROXY_INFO \
+			-file "$x509_user_proxy" \
+			-timeleft); then
 		return 1
 	fi
 	if [ x"$timeleft" != x"-1" ]; then
@@ -745,7 +781,7 @@ restart_nginx() {
 	return 0
 }
 
-update_reverse_proxy() {
+update_reverse_proxy_for_apache() {
 	local tmpfile=$(mktemp "$GFARMS3_APACHE_REWRITE_CONF.XXXXXX") || return 1
 	local status=0
 	if ! generate_apache_conf > "$tmpfile"; then
@@ -762,6 +798,10 @@ update_reverse_proxy() {
 		fi
 	fi
 
+	return $status
+}
+
+update_reverse_proxy_for_router() {
 	local tmpfile=$(mktemp "$GFARMS3_REVERSE_PROXY_ROUTES.XXXXXX") || return 1
 
 	if ! generate_reverse_proxy_routes > "$tmpfile"; then
@@ -779,8 +819,21 @@ update_reverse_proxy() {
 	return $status
 }
 
+update_reverse_proxy() {
+	### not used
+	### /etc/sudoers.d/gfarm-s3
+	#@with_gfarm_s3_user@ ALL=(root) NOPASSWD: @with_apache@/sbin/apachectl
+	#if [ -f $APACHECTL ]; then
+	#	update_reverse_proxy_for_apache
+	#	return $?
+	#fi
+
+	update_reverse_proxy_for_router
+	return $?
+}
+
 #################################################
-### gfarm-s3-server
+### gfarm-s3-server (after sudo)
 #################################################
 
 mymc_init() {
@@ -817,25 +870,61 @@ mc_stop() {
 	mymc admin service stop $MC_PROFILE
 }
 
-## @param    (none)
+NOT_STARTED="NOT_STARTED"
+
+get_started_status_file() {
+    local local_user="$1"
+    echo "$(get_user_metadir $local_user)/started"
+}
+
+save_started_status() {
+    local status="$1"  # 1=started, 0=stopped
+    local local_user="$2"
+    local STARTED_STATUS=$(get_started_status_file "$local_user")
+    echo "$status" | dd of="$STARTED_STATUS"
+}
+
+# 0=started, 1=stopped
+is_started() {
+    local local_user="$1"
+    local STARTED_STATUS=$(get_started_status_file "$local_user")
+    [ -f "$STARTED_STATUS" ] || return 1
+    local status=$(cat "$STARTED_STATUS")
+    [ $status -eq 1 ]
+    return $?
+}
+
+## @param    $1 -- gfarm_shared_dir
+##           $2 -- resume
 ## @envvar   USER  -- cureent user
 ##           uport -- port to be tried, unless empty strnig
 ## @return   0 -- success    1 -- fail
 ## @stdout   (empty)  -- success without spawning MinIO || fail
 ##           port:pid -- success, MinIO's PID == pid
+##           NOT_STARTED -- success, resume==1 and is_started==0
 start_server() {
 	local SUCCESS=0
 	local RETRY=1
 
 	local gfarm_shared_dir="$1"
+	local resume="$2"
+
+	if [ $resume -eq 1 ] && ! is_started "$USER"; then
+		echo "$NOT_STARTED"
+		return 0
+	fi
 	for port in $(list_unused_ports "$USER" "$uport"); do
 		try_start_a_server "$gfarm_shared_dir" "$port"
 		case $? in
-		$SUCCESS) return 0;;
+		$SUCCESS)
+			save_started_status 1 "$USER"
+			return 0
+			;;
 		$RETRY) ;;
 		*) echo "UNKNOWN ERROR" 1>&2; return 1;;
 		esac
 	done
+	save_started_status 0 "$USER"
 	echo "NO PORT AVAILABLE" 1>&2
 	return 1
 }
@@ -859,6 +948,7 @@ try_start_a_server() {
 		return $ABORT
 	fi
 	if mc_config $address; then
+		mymc_finish
 		## MinIO is already running
 		## success with empty stdout
 		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[S] minio is already running"
@@ -872,7 +962,9 @@ try_start_a_server() {
 	 export MINIO_GFARMS3_CACHEDIR_SIZE_MB="$GFARMS3_CACHE_SIZE_MB_PER_USER"; \
 	 export GFARMS3_PARTFILE_DIGEST="$GFARMS3_PARTFILE_DIGEST"; \
 	 if ! chmod 700 $MINIO_GFARMS3_CACHEDIR; then exit 1; fi; \
-	 HOME="$GFARMS3_METADIR" $MINIO_PATH gateway $GATEWAY \
+	 X509_USER_PROXY="$(get_x509_user_proxy $USER)" \
+	 HOME="$(get_user_metadir $USER)" \
+	 $MINIO_PATH gateway $GATEWAY \
 		--address "$address" \
 		"$gfarm_shared_dir" \
 		$GFARMS3_GFARM_SHARED_VIRTUAL_NAME & \
@@ -880,14 +972,23 @@ try_start_a_server() {
 	 wait; \
 	 rm -rf "$MINIO_GFARMS3_CACHEDIR"; \
 	 echo "Minio Exited") <&- >$tmpfile 2>&1 3>$pidfile &
-	for i in $(seq 1 1 60); do
-		if egrep -l "^(Endpoint|Minio Exited)" $tmpfile 1>&2; then
+	RETRY_MAX=60  # sec.
+	for i in $(seq 1 1 $RETRY_MAX); do
+		if egrep "^(Endpoint|Minio Exited)" $tmpfile 1>&2; then
 			## MinIO started, and wrote greeting message to stdout
 			## or MinIO exited (for some reason)
 			break
 		fi
 		sleep 1
 	done
+
+	# debug
+	cat $tmpfile 1>&2
+
+	local port_pid=$(cat $pidfile)
+	#port="${port_pid%:*}"
+	local pid="${port_pid#*:}"
+	rm -f $pidfile
 
 ### case 0: Minio Launched normally
 ###         Pattern "^Endpoint" is in log
@@ -909,22 +1010,19 @@ try_start_a_server() {
 
 		if ! grep -l "port is already in use" $tmpfile 1>&2; then
 			rm -f $tmpfile
-			rm -f $pidfile
 ###			case 2
 			logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[2] port is in use"
 			return $ABORT
 		fi
 
 		rm -f $tmpfile
-		rm -f $pidfile
 ###		case 1
 		return $RETRY	## temporary error (minio has quit)
 	fi
 
 	if ! grep -l "^Endpoint" $tmpfile 1>&2; then
-		kill -KILL $(cat $pidfile)
+		kill -KILL $pid
 		rm -f $tmpfile
-		rm -f $pidfile
 ###		case 3
 		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[3] fatal error (another minio may running)"
 		return $ABORT	## fatal error (minio may still running)
@@ -934,22 +1032,19 @@ try_start_a_server() {
 
 	rm -f $tmpfile
 	if ! mymc_init; then
-		rm -f $pidfile
 ### case M: mc_init failed
 		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[M] mc_init failed"
 		return $ABORT
 	fi
 	if ! mc_config $address; then
 		mymc_finish
-		kill -KILL $(cat $pidfile)
-		rm -f $pidfile
+		kill -KILL $pid
 ###		case 0 => case 4
 		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[4] fatal error (another minio is running)"
 		return $ABORT	## fatal error (minio still running)
 	fi
 	mymc_finish
-	cat $pidfile
-	rm -f $pidfile
+	echo "$port:$pid"  # result
 	logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[5] minio started"
 ###	case 0 => case 5:
 	return $SUCCESS
@@ -963,6 +1058,7 @@ stop_server() {
 		return 1
 	fi
 	try_stop_a_server "$port" "$pid"
+	save_started_status 0 "$USER"
 }
 
 try_stop_a_server() {

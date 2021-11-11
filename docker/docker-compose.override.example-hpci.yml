@@ -6,5 +6,6 @@ services:
       args:
         http_proxy: http://10.0.2.15:3128
         https_proxy: http://10.0.2.15:3128
-        MYPROXY_SERVER: portal.hpci.nii.ac.jp:7512
+        #MYPROXY_SERVER: portal.hpci.nii.ac.jp:7512
+        MYPROXY_SERVER: portal-c.hpci.nii.ac.jp:7512
         SHARED_DIR: /home/hp120273/hpci001971/minio-share

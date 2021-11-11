@@ -1,4 +1,6 @@
-#! /bin/sh
+#! /bin/bash
+
+set -eux -o pipefail
 
 export LANG=C
 export LC_CTYPE=C
@@ -15,13 +17,15 @@ options ::= --gfarm_shared_dir gfarm_shared_dir |
             --authenticated authenticated_method_name |
             --bucket bucket
             --remote_addr remote_addr
-action ::= start|stop|restart|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl
+            --quiet
+action ::= start|stop|restart|resume|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl
 "
 
 authenticated=""
 gfarm_shared_dir=""
 bucket=""
 remote_addr=""
+quiet=0
 
 while [ $# -gt 0 ]; do
 	opt="$1"
@@ -30,6 +34,7 @@ while [ $# -gt 0 ]; do
 	--gfarm_shared_dir) gfarm_shared_dir="$2"; shift;;
 	--bucket) bucket="$2"; shift;;
 	--remote_addr) remote_addr="$2"; shift;;
+	--quiet) quiet=1;;
 	*) break;;
 	esac
 	shift;
@@ -44,8 +49,7 @@ action="$1"
 global_username="$2"
 user_password="$3"
 
-case "$action" in
-start|stop|restart|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl) ;;
+case "$action" in start|stop|restart|resume|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl) ;;
 *) echo $USAGE 1>&2; exit 1;;
 esac
 
@@ -78,6 +82,13 @@ fi
 
 gfarm_shared_dir=$(gfarm_shared_dir_path "$gfarm_shared_dir" "$global_username")
 
+rungf() {
+	local local_username="$1"
+	local x509_user_proxy=$(get_x509_user_proxy $local_username)
+	shift
+	mysudo "$local_username" X509_USER_PROXY="$x509_user_proxy" "$@"
+}
+
 case "$action" in
 start)
 	spawn_per_user_server "$local_username" "$gfarm_shared_dir";;
@@ -86,6 +97,8 @@ stop)
 restart)
 	stop_per_user_server "$local_username" &&
 	spawn_per_user_server "$local_username" "$gfarm_shared_dir";;
+resume)
+	resume_per_user_server "$local_username" "$gfarm_shared_dir";;
 status)
 	get_s3_server_status "$local_username";;
 keygen)
@@ -93,16 +106,16 @@ keygen)
 info)
 	true;;
 gfuser)
-	mysudo "$local_username" $GFUSER -l; exit $?;;
+	rungf "$local_username" $GFUSER -l; exit $?;;
 gfgroup)
-	mysudo "$local_username" $GFGROUP; exit $?;;
+	rungf "$local_username" $GFGROUP; exit $?;;
 gfls)
-	mysudo "$local_username" $GFLS "$gfarm_shared_dir/$bucket"; exit $?;;
+	rungf "$local_username" $GFLS "$gfarm_shared_dir/$bucket"; exit $?;;
 gfgetfacl)
-	mysudo "$local_username" $GFGETFACL "$gfarm_shared_dir/$bucket"; exit $?;;
+	rungf "$local_username" $GFGETFACL "$gfarm_shared_dir/$bucket"; exit $?;;
 gfsetfacl)
 	### ignore all errors ==> exit 0
-	mysudo "$local_username" $GFSETFACL -R -b -M - "$gfarm_shared_dir/$bucket"; exit 0;;
+	rungf "$local_username" $GFSETFACL -R -b -M - "$gfarm_shared_dir/$bucket"; exit 0;;
 esac
 
 exit_status=$?
@@ -115,6 +128,7 @@ else
 	reason="$action exit: code = $exit_status"
 fi
 
+if [ $quiet -ne 1 ]; then
 cat <<-EOF
 	{
 		"status": "$status",
@@ -128,3 +142,4 @@ cat <<-EOF
 		"secret_key": "$(get_per_user_secret_key "$local_username")"
 	}
 EOF
+fi

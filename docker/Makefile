@@ -39,6 +39,10 @@ stop:
 restart:
 	$(COMPOSE) restart
 
+restart-withlog:
+	$(MAKE) restart
+	$(COMPOSE) logs --follow
+
 shell:
 	$(COMPOSE) exec gfminio bash
 

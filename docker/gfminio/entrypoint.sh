@@ -25,7 +25,7 @@ GFARM_S3_MINIO_BRANCH=gfarmmerge
 ### cache files in MINIO_BUILD_DIR to build.
 install_gf_s3() {
     groupadd -K GID_MIN=100 ${GFARM_S3_GROUPNAME} && \
-    useradd -K UID_MIN=100 -m ${GFARM_S3_USERNAME} -g ${GFARM_S3_GROUPNAME} -d ${GFARM_S3_HOMEDIR}
+    useradd -K UID_MIN=100 -m ${GFARM_S3_USERNAME} -g ${GFARM_S3_GROUPNAME} -d ${GFARM_S3_HOMEDIR} -s /bin/bash
 
     MINIO_WORKDIR=${MINIO_BUILD_DIR}/minio/work/build
     GFARM_S3_MINIO_DIR=${MINIO_WORKDIR}/gfarm-s3-minio
@@ -45,7 +45,7 @@ install_gf_s3() {
     --with-myproxy=/usr \
     --with-gunicorn=/usr/local \
     --with-gfarm-s3-homedir=${GFARM_S3_HOMEDIR} \
-    --with-gfarm-s3--user=${GFARM_S3_USERNAME} \
+    --with-gfarm-s3-user=${GFARM_S3_USERNAME} \
     --with-gfarm-s3-group=${GFARM_S3_GROUPNAME} \
     --with-cache-basedir=${CACHE_DIR} \
     --with-cache-size=${CACHE_SIZE} \
@@ -144,6 +144,7 @@ for line in $(cat "${USERMAP}"); do
     chown "${LOCAL_USERNAME}":root "${SECRET_DIR_VOLUME}"
     mksym "${SECRET_DIR_VOLUME}" "${SECRET_DIR}"
 
+    ### create myproxy-logon script
     if [ -n "${MYPROXY_SERVER}" ]; then
         MYPROXY_LOGON="${HOMEDIR}/myproxy-logon"
         cat <<EOF > "${MYPROXY_LOGON}"
@@ -155,7 +156,13 @@ EOF
     fi
 
     gfarm-s3-useradd "${GFARM_USERNAME}" "${LOCAL_USERNAME}" "${ACCESSKEY_ID}" || true  ## may fail
+
+    ### resume minio
+    sudo -u "${GFARM_S3_GROUPNAME}" gfarm-s3-login --quiet --authenticated "DUMMY_AUTH_METHOD" resume "${GFARM_USERNAME}" "DUMMY_PASSWORD" > /dev/null &
+    ##### backgroud
 done
+### wait for resuming minio
+wait
 IFS="$SAVE_IFS"
 
 exec "$@"

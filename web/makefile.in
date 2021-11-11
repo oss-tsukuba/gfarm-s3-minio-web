@@ -18,8 +18,9 @@ install:
 	(cd gfarm-s3/console && $(TAR) cf - static) | (cd $(GFARM_S3_HOMEDIR) && $(TAR) xfp -)
 	$(CHOWN) -R $(GFARM_S3_USER):$(GFARM_S3_GROUP) $(GFARM_S3_HOMEDIR)/gfarm-s3 $(GFARM_S3_HOMEDIR)/rungunicorn $(GFARM_S3_HOMEDIR)/runserver $(GFARM_S3_HOMEDIR)/static
 	$(CHMOD) +x $(GFARM_S3_HOMEDIR)/rungunicorn $(GFARM_S3_HOMEDIR)/runserver
-	$(CHMOD) og+rX $(GFARM_S3_HOMEDIR)
-	$(CHMOD) -R og+rX $(GFARM_S3_HOMEDIR)/static
+	# read-only by others
+	$(CHMOD) -R og-w $(GFARM_S3_HOMEDIR)
+	$(CHMOD) -R og+rX $(GFARM_S3_HOMEDIR)
 
 clean:
 	$(RM) -fr gfarm-s3/console/static/console/node_modules
