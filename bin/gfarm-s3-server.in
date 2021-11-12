@@ -6,8 +6,6 @@ export LANG=C
 export LC_CTYPE=C
 export LC_COLLATE=C
 
-MC_PROFILE="mcuser"
-
 show_secret_key() {
 	cat "$GFARMS3_SECRET_KEY"
 }

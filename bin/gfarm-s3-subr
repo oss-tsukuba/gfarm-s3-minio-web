@@ -1,3 +1,5 @@
+# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
 #################################################
 ### utilities & common subroutines
 #################################################
@@ -588,7 +590,7 @@ spawn_per_user_server_common() {
 			status=2
 		fi
 	else
-		echo "MinIO is already running" 1>&2
+		echo "ERROR: MinIO could not start" 1>&2
 	fi
 	return $status
 }
@@ -836,38 +838,45 @@ update_reverse_proxy() {
 ### gfarm-s3-server (after sudo)
 #################################################
 
-mymc_init() {
-	MC_CONFIG_DIR=$(mktemp -d $GFARM_S3_TMP/mc.XXXXXX) || return 1
+_mc_init() {
+    echo $(mktemp -d $GFARM_S3_TMP/mc.XXXXXX) || echo ""
 }
 
-mymc_finish() {
-	if [ -z "$MC_CONFIG_DIR" ]; then return 1; fi
-	rm -rf "$MC_CONFIG_DIR"
+_mc_fin() {
+    local config_dir=$(_mc_init)
+    [ -d "$config_dir" ] || return
+    [ "$config_dir" != "/" ] || return
+    rm -rf "$config_dir"
 }
 
-mymc() {
-	if [ -z "$MC_CONFIG_DIR" ]; then return 1; fi
-
-	r=$($MC_PATH --config-dir "$MC_CONFIG_DIR" "$@" 2>&1)
-	status=$?
-	logger -i -p local7.debug -t gfarm-s3-minio-web:mymc "[$r]"
-
-	return $status
+_mc() {
+    local config_dir=$(_mc_init)
+    [ -n "$config_dir" ] || return 1
+    if r=$($MC_PATH --config-dir "$config_dir" "$@" 2>&1); then
+        status=0
+    else
+        status=1
+    fi
+    _mc_fin "$config_dir"
+    logger -i -p local7.debug -t gfarm-s3-minio-web:mc "[$r]"
+    return $status
 }
 
-mc_config() {
-	local address="$1"
-	local ENDPOINT_URL="http://$address"
+MC_PROFILE="mcuser"
 
-	mymc config host add \
-		"$MC_PROFILE" \
-		"$ENDPOINT_URL" \
-		"$MINIO_ROOT_USER" \
-		"$MINIO_ROOT_PASSWORD" 1>&2
+minio_connect_check() {
+    local address="$1"
+    local ENDPOINT_URL="http://$address"
+
+    _mc config host add \
+         "$MC_PROFILE" \
+         "$ENDPOINT_URL" \
+         "$MINIO_ROOT_USER" \
+         "$MINIO_ROOT_PASSWORD" 1>&2
 }
 
-mc_stop() {
-	mymc admin service stop $MC_PROFILE
+minio_stop() {
+    _mc admin service stop $MC_PROFILE
 }
 
 NOT_STARTED="NOT_STARTED"
@@ -881,7 +890,7 @@ save_started_status() {
     local status="$1"  # 1=started, 0=stopped
     local local_user="$2"
     local STARTED_STATUS=$(get_started_status_file "$local_user")
-    echo "$status" | dd of="$STARTED_STATUS"
+    echo "$status" | dd of="$STARTED_STATUS" 2> /dev/null
 }
 
 # 0=started, 1=stopped
@@ -938,23 +947,13 @@ try_start_a_server() {
 	local RETRY=1
 	local ABORT=2
 	local GATEWAY=gfarm
-	#gfarm_shared_dir=/tmp/nas
-	#GFARMS3_GFARM_SHARED_VIRTUAL_NAME=
-	#GATEWAY=nas
 
-	if ! mymc_init; then
-### case M: mc_init failed
-		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[M] mc_init failed"
-		return $ABORT
-	fi
-	if mc_config $address; then
-		mymc_finish
+	if minio_connect_check $address; then
 		## MinIO is already running
 		## success with empty stdout
 		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[S] minio is already running"
 		return $SUCCESS
 	fi
-	mymc_finish
 	local tmpfile=$(mktemp $GFARM_S3_TMP/minio-log.XXXXXX) || return $ABORT
 	local pidfile=$(mktemp $GFARM_S3_TMP/minio-pid.XXXXXX) || (rm -f $tmpfile; return $ABORT)
 	( \
@@ -992,7 +991,7 @@ try_start_a_server() {
 
 ### case 0: Minio Launched normally
 ###         Pattern "^Endpoint" is in log
-###	    try connect using mc
+###         try connect using mc
 ###         case 4: fail     => ABORT spawning process
 ###         case 5: SUCCESS
 ### case 1: Minio Exited  (port is in use)
@@ -1031,19 +1030,12 @@ try_start_a_server() {
 ###	case 0
 
 	rm -f $tmpfile
-	if ! mymc_init; then
-### case M: mc_init failed
-		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[M] mc_init failed"
-		return $ABORT
-	fi
-	if ! mc_config $address; then
-		mymc_finish
+	if ! minio_connect_check $address; then
 		kill -KILL $pid
 ###		case 0 => case 4
-		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[4] fatal error (another minio is running)"
-		return $ABORT	## fatal error (minio still running)
+		logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[4] error (another minio is running, or Gfarm authentication is failed)"
+		return $ABORT
 	fi
-	mymc_finish
 	echo "$port:$pid"  # result
 	logger -i -p local7.debug -t gfarm-s3-minio-web:try_start_a_server "[5] minio started"
 ###	case 0 => case 5:
@@ -1065,28 +1057,23 @@ try_stop_a_server() {
 	local port="$1"
 	local pid="$2"
 	local address=127.0.0.1:"$port"
-	if ! mymc_init; then return 1; fi
-	if mc_config $address; then
-		if mc_stop; then
-			mymc_finish
-
+	if minio_connect_check $address; then
+		if minio_stop; then
 			for i in $(seq 1 1 $GFARM_S3_WAIT_COUNT); do
 				if ! kill -0 $pid; then
 					return 0
 				fi
 				sleep 1
 			done
-
 			return 0
 		fi
 	fi
-	mymc_finish
 	for i in $(seq 1 1 $GFARM_S3_KILL_COUNT); do
-		sleep 1
 		if ! kill -0 $pid; then
 			return 0
 		fi
 		kill -TERM $pid
+		sleep 1
 	done
 	kill -KILL $pid
 	return 0
@@ -1122,8 +1109,6 @@ status_server_quick() {
 get_server_status() {
 	local port="$1"
 	local address=127.0.0.1:"$port"
-	if ! mymc_init; then return 1; fi
-	mc_config $address 1>&2
+	minio_connect_check $address 1>&2
 	echo $?
-	mymc_finish
 }
