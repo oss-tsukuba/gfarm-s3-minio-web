@@ -1,4 +1,5 @@
 /docker-compose.override.yml
+/.env
 /gfarm-s3-usermap.conf
 /gfarm2.conf
 /gfarm_shared_key

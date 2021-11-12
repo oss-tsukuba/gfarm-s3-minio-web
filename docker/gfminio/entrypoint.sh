@@ -2,32 +2,35 @@
 
 set -eux -o pipefail
 
-: SHARED_DIR=${SHARED_DIR}
-: MYPROXY_SERVER=${MYPROXY_SERVER}
-: GFARM_S3_MINIO_WEB_HOST=${GFARM_S3_MINIO_WEB_HOST}
+### from build args
 : WORKDIR=${WORKDIR}
-: MINIO_BUILD_DIR=${MINIO_BUILD_DIR}
+
+### from enviroment
+: MYPROXY_SERVER=${MYPROXY_SERVER}
+: GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR}
+: GFARM_S3_BUILD_DIR=${GFARM_S3_BUILD_DIR}
 : GFARM_S3_USERNAME=${GFARM_S3_USERNAME}
 : GFARM_S3_GROUPNAME=${GFARM_S3_USERNAME}
-: GFARM_S3_HOMEDIR=${GFARM_S3_HOMEDIR}
+# TODO GFARM_S3_LOCALTMP
 : CACHE_DIR=${CACHE_DIR}
 : CACHE_SIZE=${CACHE_SIZE}
+
+GFARM_S3_HOMEDIR=/home/${GFARM_S3_USERNAME}
 
 HOME_BASE=/home
 HOST_HOME_BASE=/host_home
 USERMAP=/gfarm-s3-usermap.conf
 SECRET_VOLUME=/s3secret
 
-### TODO master
-#GFARM_S3_MINIO_WEB_BRANCH=router
+#TODO gfarm branch
 GFARM_S3_MINIO_BRANCH=gfarmmerge
 
-### cache files in MINIO_BUILD_DIR to build.
+### cache files in GFARM_S3_BUILD_DIR to build.
 install_gf_s3() {
     groupadd -K GID_MIN=100 ${GFARM_S3_GROUPNAME} && \
     useradd -K UID_MIN=100 -m ${GFARM_S3_USERNAME} -g ${GFARM_S3_GROUPNAME} -d ${GFARM_S3_HOMEDIR} -s /bin/bash
 
-    MINIO_WORKDIR=${MINIO_BUILD_DIR}/minio/work/build
+    MINIO_WORKDIR=${GFARM_S3_BUILD_DIR}/minio/work/build
     GFARM_S3_MINIO_DIR=${MINIO_WORKDIR}/gfarm-s3-minio
     if [ ! -d "${GFARM_S3_MINIO_DIR}" ]; then
         mkdir -p ${MINIO_WORKDIR} \
@@ -50,8 +53,8 @@ install_gf_s3() {
     --with-cache-basedir=${CACHE_DIR} \
     --with-cache-size=${CACHE_SIZE} \
     --with-myproxy-server=${MYPROXY_SERVER} \
-    --with-gfarm-shared-dir=${SHARED_DIR} \
-    --with-minio-builddir=${MINIO_BUILD_DIR} \
+    --with-gfarm-shared-dir=${GFARM_S3_SHARED_DIR} \
+    --with-minio-builddir=${GFARM_S3_BUILD_DIR} \
     && make \
     && make install \
     && mkdir -p ${CACHE_DIR} \

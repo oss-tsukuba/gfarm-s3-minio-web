@@ -9,8 +9,17 @@ services:
       args:
         GFARM_SRC_URL: https://github.com/oss-tsukuba/gfarm/archive/refs/tags/2.7.19.tar.gz
         GFARM2FS_SRC_URL: https://github.com/oss-tsukuba/gfarm2fs/archive/refs/tags/1.2.15.tar.gz
-        SHARED_DIR: /share
-        MYPROXY_SERVER:
+    environment:
+      ### TODO MYPROXY_SERVERS=
+      - MYPROXY_SERVER=
+      - GFARM_S3_BUILD_DIR=/build_cache
+      - GFARM_S3_SHARED_DIR=/share
+      - GFARM_S3_USERNAME=_gfarm_s3
+      - GFARM_S3_GROUPNAME=_gfarm_s3
+      ### TODO GFARM_S3_LOCALTMP
+      - CACHE_DIR=/var/cache/gfarm-s3
+      - CACHE_SIZE=1024
+
     volumes:
       #TODO supervisord
       - /sys/fs/cgroup:/sys/fs/cgroup:ro

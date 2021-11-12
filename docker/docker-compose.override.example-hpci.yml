@@ -1,11 +1,17 @@
 version: '3.4'
 
+# variables from .env
+
 services:
   gfminio:
     build:
       args:
-        http_proxy: http://10.0.2.15:3128
-        https_proxy: http://10.0.2.15:3128
-        #MYPROXY_SERVER: portal.hpci.nii.ac.jp:7512
-        MYPROXY_SERVER: portal-c.hpci.nii.ac.jp:7512
-        SHARED_DIR: /home/hp120273/hpci001971/minio-share
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+    environment:
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
+      - MYPROXY_SERVER=portal.hpci.nii.ac.jp:7512
+      #- MYPROXY_SERVER=portal-c.hpci.nii.ac.jp:7512
+      #- GFARM_S3_SHARED_DIR=/home/hp...../hpci...../minio-share
+      - GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR}

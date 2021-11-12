@@ -49,10 +49,11 @@
   各行に
   <Gfarm Username>:<Local Username>:<S3 Accesskey ID>
   を列挙する
-- docker-compose.override.yml を作成し、このディレクトリに置く
+- (必要であれば) docker-compose.override.yml を作成し、このディレクトリに置く
+  ファイルはシンボリックリンクでも良い
   docker-compose.yml から自分の環境に合わせて上書き
   docker-compose.override.example-hpci.yml は HPCI 共用ストレージ向けの例
-  シンボリックリンクでも良い
+  .env ファイルにパラメータを設定する例にもなっている
 - gfarm-s3-usermap.conf 作成
   許可するローカルユーザと、Gfarm ユーザとの対応付け、
   および、S3 アクセスキーとの対応付けをおこなう
@@ -62,7 +63,8 @@
 
 ## 永続化される情報
 
-以下が Docker volume に保存される。
+コンテナを削除・再生成しても以下の情報は維持される。
+(Docker volume に保存される。)
 
 - 各ユーザの S3 シークレットアクセスキー
 - 各ユーザの X509_USER_PROXY ファイル
@@ -74,45 +76,68 @@
 
 ## 構築、更新 (ビルド時間含む)
 
+```
 make reborn
+```
 
-ログを表示しながら起動 (起動後は ctrl-c で停止)
+ログを表示しながら起動 (起動後は ctrl-c で終了)
+
+```
 make reborn-withlog
+```
 
-## コンテナイメージ再生成
+## コンテナイメージから再生成 (依存パッケージの更新含む)
 
+```
 make reborn-nocache
+```
 
 ## 停止
 
+```
 make stop
+```
 
 ## 再起動 (短時間)
 
+```
 make restart
+```
 
-ログを表示しながら起動 (起動後は ctrl-c で停止)
+ログを表示しながら起動 (起動後は ctrl-c で終了)
+
+```
 make restart-withlog
+```
 
 ## コンテナ内シェル
 
+```
 make shell
+```
+
+コンテナの中で各ユーザに変更
+
+```
 sudo -i -u ユーザ
+```
 
 ## 永続情報も消す
 
+```
 make down-REMOVE_VOLUMES
+```
 
 ## メンテナンス
 
 - コンテナを再構築(reborn)する必要がある場合
   - docker-compose.yml 設定変更時
   - ユーザ対応が入れ替わる場合
-  - gfarm-s3-minio-web 更新時
-  - gfarm-s3-minio 更新時
+  - gfarm-s3-minio-web ソースコード更新時
+  - gfarm-s3-minio ソースコード更新時
+  - gfarm 本体ソースコード更新時
 - コンテナを再起動(restart)する必要がある場合
-  - ユーザ増減時
-  - ユーザのホームディレクトリ増減時
+  - ユーザ増減時 (gfarm-s3-usermap 更新時)
 
 ## 永続情報のバックアップ、リストア
 
