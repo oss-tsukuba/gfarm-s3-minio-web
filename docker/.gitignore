@@ -2,6 +2,6 @@
 /.env
 /gfarm-s3-usermap.conf
 /gfarm2.conf
-/gfarm_shared_key
 /certificates
 /hpci-certificates
+/mnt

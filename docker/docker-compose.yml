@@ -25,13 +25,14 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
       - /home:/host_home:ro
+      - s3secret:/s3secret:rw
+      - build_cache:/build_cache:rw
+
+      - ./mnt:/mnt:rw
+
       - ./gfarm2.conf:/usr/local/etc/gfarm2.conf:ro
       - ./certificates:/etc/grid-security/certificates:ro
       - ./gfarm-s3-usermap.conf:/gfarm-s3-usermap.conf:ro
-
-      - s3secret:/s3secret:rw
-      - build_cache:/build_cache:rw
-      - ./mnt:/mnt:rw
 
     security_opt:
       - seccomp:unconfined

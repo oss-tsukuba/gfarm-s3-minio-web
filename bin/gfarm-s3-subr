@@ -482,8 +482,6 @@ challenge_auth() {
 	local res=""
 	local x509_user_proxy="$(get_x509_user_proxy $local_user)"
 
-	export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
-
 #	echo challenge_auth "$@" 1>&2
 
 	if [ -n "$MYPROXY_SERVER" ]; then

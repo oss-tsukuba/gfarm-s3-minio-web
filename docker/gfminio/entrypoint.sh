@@ -108,15 +108,16 @@ for line in $(cat "${USERMAP}"); do
        continue
     fi
 
+    USER_UID=$(stat -c %u "${HOST_HOMEDIR}")
+    USER_GID=$(stat -c %g "${HOST_HOMEDIR}")
+    GROUP_NAME="gid${USER_GID}"
+
     HOMEDIR="${HOME_BASE}/${LOCAL_USERNAME}"
     if [ ! -d "${HOMEDIR}" ]; then
-        USER_UID=$(stat -c %u "${HOST_HOMEDIR}")
-        USER_GID=$(stat -c %g "${HOST_HOMEDIR}")
-
         if group_exist "${USER_GID}"; then
             :
         else
-            groupadd -g ${USER_GID} "gid${USER_GID}"
+            groupadd -g ${USER_GID} "${GROUP_NAME}"
         fi
         useradd -m -s /bin/bash -g ${USER_GID} -b "${HOME_BASE}" -u "${USER_UID}" "${LOCAL_USERNAME}"
         echo "INFO: create ${HOMEDIR}" >&2
@@ -131,7 +132,12 @@ for line in $(cat "${USERMAP}"); do
     ### .gfarm_shared_key
     GFARM_SHARED_KEY="${HOMEDIR}/.gfarm_shared_key"
     HOST_GFARM_SHARED_KEY="${HOST_HOMEDIR}/.gfarm_shared_key"
-    mksym "${HOST_GFARM_SHARED_KEY}" "${GFARM_SHARED_KEY}"
+    # XXX TODO? cannot use .gfarm_shared_key on read only file system
+    ### mksym "${HOST_GFARM_SHARED_KEY}" "${GFARM_SHARED_KEY}"
+    cp -f "${HOST_GFARM_SHARED_KEY}" "${GFARM_SHARED_KEY}"
+    # XXX must be writable
+    chmod 700 "${GFARM_SHARED_KEY}"
+    chown "${LOCAL_USERNAME}":"${USER_GID}" "${GFARM_SHARED_KEY}"
 
     ### .gfarm2rc
     GFARM2RC="${HOMEDIR}/.gfarm2rc"

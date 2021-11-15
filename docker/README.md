@@ -138,7 +138,18 @@ make down-REMOVE_VOLUMES
   - gfarm 本体ソースコード更新時
 - コンテナを再起動(restart)する必要がある場合
   - ユーザ増減時 (gfarm-s3-usermap 更新時)
+  - ユーザの .gfarm_shared_key 更新時
+    libgfarm 側の実装が理由で、鍵ファイルを読み込み専用で利用できないため
+    TODO できれば、ホスト OS 側のファイル更新するだけで反映されるようにしたい
 
 ## 永続情報のバックアップ、リストア
 
 TODO
+
+### 開発者向け
+
+gfarm/docker/dev 環境にアクセスするには、以下のようにしてから構築する。
+
+```
+ln -s docker-compose.override.dev.yml docker-compose.override.yml
+```
