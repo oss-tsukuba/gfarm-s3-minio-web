@@ -60,8 +60,7 @@ install_gf_s3() {
     && mkdir -p ${CACHE_DIR} \
     && chmod 1777 ${CACHE_DIR}
 
-    # TODO RUN systemctl enable gfarm-s3-web.service
-    systemctl enable gunicorn \
+    systemctl enable gfarm-s3-webui.service \
     && systemctl enable gfarm-s3-router.service
 }
 

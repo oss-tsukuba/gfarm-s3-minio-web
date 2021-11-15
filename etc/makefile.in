@@ -45,7 +45,7 @@ install:
 	$(TOUCH) $(GFARMS3_APACHE_REWRITE_CONF)
 	$(CHOWN) $(GFARM_S3_USERNAME) $(GFARMS3_APACHE_REWRITE_CONF)
 
-	$(INSTALL) -D -m 644 gunicorn.service $(SYSTEMD_SYSTEM)/gunicorn.service
+	$(INSTALL) -D -m 644 gfarm-s3-webui.service $(SYSTEMD_SYSTEM)/gfarm-s3-webui.service
 	$(INSTALL) -D -m 644 gfarm-s3-router.service $(SYSTEMD_SYSTEM)/gfarm-s3-router.service
 	#$(MKDIR) -p $(ROUTER_HOMEDIR)
 	#$(CHOWN) $(GFARM_S3_USERNAME):$(GFARM_S3_GROUPNAME) $(ROUTER_HOMEDIR)
@@ -53,11 +53,11 @@ install:
 	$(CHOWN) $(GFARM_S3_USERNAME):$(GFARM_S3_GROUPNAME) $(ROUTER_HOMEDIR)/router.py
 
 	#@echo please add apache-gfarm-s3.conf content to your httpd.conf
-	@echo systemctl enable --now gunicorn.service
+	@echo systemctl enable --now gfarm-s3-webui.service
 	@echo systemctl enable --now gfarm-s3-router.service
 
 clean:
 
 distclean:
-	$(RM) -f apache-gfarm-s3.conf gfarm-s3.conf gunicorn.service sudoers
+	$(RM) -f apache-gfarm-s3.conf gfarm-s3.conf gfarm-s3-webui.service gfarm-s3-router.service sudoers
 	$(RM) -f makefile

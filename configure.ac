@@ -228,8 +228,8 @@ bin/gfarm-s3-viusermap
 bin/makefile
 etc/apache-gfarm-s3.conf
 etc/gfarm-s3.conf
+etc/gfarm-s3-webui.service
 etc/gfarm-s3-router.service
-etc/gunicorn.service
 etc/makefile
 etc/nginx.conf
 etc/sudoers

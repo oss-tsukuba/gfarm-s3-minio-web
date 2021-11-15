@@ -235,7 +235,7 @@ with-apache, with-gunicornはそれぞれのインストール
 GFARM_S3_PREFIX ディレクトリ以下のファイル以外に、下記が追加される。
 
 * /etc/sudoers.d/gfarm-s3
-* gunicorn.service, gfarm-s3-router.service (systemd 用)
+* gfarm-s3-webui.service, gfarm-s3-router.service (systemd 用)
 * /home/_gfarm_s3/ 以下にファイル
 
 #### Gfarm-S3の設定
@@ -310,7 +310,7 @@ sudo apachectl start
 
 ##### serviceを登録・起動する
 ```
-sudo systemctl enable --now gunicorn.service
+sudo systemctl enable --now gfarm-s3-webui.service
 sudo systemctl enable --now gfarm-s3-router.service
 ```
 
