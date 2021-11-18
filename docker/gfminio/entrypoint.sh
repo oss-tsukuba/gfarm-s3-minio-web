@@ -1,6 +1,10 @@
 #!/bin/bash
 
-set -eux -o pipefail
+# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
+set -eu
+set -o pipefail
+#set -x
 
 ### from build args
 : WORKDIR=${WORKDIR}
@@ -133,10 +137,12 @@ for line in $(cat "${USERMAP}"); do
     HOST_GFARM_SHARED_KEY="${HOST_HOMEDIR}/.gfarm_shared_key"
     # XXX TODO? cannot use .gfarm_shared_key on read only file system
     ### mksym "${HOST_GFARM_SHARED_KEY}" "${GFARM_SHARED_KEY}"
-    cp -f "${HOST_GFARM_SHARED_KEY}" "${GFARM_SHARED_KEY}"
-    # XXX must be writable
-    chmod 700 "${GFARM_SHARED_KEY}"
-    chown "${LOCAL_USERNAME}":"${USER_GID}" "${GFARM_SHARED_KEY}"
+    if [ -f "${HOST_GFARM_SHARED_KEY}" ]; then
+        cp -f "${HOST_GFARM_SHARED_KEY}" "${GFARM_SHARED_KEY}"
+        # XXX must be writable
+        chmod 700 "${GFARM_SHARED_KEY}"
+        chown "${LOCAL_USERNAME}":"${USER_GID}" "${GFARM_SHARED_KEY}"
+    fi
 
     ### .gfarm2rc
     GFARM2RC="${HOMEDIR}/.gfarm2rc"
