@@ -26,12 +26,12 @@ SYSTEMD_SYSTEM=/usr/lib/systemd/system
 all:
 
 install:
-	$(INSTALL) -D -c gfarm-s3.conf $(GFARMS3_CONF_DIR)/gfarm-s3.conf
+	$(INSTALL) -D -m 644 gfarm-s3.conf $(GFARMS3_CONF_DIR)/gfarm-s3.conf
 
 	$(TOUCH) $(GFARMS3_LOCAL_USER_MAP)
 	$(CHMOD) 644 $(GFARMS3_LOCAL_USER_MAP)
 
-	$(INSTALL) -D -c sudoers /etc/sudoers.d/gfarm-s3
+	$(INSTALL) -D -m 644 sudoers /etc/sudoers.d/gfarm-s3
 	@echo "*** NOTICE *** The installer has created a file '/etc/sudoers.d/gfarm-s3'." 1>&2
 	@echo "*** NOTICE *** Please confirm content of the file." 1>&2
 
@@ -48,9 +48,9 @@ install:
 	$(INSTALL) -D -m 644 gfarm-s3-webui.service $(SYSTEMD_SYSTEM)/gfarm-s3-webui.service
 	$(INSTALL) -D -m 644 gfarm-s3-router.service $(SYSTEMD_SYSTEM)/gfarm-s3-router.service
 	#$(MKDIR) -p $(ROUTER_HOMEDIR)
-	#$(CHOWN) $(GFARM_S3_USERNAME):$(GFARM_S3_GROUPNAME) $(ROUTER_HOMEDIR)
-	$(INSTALL) -D -c -m 644 ../router/router.py $(ROUTER_HOMEDIR)
-	$(CHOWN) $(GFARM_S3_USERNAME):$(GFARM_S3_GROUPNAME) $(ROUTER_HOMEDIR)/router.py
+	#$(CHOWN) $(GFARM_S3_USERNAME):root $(ROUTER_HOMEDIR)
+	$(INSTALL) -D -m 644 ../router/router.py $(ROUTER_HOMEDIR)
+	$(CHOWN) $(GFARM_S3_USERNAME):root $(ROUTER_HOMEDIR)/router.py
 
 	#@echo please add apache-gfarm-s3.conf content to your httpd.conf
 	@echo systemctl enable --now gfarm-s3-webui.service

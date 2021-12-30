@@ -11,6 +11,9 @@ COMPOSE = $(SUDO) COMPOSE_PROJECT_NAME=$(COMPOSE_PROJECT_NAME) $(COMPOSE_V1)
 ps:
 	$(COMPOSE) ps
 
+config-check:
+	$(COMPOSE) config
+
 prune:
 	$(DOCKER) system prune -f
 

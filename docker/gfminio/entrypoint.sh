@@ -10,6 +10,10 @@ set -o pipefail
 : WORKDIR=${WORKDIR}
 
 ### from enviroment
+: DJANGO_DEBUG=${DJANGO_DEBUG}
+: SERVER_URL=${SERVER_URL}
+: ALLOWED_HOSTS=${ALLOWED_HOSTS}
+: CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
 : MYPROXY_SERVER=${MYPROXY_SERVER}
 : GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR}
 : GFARM_S3_BUILD_DIR=${GFARM_S3_BUILD_DIR}
@@ -20,6 +24,24 @@ set -o pipefail
 : CACHE_SIZE=${CACHE_SIZE}
 
 GFARM_S3_HOMEDIR=/home/${GFARM_S3_USERNAME}
+
+URL_REGEXP="^([^/:]+?)://([^/:]+?):?([[:digit:]]+)?(/.*)?"
+[[ ${SERVER_URL} =~ ${URL_REGEXP} ]]
+URL_SCHEME=${BASH_REMATCH[1]}
+SERVER_NAME=${BASH_REMATCH[2]}
+SERVER_PORT=${BASH_REMATCH[3]}
+URL_PATH=${BASH_REMATCH[4]}
+
+# update SERVER_URL
+SERVER_URL="${URL_SCHEME}://${SERVER_NAME}"
+if [ -n "${SERVER_PORT}" ]; then
+    SERVER_URL="${SERVER_URL}:${SERVER_PORT}"
+fi
+
+# update when empty
+ALLOWED_HOSTS=${ALLOWED_HOSTS:-${SERVER_NAME}}
+# update when empty
+CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-${SERVER_URL}}
 
 HOME_BASE=/home
 HOST_HOME_BASE=/host_home
@@ -44,9 +66,13 @@ install_gf_s3() {
         && git checkout ${GFARM_S3_MINIO_BRANCH}
     fi
 
+    PREFIX=/usr/local
+    SYSCONFDIR=${PREFIX}/etc
+
     cd ${WORKDIR}/gfarm-s3-minio-web \
     && ./configure \
-    --prefix=/usr/local \
+    --prefix=${PREFIX} \
+    --sysconfdir=${SYSCONFDIR} \
     --with-gfarm=/usr/local \
     --with-globus=/usr \
     --with-myproxy=/usr \
@@ -63,6 +89,27 @@ install_gf_s3() {
     && make install \
     && mkdir -p ${CACHE_DIR} \
     && chmod 1777 ${CACHE_DIR}
+
+    #TODO in "make install"
+    DJANGO_SECRET_KEY=${SYSCONFDIR}/django_secret_key.txt
+    if [ ! -f ${DJANGO_SECRET_KEY} ]; then
+        #pip install django-generate-secret-key
+        #cd ${GFARM_S3_HOMEDIR}/gfarm-s3
+        #python3 manage.py generate_secret_key "${DJANGO_SECRET_KEY}"
+        python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())" > "${DJANGO_SECRET_KEY}"
+        chmod 400 "${DJANGO_SECRET_KEY}"
+        chown ${GFARM_S3_USERNAME}:root "${DJANGO_SECRET_KEY}"
+    fi
+
+    #TODO rename?: gfarm-s3.conf
+    CONF_OVERWRITE=${SYSCONFDIR}/gfarm-s3-overwrite.conf
+    cat <<EOF > "${CONF_OVERWRITE}"
+DJANGO_DEBUG=${DJANGO_DEBUG}
+ALLOWED_HOSTS=${ALLOWED_HOSTS}
+
+# required by Django 4 or later
+CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
+EOF
 
     systemctl enable gfarm-s3-webui.service \
     && systemctl enable gfarm-s3-router.service
@@ -102,8 +149,8 @@ for line in $(cat "${USERMAP}"); do
     LOCAL_USERNAME=$(echo "${line}" | awk -F : '{print $2}' | sed "s/\s//g")
     ACCESSKEY_ID=$(echo "${line}" | awk -F : '{print $3}' | sed "s/\s//g")
 
-    [ -z "${LOCAL_USERNAME}" ] && continue
-    [ "${LOCAL_USERNAME:0:1}" = "#" ] && continue
+    [ -z "${GFARM_USERNAME}" ] && continue
+    [ "${GFARM_USERNAME:0:1}" = "#" ] && continue
 
     HOST_HOMEDIR="${HOST_HOME_BASE}/${LOCAL_USERNAME}"
     if [ ! -d "${HOST_HOMEDIR}" ]; then
@@ -125,7 +172,7 @@ for line in $(cat "${USERMAP}"); do
         useradd -m -s /bin/bash -g ${USER_GID} -b "${HOME_BASE}" -u "${USER_UID}" "${LOCAL_USERNAME}"
         echo "INFO: create ${HOMEDIR}" >&2
     fi
-    sudo usermod -a -G "${GFARM_S3_GROUPNAME}" "${LOCAL_USERNAME}"
+    usermod -a -G "${GFARM_S3_GROUPNAME}" "${LOCAL_USERNAME}"
 
     ### .globus
     DOTGLOBUS="${HOMEDIR}/.globus"
@@ -172,7 +219,7 @@ EOF
     gfarm-s3-useradd "${GFARM_USERNAME}" "${LOCAL_USERNAME}" "${ACCESSKEY_ID}" || true  ## may fail
 
     ### resume minio
-    sudo -u "${GFARM_S3_GROUPNAME}" gfarm-s3-login --quiet --authenticated "DUMMY_AUTH_METHOD" resume "${GFARM_USERNAME}" "DUMMY_PASSWORD" > /dev/null &
+    sudo -u "${GFARM_S3_USERNAME}" gfarm-s3-login --quiet --authenticated "DUMMY_AUTH_METHOD" resume "${GFARM_USERNAME}" "DUMMY_PASSWORD" > /dev/null &
     ##### backgroud
 done
 ### wait for resuming minio

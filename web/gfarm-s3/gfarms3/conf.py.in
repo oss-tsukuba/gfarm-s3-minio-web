@@ -1,0 +1,50 @@
+import json
+from subprocess import Popen, PIPE
+
+prefix = '@prefix@'
+sysconfdir = '@sysconfdir@'
+
+# NOTE: @bindir@ is not available (... bindir='${exec_prefix}/bin')
+gfarm_s3_readconf = prefix + '/bin/gfarm-s3-readconf'
+#gfarm_s3_readconf = 'bin/gfarm-s3-readconf.in' //TODO
+
+django_secret_key_file = sysconfdir + '/django_secret_key.txt'
+
+def load_gfarm_s3_conf():
+    #TODO  cmd = ['bash', gfarm_s3_readconf, "-json"]
+    cmd = [gfarm_s3_readconf, "-json"]
+    with Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE) as p:
+        (out, err) = p.communicate()
+        p.wait()
+    return json.loads(out.decode().strip())
+
+_conf = None
+
+def get_gfarm_s3_conf():
+    global _conf
+
+    if _conf is not None:
+        return _conf
+    _conf = load_gfarm_s3_conf()
+    return _conf
+
+from distutils.util import strtobool
+
+def to_bool(s):
+    if strtobool(s):
+        return True
+    else:
+        return False
+
+def get_str(key):
+    c = get_gfarm_s3_conf()
+    return c[key]
+
+# commna separator
+def get_list(key):
+    c = get_gfarm_s3_conf()
+    return c[key].split(',')
+
+def get_bool(key):
+    c = get_gfarm_s3_conf()
+    return to_bool(c[key])

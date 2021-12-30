@@ -1,0 +1,81 @@
+#! /bin/bash
+
+set -eu
+#set -x
+
+#TODO ?
+#CONF_DEFAULT=@sysconfdir@/gfarm-s3-default.conf
+#CONF=@sysconfdir@/gfarm-s3.conf
+
+CONF_DEFAULT=@sysconfdir@/gfarm-s3.conf
+CONF=@sysconfdir@/gfarm-s3-overwrite.conf
+
+confprint()
+{
+    egrep "^[^\\s#=]+=[^=]*$" "${1}" \
+    | egrep -v "\\$\\([^\\)]+\\)" \
+    | egrep -v "\`[^\`]+\`)"
+}
+
+SAVE_IFS=$IFS
+IFS="
+"
+
+C1=$(confprint "${CONF_DEFAULT}")
+
+declare -A KEYS
+
+for kv in $C1; do
+    k=${kv%=*}
+    v=${kv#*=}
+    KEYS[$k]=1  # exist
+
+    # evaluate
+    eval $kv
+done
+
+C2=$(confprint "${CONF}")
+
+
+for kv in $C2; do
+    k=${kv%=*}
+    v=${kv#*=}
+    if [ "${KEYS[$k]:-}" = "1" ]; then
+        # overwrite
+        eval $kv
+    fi
+done
+
+to_json()
+{
+    echo "{"
+    first=1
+    # from keys of C1
+    for k in "${!KEYS[@]}"; do
+        if [ $first -eq 0 ]; then
+            echo ","
+        fi
+        v=$(eval echo \$$k)
+        v=$(echo $v | sed 's/"/\\"/')
+        echo -n "\"$k\": \"$v\""
+        first=0
+    done
+    echo ""
+    echo "}"
+}
+
+to_sh()
+{
+    # from keys of C1
+    for k in "${!KEYS[@]}"; do
+        v=$(eval echo \$$k)
+        v=$(echo $v | sed 's/"/\\"/')
+        echo "$k=\"$v\""
+    done
+}
+
+if [ "${1:-}" = "-json" ]; then
+    to_json
+else
+    to_sh
+fi

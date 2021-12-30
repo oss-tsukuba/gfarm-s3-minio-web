@@ -16,7 +16,7 @@ all::
 install:
 	$(TAR) cf - gfarm-s3 rungunicorn runserver | (cd $(GFARM_S3_HOMEDIR) && $(TAR) xfp -)
 	(cd gfarm-s3/console && $(TAR) cf - static) | (cd $(GFARM_S3_HOMEDIR) && $(TAR) xfp -)
-	$(CHOWN) -R $(GFARM_S3_USER):$(GFARM_S3_GROUP) $(GFARM_S3_HOMEDIR)/gfarm-s3 $(GFARM_S3_HOMEDIR)/rungunicorn $(GFARM_S3_HOMEDIR)/runserver $(GFARM_S3_HOMEDIR)/static
+	$(CHOWN) -R $(GFARM_S3_USER):root $(GFARM_S3_HOMEDIR)/gfarm-s3 $(GFARM_S3_HOMEDIR)/rungunicorn $(GFARM_S3_HOMEDIR)/runserver $(GFARM_S3_HOMEDIR)/static
 	$(CHMOD) +x $(GFARM_S3_HOMEDIR)/rungunicorn $(GFARM_S3_HOMEDIR)/runserver
 	# read-only by others
 	$(CHMOD) -R og-w $(GFARM_S3_HOMEDIR)

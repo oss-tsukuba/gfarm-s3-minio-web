@@ -221,6 +221,7 @@ bin/gfarm-s3-generate-usermap-hpci
 bin/gfarm-s3-login
 bin/gfarm-s3-server
 bin/gfarm-s3-minio
+bin/gfarm-s3-readconf
 bin/gfarm-s3-sharedsecret-password
 bin/gfarm-s3-update-reverse-proxy
 bin/gfarm-s3-useradd
@@ -237,5 +238,6 @@ minio/makefile
 web/makefile
 web/rungunicorn
 web/runserver
+web/gfarm-s3/gfarms3/conf.py
 ])
 AC_OUTPUT

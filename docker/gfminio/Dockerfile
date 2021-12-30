@@ -65,7 +65,7 @@ RUN mkdir -p ${WORKDIR} \
     && make -j \
     && make -j install
 
-RUN python3 -m pip install Django gunicorn boto3
+RUN python3 -m pip install 'Django<=4' gunicorn boto3
 
 COPY ${BASEDIR}/nginx-gfarm-s3.conf /etc/nginx/sites-available/gfarm
 RUN ln -s /etc/nginx/sites-available/gfarm /etc/nginx/sites-enabled/gfarm \

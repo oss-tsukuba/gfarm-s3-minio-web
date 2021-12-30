@@ -1,5 +1,7 @@
 version: '3.4'
 
+# use variables from .env
+
 services:
   gfminio:
     hostname: gfminio
@@ -7,9 +9,22 @@ services:
       context: ../
       dockerfile: ./docker/gfminio/Dockerfile
       args:
-        GFARM_SRC_URL: https://github.com/oss-tsukuba/gfarm/archive/refs/tags/2.7.19.tar.gz
-        GFARM2FS_SRC_URL: https://github.com/oss-tsukuba/gfarm2fs/archive/refs/tags/1.2.15.tar.gz
+        - GFARM_SRC_URL=https://github.com/oss-tsukuba/gfarm/archive/refs/tags/2.7.19.tar.gz
+        - GFARM2FS_SRC_URL=https://github.com/oss-tsukuba/gfarm2fs/archive/refs/tags/1.2.15.tar.gz
+        ### optional
+        - http_proxy=${http_proxy:-}
+        - https_proxy=${https_proxy:-}
     environment:
+      ### mandatory
+      - SERVER_URL=${SERVER_URL:?SERVER_URL}
+
+      ### optional
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+      # empty means using SERVER_NAME from SERVER_URL
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
+      # empty means using SERVER_URL
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS-}
+
       ### TODO MYPROXY_SERVERS=
       - MYPROXY_SERVER=
       - GFARM_S3_BUILD_DIR=/build_cache

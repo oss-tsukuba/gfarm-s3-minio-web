@@ -1,6 +1,7 @@
 #! /bin/bash
 
-set -eux -o pipefail
+set -eu -o pipefail
+#set -x
 
 export LANG=C
 export LC_CTYPE=C

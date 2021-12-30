@@ -547,6 +547,7 @@ challenge_auth() {
 		;;
 	esac
 
+	sleep 5
 	return 1
 }
 
@@ -577,7 +578,7 @@ spawn_per_user_server_common() {
 	elif [ -n "$port_pid" ]; then
 		local port="${port_pid%:*}"
 		local pid="${port_pid#*:}"
-		echo "MinIO started" 1>&2
+		echo "MinIO started (for $user)" 1>&2
 		## No need to check `port' confliction,
 		## as a port # that returned by gfarm-s3-server is
 		## actually allocated for current user.
@@ -788,7 +789,7 @@ update_reverse_proxy_for_apache() {
 		return 1
 	fi
 
-	if cmp "$tmpfile" "$GFARMS3_APACHE_REWRITE_CONF" >/dev/null; then
+	if cmp -s "$tmpfile" "$GFARMS3_APACHE_REWRITE_CONF"; then
 		echo "no change" 1>&2
 		rm "$tmpfile"
 	else
@@ -808,7 +809,7 @@ update_reverse_proxy_for_router() {
 		return 1
 	fi
 
-	if cmp "$tmpfile" "$GFARMS3_REVERSE_PROXY_ROUTES" >/dev/null; then
+	if cmp -s "$tmpfile" "$GFARMS3_REVERSE_PROXY_ROUTES"; then
 		echo "no change" 1>&2
 		rm "$tmpfile"
 	else

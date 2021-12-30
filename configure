@@ -11748,7 +11748,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-minio bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gfarm-s3-webui.service etc/gfarm-s3-router.service etc/makefile etc/nginx.conf etc/sudoers minio/makefile web/makefile web/rungunicorn web/runserver"
+ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-minio bin/gfarm-s3-readconf bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gfarm-s3-webui.service etc/gfarm-s3-router.service etc/makefile etc/nginx.conf etc/sudoers minio/makefile web/makefile web/rungunicorn web/runserver web/gfarm-s3/gfarms3/conf.py"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -12749,6 +12749,7 @@ do
     "bin/gfarm-s3-login") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-login" ;;
     "bin/gfarm-s3-server") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-server" ;;
     "bin/gfarm-s3-minio") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-minio" ;;
+    "bin/gfarm-s3-readconf") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-readconf" ;;
     "bin/gfarm-s3-sharedsecret-password") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-sharedsecret-password" ;;
     "bin/gfarm-s3-update-reverse-proxy") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-update-reverse-proxy" ;;
     "bin/gfarm-s3-useradd") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-useradd" ;;
@@ -12765,6 +12766,7 @@ do
     "web/makefile") CONFIG_FILES="$CONFIG_FILES web/makefile" ;;
     "web/rungunicorn") CONFIG_FILES="$CONFIG_FILES web/rungunicorn" ;;
     "web/runserver") CONFIG_FILES="$CONFIG_FILES web/runserver" ;;
+    "web/gfarm-s3/gfarms3/conf.py") CONFIG_FILES="$CONFIG_FILES web/gfarm-s3/gfarms3/conf.py" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
