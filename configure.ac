@@ -155,7 +155,7 @@ AC_MSG_CHECKING([number of router workers])
 AC_ARG_WITH([router-nworkers],
   AC_HELP_STRING([--router-nworkers=ROUTER_NWORKERS], [number of workers [[10]]]))
 case x$router_nworkers in
-  x|xyes|xno) router_nworkers=10 ;;
+  x|xyes|xno) router_nworkers=1 ;;
 esac
 AC_MSG_RESULT([$router_nworkers])
 AC_SUBST(router_nworkers)

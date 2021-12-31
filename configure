@@ -11566,7 +11566,7 @@ if test "${with_router_nworkers+set}" = set; then :
 fi
 
 case x$router_nworkers in
-  x|xyes|xno) router_nworkers=10 ;;
+  x|xyes|xno) router_nworkers=1 ;;
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $router_nworkers" >&5
 $as_echo "$router_nworkers" >&6; }
