@@ -1,17 +1,14 @@
 [Unit]
-Description = gfarm s3 router (gunicorn app)
+Description = Gfarm S3 router (gunicorn app)
 After = network.target
 
 [Service]
-#Type = notify
+Type = simple
 User = @with_gfarm_s3_user@
-#Group = @with_gfarm_s3_group@
-#RuntimeDirectory = gunicorn
+Group = @with_gfarm_s3_group@
+RuntimeDirectory = gfarm-s3-router
 WorkingDirectory = /
-Environment = threads=@router_nthreads@ workers=@router_nworkers@ bind=@with_router_addr@ chdir=@with_gfarm_s3_homedir@/gfarm-s3 timeout=180
-
-#ExecStart = @with_gunicorn@/bin/gunicorn --error-logfile - --threads $threads --workers $workers --bind $bind --chdir $chdir --capture-output --timeout $timeout --reload router.router:app
-ExecStart = @with_gunicorn@/bin/gunicorn --error-logfile - --threads $threads --workers $workers --bind $bind --chdir $chdir --capture-output --timeout $timeout router.router:app
+ExecStart = @prefix@/libexec/gfarm-s3-router
 
 #ExecReload = /bin/kill -s HUP $MAINPID
 #KillMode = mixed

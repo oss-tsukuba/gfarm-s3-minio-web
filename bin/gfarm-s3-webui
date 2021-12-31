@@ -1,0 +1,24 @@
+#! /bin/sh
+
+set -eu
+
+eval $(gfarm-s3-readconf)
+
+threads=2
+workers=1
+
+TIMEOUT=180
+
+#RELOAD="--reload"
+RELOAD=""
+
+exec "${GUNICORN_DIR}/bin/gunicorn" \
+     --error-logfile - \
+     --capture-output \
+     --threads $threads \
+     --workers $workers \
+     --bind "$WEBUI_ADDR" \
+     --chdir "$WEBUI_BASEDIR" \
+     --timeout $TIMEOUT \
+     $RELOAD \
+     gfarms3.wsgi:application

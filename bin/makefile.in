@@ -1,8 +1,9 @@
-PREFIX=@prefix@
-
-BINDIR=$(PREFIX)/bin
-LIBDIR=$(PREFIX)/lib
-INSTALL=install
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+libdir = @libdir@
+libexecdir = @libexecdir@
+INSTALL = install
 
 scripts= \
 	gfarm-s3-configtest \
@@ -29,11 +30,16 @@ generated_scripts= \
 	gfarm-s3-useradd \
 	gfarm-s3-viusermap
 
+libexec_files = \
+	gfarm-s3-webui \
+	gfarm-s3-router
+
 all:
 
 install:
-	for i in $(scripts); do $(INSTALL) -D -c -m 555 $$i $(BINDIR)/$$i; done
-	$(INSTALL) -D -c -m 644 gfarm-s3-subr $(LIBDIR)/gfarm-s3-subr
+	for i in $(scripts); do $(INSTALL) -D -c -m 555 $$i $(bindir)/$$i; done
+	for i in $(libexec_files); do $(INSTALL) -D -c -m 555 $$i $(libexecdir)/$$i; done
+	$(INSTALL) -D -c -m 644 gfarm-s3-subr $(libdir)/gfarm-s3-subr
 
 clean:
 

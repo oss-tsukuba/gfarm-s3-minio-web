@@ -1,15 +1,15 @@
 [Unit]
-Description = gunicorn daemon for Gfarm-S3-Web (WebUI)
+Description = Gfarm-S3 WebUI (gunicorn app)
 After = network.target
 
 [Service]
-#Type = notify
+Type = simple
 User = @with_gfarm_s3_user@
 Group = @with_gfarm_s3_group@
-#RuntimeDirectory = gunicorn
+RuntimeDirectory = gfarm-s3-webui
 WorkingDirectory = /
-Environment = workers=2 bind=@with_webui_addr@ chdir=@with_gfarm_s3_homedir@/gfarm-s3
-ExecStart = @with_gunicorn@/bin/gunicorn --error-logfile - --workers $workers --bind $bind --chdir $chdir gfarms3.wsgi:application
+ExecStart = @prefix@/libexec/gfarm-s3-webui
+
 #ExecReload = /bin/kill -s HUP $MAINPID
 #KillMode = mixed
 #TimeoutStopSec = 5

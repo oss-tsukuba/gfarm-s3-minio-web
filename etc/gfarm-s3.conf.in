@@ -57,5 +57,16 @@ HOMEDIR_BASE=/home
 
 # for Django
 ALLOWED_HOSTS="*"
-CSRF_TRUSTED_ORIGINS=
+CSRF_TRUSTED_ORIGINS=""
 DJANGO_DEBUG=False
+
+# for gfarm-s3-webui
+GUNICORN_DIR=@with_gunicorn@
+WEBUI_ADDR=@with_webui_addr@
+WEBUI_BASEDIR=@with_gfarm_s3_homedir@/gfarm-s3
+
+# for gfarm-s3-router
+ROUTER_ADDR=@with_router_addr@
+ROUTER_THREAD_NUM=@router_nthreads@
+ROUTER_WORKER_NUM=@router_nworkers@
+ROUTER_BASEDIR=@with_gfarm_s3_homedir@/gfarm-s3

@@ -1,0 +1,21 @@
+#! /bin/sh
+
+set -eu
+
+eval $(gfarm-s3-readconf)
+
+TIMEOUT=180
+
+#RELOAD="--reload"
+RELOAD=""
+
+exec "${GUNICORN_DIR}/bin/gunicorn" \
+     --error-logfile - \
+     --capture-output \
+     --threads "$ROUTER_THREAD_NUM" \
+     --workers "$ROUTER_WORKER_NUM" \
+     --bind "$ROUTER_ADDR" \
+     --chdir "$ROUTER_BASEDIR" \
+     --timeout $TIMEOUT \
+     $RELOAD \
+     router.router:app
