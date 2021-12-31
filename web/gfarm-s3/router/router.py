@@ -16,12 +16,10 @@ logger = getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(DEBUG)
 
-gfarm_s3_conf = "/usr/local/etc/gfarm-s3.conf"
-
 
 def app(environ, start_response):
     (method, path, request_hdr, input, file_wrapper) = accept_request(environ)
-#    logger.debug(f"@@@ accept_request request_hdr = {request_hdr}")
+    logger.info(f"accept_request: method = {method}, path = {path}, request_hdr = {request_hdr}")
 
     destURL = getDestURL(request_hdr)
     if isinstance(destURL, int):
@@ -29,9 +27,6 @@ def app(environ, start_response):
         start_response(f"{destURL}", [])
         return []
     url = destURL + path
-
-    #### debug
-    #### end debug
 
     #logger.debug(f"@@@ METHOD {method}")
     #logger.debug(f"@@@ {method} {url} {input}")
@@ -190,7 +185,7 @@ def getDestURL(request_hdr):
 
 def getS3AccessKeyID(Authorization):
     """
-    see blelow for more strict implementation
+    see below for more strict implementation
     """
     if Authorization is None:
         return None
@@ -217,7 +212,7 @@ def parse_s3_auth(authorization):
 
 def lookupRoutingTable(AccessKeyID):
     key = AccessKeyID	## Access Key ID itself is used for DB Key
-    r = getReverseProxyRoutesDict(gfarm_s3_conf).get(key)
+    r = getReverseProxyRoutesDict().get(key)
     #logger.debug(f"@@@ lookupRoutingTable: {AccessKeyID} => {r}")
     if r is None:
         return 503
@@ -237,52 +232,48 @@ reverseProxyRoutes = dict({
     })
 
 
-def getReverseProxyRoutesDict(gfarm_s3_conf):
+def getReverseProxyRoutesDict():
     global reverseProxyRoutes
+
     with reverseProxyRoutes["lock"]:
         path = reverseProxyRoutes["path"]
     if path is None:
         with reverseProxyRoutes["lock"]:
-            path = get_gfarms3_env(gfarm_s3_conf, "GFARMS3_REVERSE_PROXY_ROUTES")
+            path = get_gfarms3_env("GFARMS3_REVERSE_PROXY_ROUTES")
             reverseProxyRoutes["path"] = path
 #            logger.debug(f"@@@ getReverseProxyRoutesDict: path = {path}")
 
     with reverseProxyRoutes["lock"]:
-        dict = reverseProxyRoutes["dict"]
+        _dict = reverseProxyRoutes["dict"]
         timestamp = reverseProxyRoutes["timestamp"]
 
     timestamp_file = os.stat(path).st_mtime
-    if dict is None or timestamp < timestamp_file:
+    if _dict is None or timestamp < timestamp_file:
 #        logger.debug(f"@@@ getReverseProxyRoutesDict: loadReverseProxyRoutesDict()")
-        dict = loadReverseProxyRoutesDict(path)
+        _dict = loadReverseProxyRoutesDict(path)
         with reverseProxyRoutes["lock"]:
             if reverseProxyRoutes["timestamp"] >= timestamp_file:
                 # lose the race
 #                logger.debug(f"@@@ getReverseProxyRoutesDict: lose")
-                dict = reverseProxyRoutes["timestamp"]
+                _dict = reverseProxyRoutes["timestamp"]
             else:
 #                logger.debug(f"@@@ getReverseProxyRoutesDict: update")
-                reverseProxyRoutes["dict"] = dict
+                reverseProxyRoutes["dict"] = _dict
                 reverseProxyRoutes["timestamp"] = timestamp_file
 
-#    logger.debug(f"@@@ getReverseProxyRoutesDict: dict = {dict}")
-    return dict
+#    logger.debug(f"@@@ getReverseProxyRoutesDict: _dict = {_dict}")
+    return _dict
 
 
 def loadReverseProxyRoutesDict(path):
-    ## WARNING: Expensive operation
+    ## NOTE: Expensive operation
     with open(path, "r") as f:
         return dict([(e[0], [e[1].strip()]) for e in
                          [e.split('\t') for e in f.readlines()]])
 
 
-def get_gfarms3_env(gfarm_s3_conf , key):
-    ## WARNING: Expensive operation
-    cmd = ["sh", "-c", f". {gfarm_s3_conf}; printf \"%s\" ${key}"]
-    with Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE) as p:
-        (out, err) = p.communicate()
-        p.wait()
-    return out.decode()
+def get_gfarms3_env(key):
+    return conf.get_str(key)
 
 
 def myformat(t=None):
