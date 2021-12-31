@@ -8,6 +8,9 @@ from subprocess import Popen, PIPE
 import time
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
+
+from gfarms3 import conf
+
 handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
 logger = getLogger(__name__)
 logger.addHandler(handler)
