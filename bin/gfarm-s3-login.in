@@ -95,7 +95,7 @@ bfa_log_addr() {
 bfa_log_clear() {
     ADDR="$1"
 
-    # If log_addr and log_clear are called simultaneously,
+    # If bfa_log_addr and bfa_log_clear are called simultaneously,
     # ADDR may not be cleared or may not be added. (optimistically)
 
     tmpfile1=$(mktemp)
@@ -108,7 +108,7 @@ bfa_log_clear() {
 }
 
 # check Brute-force attack
-if ! check_addr "$remote_addr"; then
+if ! bfa_check_addr "$remote_addr"; then
     log_info "login failed: Brute-force attack: $global_username $remote_addr"
     login_failed
     exit 1
