@@ -57,7 +57,7 @@ status=failure
 
 usermap_entry=$(lookup_usermap_by_global_username "$global_username" "$GFARMS3_LOCAL_USER_MAP")
 if [ -z "$usermap_entry" ]; then
-	logger -i -p local7.debug -t gfarm-s3-login "user not found in $GFARMS3_LOCAL_USER_MAP: $global_username $remote_addr"
+	log_debug "user not found in $GFARMS3_LOCAL_USER_MAP: $global_username $remote_addr"
 cat <<-EOF
 	{
 		"status": "$status",
@@ -71,7 +71,7 @@ local_username=$(get_local_username "$usermap_entry")
 if [ -n "$authenticated" ]; then
 	authenticated_method="$authenticated"
 elif ! authenticated_method=$(challenge_auth "$global_username" "$user_password" "$local_username"); then
-	logger -i -p local7.info -t gfarm-s3-login "login failed: $global_username $remote_addr"
+	log_info "login failed: $global_username $remote_addr"
 cat <<-EOF
 	{
 		"status": "$status",
