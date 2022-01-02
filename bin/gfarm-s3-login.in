@@ -53,40 +53,86 @@ case "$action" in start|stop|restart|resume|status|keygen|info|gfuser|gfgroup|gf
 *) echo $USAGE 1>&2; exit 1;;
 esac
 
-status=failure
-reason_error="incorrect username or password"
+login_failed() {
+    cat <<-EOF
+{
+  "status": "failure",
+  "reason": "incorrect username or password"
+}
+EOF
+    sleep ${GFARM_S3_LOGIN_CHALLENGE_INTERVAL}
+}
 
-#TODO
-GFARM_S3_LOGIN_CHALLENGE_INTERVAL=5
+# Brute-force attack
+bfa_check_addr() {
+    ADDR="$1"
+
+    if [ ! -f "${GFARM_S3_LOGIN_CHALLENGE_LOG}" ]; then
+        touch "${GFARM_S3_LOGIN_CHALLENGE_LOG}"
+        if [ ! -r "${GFARM_S3_LOGIN_CHALLENGE_LOG}" \
+             -o ! -w "${GFARM_S3_LOGIN_CHALLENGE_LOG}" \
+             -o ! -O "${GFARM_S3_LOGIN_CHALLENGE_LOG}" ]; then
+            logger_error "invalid ${GFARM_S3_LOGIN_CHALLENGE_LOG}"
+            exit 1
+        fi
+        return 0
+    fi
+
+    count=$(grep "^${ADDR}\$" "${GFARM_S3_LOGIN_CHALLENGE_LOG}" | wc -l)
+    if [ ${count} -gt ${GFARM_S3_LOGIN_CHALLENGE_MAX} ]; then
+        return 1
+    fi
+    return 0
+}
+
+bfa_log_addr() {
+    ADDR="$1"
+
+    # atomic operation
+    echo "${ADDR}" >> "${GFARM_S3_LOGIN_CHALLENGE_LOG}"
+}
+
+bfa_log_clear() {
+    ADDR="$1"
+
+    # If log_addr and log_clear are called simultaneously,
+    # ADDR may not be cleared or may not be added. (optimistically)
+
+    tmpfile1=$(mktemp)
+    tmpfile2=$(mktemp)
+    cp "${GFARM_S3_LOGIN_CHALLENGE_LOG}" "$tmpfile1"
+    grep -v "^${ADDR}\$" "$tmpfile1" > "$tmpfile2" 2> /dev/null || true
+    rm -f "$tmpfile1"
+    # atomic operation
+    mv "$tmpfile2" "${GFARM_S3_LOGIN_CHALLENGE_LOG}"
+}
+
+# check Brute-force attack
+if ! check_addr "$remote_addr"; then
+    log_info "login failed: Brute-force attack: $global_username $remote_addr"
+    login_failed
+    exit 1
+fi
 
 usermap_entry=$(lookup_usermap_by_global_username "$global_username" "$GFARMS3_LOCAL_USER_MAP")
 if [ -z "$usermap_entry" ]; then
-	log_info "login failed: user not found in $GFARMS3_LOCAL_USER_MAP: $global_username $remote_addr"
-cat <<-EOF
-	{
-		"status": "$status",
-		"reason": "$reason_error"
-	}
-EOF
-	sleep ${GFARM_S3_LOGIN_CHALLENGE_INTERVAL}
-	exit 1
+    log_info "login failed: user not found in $GFARMS3_LOCAL_USER_MAP: $global_username $remote_addr"
+    login_failed
+    bfa_log_addr "$remote_addr"
+    exit 1
 fi
 local_username=$(get_local_username "$usermap_entry")
 
 if [ -n "$authenticated" ]; then
-	authenticated_method="$authenticated"
+    authenticated_method="$authenticated"
 elif authenticated_method=$(challenge_auth "$global_username" "$user_password" "$local_username"); then
     log_info "login ($authenticated_method): $global_username $local_username $remote_addr"
+    bfa_log_clear "$remote_addr"
 else
-	log_info "login failed: $global_username $local_username $remote_addr"
-cat <<-EOF
-	{
-		"status": "$status",
-		"reason": "$reason_error"
-	}
-EOF
-	sleep ${GFARM_S3_LOGIN_CHALLENGE_INTERVAL}
-	exit 1
+    log_info "login failed: $global_username $local_username $remote_addr"
+    login_failed
+    bfa_log_addr "$remote_addr"
+    exit 1
 fi
 
 gfarm_shared_dir=$(gfarm_shared_dir_path "$gfarm_shared_dir" "$global_username")

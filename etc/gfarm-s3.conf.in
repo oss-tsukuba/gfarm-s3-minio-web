@@ -6,7 +6,7 @@ GFARM_S3_LOG_FACILITY=local7
 #GFARM_S3_LOG_OUTPUT=stderr
 GFARM_S3_LOG_OUTPUT=syslog
 
-# gfarm-s3-logon
+# gfarm-s3-login
 GFARM_S3_PREFIX=@prefix@
 GFARM_S3_TMP=/tmp
 GFARM_S3_BIN=$GFARM_S3_PREFIX/bin
@@ -26,6 +26,11 @@ GFARMS3_LOGIN_METHOD=myproxy-logon,grid-proxy-init,gfarm-shared-key
 #GFARMS3_LOGIN_METHOD=grid-proxy-init
 #GFARMS3_LOGIN_METHOD=gfarm-shared-key
 #GFARMS3_LOGIN_METHOD=
+
+### Brute-force attack
+GFARM_S3_LOGIN_CHALLENGE_LOG=${GFARM_S3_VAR}/error_addr.log
+GFARM_S3_LOGIN_CHALLENGE_MAX=10
+GFARM_S3_LOGIN_CHALLENGE_INTERVAL=5
 
 GFARM_S3_WAIT_COUNT=5
 GFARM_S3_KILL_COUNT=5

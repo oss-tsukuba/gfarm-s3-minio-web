@@ -53,8 +53,7 @@ def cmd(action, username, passwd, authenticated = None, remote_addr = None, lang
     try:
         result = json.loads(stdout.decode().strip())
     except Exception as e:
-        #logger.error(f"@@@ CMD: JSON PARSE ERROR: [{stdout}]")
-        logger.error(f"cmd: ERROR4: {e}")
+        logger.error(f"cmd: ERROR 4 (parse JSON): {e} [{stdout}]")
         return {"status": "ERROR 4", "reason": f"{e}"}
     if "expiration_date" in result.keys():
         result["expiration_date_calendar_datetime"] = myctime(result["expiration_date"], lang)
