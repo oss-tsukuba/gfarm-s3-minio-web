@@ -3,15 +3,28 @@
 set -eu
 #set -x
 
-#TODO ?
-#CONF_DEFAULT=@sysconfdir@/gfarm-s3-default.conf
-#CONF=@sysconfdir@/gfarm-s3.conf
-
 CONF_DEFAULT=@sysconfdir@/gfarm-s3.conf
 CONF=@sysconfdir@/gfarm-s3-overwrite.conf
 
-confprint()
+CACHE="/tmp/gfarm-s3.conf.cache.${UID}"
+
+OPT_JSON="${1:-}"
+
+if [ "${OPT_JSON}" = "-json" ]; then
+    JSON=1
+    CACHE="${CACHE}.json"
+else
+    JSON=0
+fi
+
+if [ "$CACHE" -nt "$CONF_DEFAULT" -a "$CACHE" -nt "$CONF" ]; then
+    cat "$CACHE"
+    exit 0
+fi
+
+conf_filter()
 {
+    # ignore $(...) and `...`
     egrep "^[^\\s#=]+=[^=]*$" "${1}" \
     | egrep -v "\\$\\([^\\)]+\\)" \
     | egrep -v "\`[^\`]+\`)"
@@ -21,7 +34,7 @@ SAVE_IFS=$IFS
 IFS="
 "
 
-C1=$(confprint "${CONF_DEFAULT}")
+C1=$(conf_filter "${CONF_DEFAULT}")
 
 declare -A KEYS
 
@@ -30,18 +43,17 @@ for kv in $C1; do
     v=${kv#*=}
     KEYS[$k]=1  # exist
 
-    # evaluate
+    # evaluate per line
     eval $kv
 done
 
-C2=$(confprint "${CONF}")
-
+C2=$(conf_filter "${CONF}")
 
 for kv in $C2; do
     k=${kv%=*}
     v=${kv#*=}
     if [ "${KEYS[$k]:-}" = "1" ]; then
-        # overwrite
+        # overwrite only
         eval $kv
     fi
 done
@@ -74,8 +86,21 @@ to_sh()
     done
 }
 
-if [ "${1:-}" = "-json" ]; then
-    to_json
+save_tmp()
+{
+    FUNC="$1"
+
+    # use PID
+    CACHE_TMP="${CACHE}.tmp.${FUNC}.$$"
+    rm -f "${CACHE_TMP}"
+    touch "${CACHE_TMP}"
+    chmod 600 "${CACHE_TMP}"
+    ${FUNC} | tee "${CACHE_TMP}"
+    mv "${CACHE_TMP}" "${CACHE}"
+}
+
+if [ "${JSON}" -eq 1 ]; then
+    save_tmp to_json
 else
-    to_sh
+    save_tmp to_sh
 fi
