@@ -17,9 +17,15 @@ else
     JSON=0
 fi
 
-if [ "$CACHE" -nt "$CONF_DEFAULT" -a "$CACHE" -nt "$CONF" ]; then
-    cat "$CACHE"
-    exit 0
+UPDATE_CACHE=1
+
+if [ -f "$CACHE" ]; then
+    if [ ! -O "$CACHE" ]; then  # not own file
+        UPDATE_CACHE=0
+    elif [ "$CACHE" -nt "$CONF_DEFAULT" -a "$CACHE" -nt "$CONF" ]; then
+        cat "$CACHE"
+        exit 0
+    fi
 fi
 
 conf_filter()
@@ -86,21 +92,25 @@ to_sh()
     done
 }
 
-save_tmp()
+print_conf()
 {
     FUNC="$1"
 
-    # use PID
-    CACHE_TMP="${CACHE}.tmp.${FUNC}.$$"
-    rm -f "${CACHE_TMP}"
-    touch "${CACHE_TMP}"
-    chmod 600 "${CACHE_TMP}"
-    ${FUNC} | tee "${CACHE_TMP}"
-    mv "${CACHE_TMP}" "${CACHE}"
+    if  [ $UPDATE_CACHE -eq 1 ]; then
+        # use PID
+        CACHE_TMP="${CACHE}.tmp.${FUNC}.$$"
+        rm -f "${CACHE_TMP}"
+        touch "${CACHE_TMP}"
+        chmod 600 "${CACHE_TMP}"
+        ${FUNC} | tee "${CACHE_TMP}"
+        mv "${CACHE_TMP}" "${CACHE}"
+    else
+        ${FUNC}
+    fi
 }
 
 if [ "${JSON}" -eq 1 ]; then
-    save_tmp to_json
+    print_conf to_json
 else
-    save_tmp to_sh
+    print_conf to_sh
 fi
