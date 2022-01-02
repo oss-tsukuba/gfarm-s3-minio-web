@@ -13,7 +13,7 @@ ExecStart = @prefix@/bin/gfarm-s3-router
 #ExecReload = /bin/kill -s HUP $MAINPID
 #KillMode = mixed
 #TimeoutStopSec = 5
-PrivateTmp = true
+PrivateTmp = false
 
 [Install]
 WantedBy = multi-user.target
