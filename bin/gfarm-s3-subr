@@ -88,7 +88,7 @@ _log_common() {
     fi
 
     if [ ${SYSLOG} -eq 1 ]; then
-        logger -i -t $TAG -p "${GFARM_S3_LOG_FACIRITY}.${LEVEL}" \
+        logger -i -t $TAG -p "${GFARM_S3_LOG_FACILITY}.${LEVEL}" \
                "${LEVEL_UPPER}: ${MSG}"
     fi
 }
@@ -567,12 +567,12 @@ mysudo() {
 check_nopasswd() {
 	local local_user="$1"
 	echo dummy1 |
-	mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 1>&2
+	mysudo "$local_user" $GRID_PROXY_INIT -pwstdin >/dev/null 2>&1
 	if [ $? != 0 ]; then
 		return 1
 	fi
 	echo dummy2 |
-	mysudo "$local_user" $GRID_PROXY_INIT -pwstdin 1>&2
+	mysudo "$local_user" $GRID_PROXY_INIT -pwstdin >/dev/null 2>&1
 	if [ $? != 0 ]; then
 		return 1
 	fi
@@ -613,7 +613,7 @@ challenge_auth() {
 			echo myproxy-logon  # result
 			return 0
 		else
-			echo FAIL $MYPROXY_LOGON 1>&2
+			#echo FAIL $MYPROXY_LOGON 1>&2
 			log_debug "myproxy-logon: $local_user FAIL $res"
 		fi
 		;;
@@ -623,7 +623,7 @@ challenge_auth() {
 	case $GFARMS3_LOGIN_METHOD in
 	*grid-proxy-init*)
 		if check_nopasswd "$local_user"; then
-			echo SKIP $GRID_PROXY_INIT 1>&2
+			#echo SKIP $GRID_PROXY_INIT 1>&2
 			log_debug "grid-proxy-init: $local_user SKIP"
 		else
 			res=$(echo "$user_provided_key" |
@@ -661,8 +661,7 @@ challenge_auth() {
 		;;
 	esac
 
-        # Error
-	sleep 5
+	# Failed
 	return 1
 }
 
@@ -728,14 +727,16 @@ stop_per_user_server() {
 	## assert $user == $local_username
 	local access_key=$(get_access_key "$usermap_entry")
 	local status=0
-	if ! local port=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --stop --access_key "$access_key"); then
+	if local port=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --stop --access_key "$access_key"); then
+		log_info "MinIO stopped (for $user)"
+	else
 		echo "Stop MinIO failed" 1>&2
 		status=1
 		## FALLTHRU
 	fi
-### TODO (low priority):
-### We should update gfarm_s3_user_port_map here:
-### erase pid from entry (set to empty), but keep username and port number
+	### NOTE:
+	### We do not update gfarm_s3_user_port_map here.
+	### username and port number keep.
 	return $status
 }
 
@@ -1164,7 +1165,6 @@ stop_server() {
 		return 1
 	fi
 	try_stop_a_server "$port" "$pid"
-        log_info "MinIO stopped (for $USER)"
 	save_started_status 0 "$USER"
 }
 

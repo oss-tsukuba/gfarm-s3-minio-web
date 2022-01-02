@@ -1,8 +1,5 @@
 import json
 import locale
-#import logging
-from logging import getLogger, DEBUG, INFO, WARNING
-from logging.handlers import SysLogHandler
 import os
 from subprocess import Popen, PIPE
 import time
@@ -12,22 +9,13 @@ from django.utils.translation import gettext as _
 
 from contextlib import contextmanager
 
-#logger = logging.getLogger(__name__)
-#logger.setLevel(logging.DEBUG)
-#ch = logging.StreamHandler()
-#ch.setLevel(logging.DEBUG)
-#formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-#ch.setFormatter(formatter)
-#logger.addHandler(ch)
+from gfarms3 import conf
 
-handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
-logger = getLogger(__name__)
-logger.addHandler(handler)
-logger.setLevel(DEBUG)
+logger = conf.get_logger(__name__)
 
 def gfarm_s3_login(action, username, passwd, stdin = None, authenticated = None, bucket = None, remote_addr = None):
     #logger.debug(f"gfarm_s3_login")
-    GFARM_S3_BIN = "/usr/local/bin"
+    GFARM_S3_BIN = conf.get_str("GFARM_S3_BIN")
     args = [action, username, passwd]
     if authenticated is not None:
         args = ["--authenticated", authenticated] + args

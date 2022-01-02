@@ -1,6 +1,4 @@
 #from http.client import HTTPResponse
-from logging import getLogger, DEBUG, INFO, WARNING
-from logging.handlers import SysLogHandler
 import threading
 import os
 #import socket
@@ -11,22 +9,20 @@ from urllib.error import HTTPError
 
 from gfarms3 import conf
 
-handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
-logger = getLogger(__name__)
-logger.addHandler(handler)
-logger.setLevel(DEBUG)
-
+logger = conf.get_logger(__name__)
 
 def app(environ, start_response):
     (method, path, request_hdr, input, file_wrapper) = accept_request(environ)
-    logger.info(f"accept_request: method = {method}, path = {path}, request_hdr = {request_hdr}")
 
-    destURL = getDestURL(request_hdr)
+    destURL, AccessKeyID = getDestURL(request_hdr)
     if isinstance(destURL, int):
 #        logger.debug(f"@@@ {myformat()} [1] START_RESPONSE {destURL}")
         start_response(f"{destURL}", [])
         return []
     url = destURL + path
+
+    logger.info(f"request: AccessKeyID = {AccessKeyID}, method = {method}, path = {path}")
+    logger.debug(f"request_hdr = {request_hdr}")
 
     #logger.debug(f"@@@ METHOD {method}")
     #logger.debug(f"@@@ {method} {url} {input}")
@@ -180,7 +176,7 @@ def getDestURL(request_hdr):
     if AccessKeyID is None:
         return 401
     #logger.debug(f"@@@ getDestURL: AccessKeyID = {AccessKeyID}")
-    return lookupRoutingTable(AccessKeyID)
+    return lookupRoutingTable(AccessKeyID), AccessKeyID
 
 
 def getS3AccessKeyID(Authorization):

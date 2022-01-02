@@ -47,3 +47,24 @@ def get_list(key):
 def get_bool(key):
     c = get_gfarm_s3_conf()
     return to_bool(c[key])
+
+from logging import getLogger, Formatter, StreamHandler
+from logging.handlers import SysLogHandler
+
+def get_logger(name):
+    level_str = get_str("GFARM_S3_LOG_LEVEL")
+    facility_str = get_str("GFARM_S3_LOG_FACILITY")
+    output_str = get_str("GFARM_S3_LOG_OUTPUT")
+
+    logger = getLogger(name)
+    logger.setLevel(level_str.upper())
+    if "syslog" in output_str:
+        handler = SysLogHandler(address="/dev/log")
+        handler.encodePriority(facility_str, level_str)
+        logger.addHandler(handler)
+    if "stderr" in output_str:
+        handler = StreamHandler()
+        formatter = Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    return logger

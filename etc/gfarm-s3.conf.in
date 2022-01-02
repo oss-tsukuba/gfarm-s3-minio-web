@@ -1,7 +1,7 @@
 # logging (see man logger)
 GFARM_S3_LOG_LEVEL=info
 #GFARM_S3_LOG_LEVEL=debug
-GFARM_S3_LOG_FACIRITY=local7
+GFARM_S3_LOG_FACILITY=local7
 #GFARM_S3_LOG_OUTPUT=syslog,stderr
 #GFARM_S3_LOG_OUTPUT=stderr
 GFARM_S3_LOG_OUTPUT=syslog

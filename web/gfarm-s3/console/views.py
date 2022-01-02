@@ -3,23 +3,12 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 import time
-#import logging
-from logging import getLogger, DEBUG, INFO, WARNING
-from logging.handlers import SysLogHandler
+
+from gfarms3 import conf
 from . import cmd
 
-#logger = logging.getLogger(__name__)
-#logger.setLevel(logging.DEBUG)
-#ch = logging.StreamHandler()
-#ch.setLevel(logging.DEBUG)
-#formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-#ch.setFormatter(formatter)
-#logger.addHandler(ch)
+logger = conf.get_logger(__name__)
 
-handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL7)
-logger = getLogger(__name__)
-logger.addHandler(handler)
-logger.setLevel(DEBUG)
 
 ### session["global_username"]:
 ###   "non-empty"  login succeeded
@@ -56,7 +45,7 @@ def login(request):
         passwd = request.POST["passwd"]
         http_x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR", None)
         if http_x_forwarded_for is not None:
-            remote_addr = http_x_forwarded_for 
+            remote_addr = http_x_forwarded_for
         else:
             remote_addr = request.META.get("REMOTE_ADDR", None)
         ### challenge authenticateion
