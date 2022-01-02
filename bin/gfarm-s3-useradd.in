@@ -1,12 +1,12 @@
-#! /bin/sh
+#! /bin/bash
 
 export LANG=C
 export LC_CTYPE=C
 export LC_COLLATE=C
 
-prefix=@prefix@
-. @sysconfdir@/gfarm-s3.conf
-. $GFARM_S3_LIB/gfarm-s3-subr
+D=$(dirname $0)
+eval $(${D}/gfarm-s3-readconf)
+source $GFARM_S3_LIB/gfarm-s3-subr
 
 USAGE="usage: $0 global-username local-username [access_key_id]"
 

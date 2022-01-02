@@ -16,7 +16,9 @@ scripts= \
 	gfarm-s3-sharedsecret-password \
 	gfarm-s3-update-reverse-proxy \
 	gfarm-s3-useradd \
-	gfarm-s3-viusermap
+	gfarm-s3-viusermap \
+	gfarm-s3-webui \
+	gfarm-s3-router
 
 generated_scripts= \
 	gfarm-s3-configtest \
@@ -30,15 +32,10 @@ generated_scripts= \
 	gfarm-s3-useradd \
 	gfarm-s3-viusermap
 
-libexec_files = \
-	gfarm-s3-webui \
-	gfarm-s3-router
-
 all:
 
 install:
-	for i in $(scripts); do $(INSTALL) -D -c -m 555 $$i $(bindir)/$$i; done
-	for i in $(libexec_files); do $(INSTALL) -D -c -m 555 $$i $(libexecdir)/$$i; done
+	for i in $(scripts); do $(INSTALL) -D -c -m 755 $$i $(bindir)/$$i; done
 	$(INSTALL) -D -c -m 644 gfarm-s3-subr $(libdir)/gfarm-s3-subr
 
 clean:

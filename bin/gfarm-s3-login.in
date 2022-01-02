@@ -7,10 +7,9 @@ export LANG=C
 export LC_CTYPE=C
 export LC_COLLATE=C
 
-prefix=@prefix@
-. @sysconfdir@/gfarm-s3.conf
-. $GFARM_S3_LIB/gfarm-s3-subr
-
+D=$(dirname $0)
+eval $(${D}/gfarm-s3-readconf)
+source $GFARM_S3_LIB/gfarm-s3-subr
 
 USAGE="\
 usage: $0 [options...] action global-username password
@@ -54,6 +53,8 @@ case "$action" in start|stop|restart|resume|status|keygen|info|gfuser|gfgroup|gf
 *) echo $USAGE 1>&2; exit 1;;
 esac
 
+status=failure
+
 usermap_entry=$(lookup_usermap_by_global_username "$global_username" "$GFARMS3_LOCAL_USER_MAP")
 if [ -z "$usermap_entry" ]; then
 	logger -i -p local7.debug -t gfarm-s3-login "user not found in $GFARMS3_LOCAL_USER_MAP: $global_username $remote_addr"
@@ -67,7 +68,6 @@ EOF
 fi
 local_username=$(get_local_username "$usermap_entry")
 
-status=failure
 if [ -n "$authenticated" ]; then
 	authenticated_method="$authenticated"
 elif ! authenticated_method=$(challenge_auth "$global_username" "$user_password" "$local_username"); then

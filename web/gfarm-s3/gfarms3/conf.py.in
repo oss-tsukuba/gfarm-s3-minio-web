@@ -11,7 +11,6 @@ gfarm_s3_readconf = prefix + '/bin/gfarm-s3-readconf'
 django_secret_key_file = sysconfdir + '/django_secret_key.txt'
 
 def load_gfarm_s3_conf():
-    #TODO  cmd = ['bash', gfarm_s3_readconf, "-json"]
     cmd = [gfarm_s3_readconf, "-json"]
     with Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE) as p:
         (out, err) = p.communicate()

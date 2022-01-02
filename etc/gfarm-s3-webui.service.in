@@ -8,7 +8,7 @@ User = @with_gfarm_s3_user@
 Group = @with_gfarm_s3_group@
 RuntimeDirectory = gfarm-s3-webui
 WorkingDirectory = /
-ExecStart = @prefix@/libexec/gfarm-s3-webui
+ExecStart = @prefix@/bin/gfarm-s3-webui
 
 #ExecReload = /bin/kill -s HUP $MAINPID
 #KillMode = mixed
