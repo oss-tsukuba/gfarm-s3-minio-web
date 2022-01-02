@@ -16,7 +16,7 @@
         <div></div>
     </div>
 </div>
-<form action="{% url 'aclfile' %}?bucket={{ bucket }}" method="post">
+<form action="{% url 'aclfile' %}?bucket={{ bucket }}" method="post" class="submit-once">
     {% csrf_token %}
     <table class="table-responsive table-striped border-0">
         <thead>

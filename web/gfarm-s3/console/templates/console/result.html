@@ -16,8 +16,7 @@
         <tr>
             <td style="width:100%" class="bg-light">{% trans 'CurrentStatus' %}
                 <div style='float: right; text-align: right'>
-                    <form action="{% if not s3sstatus %}{% url 'starts3' %}{% else %}{% url 'stops3' %}{% endif %}"
-                        method="post" class="form-inline">
+                    <form action="{% if not s3sstatus %}{% url 'starts3' %}{% else %}{% url 'stops3' %}{% endif %}" method="post" class="form-inline submit-once">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-outline-primary h-75 form-control" value="Launch">
                             {% if not s3sstatus %}
@@ -61,7 +60,7 @@
         <tr>
             <td>{% trans 'secretKey' %}
                 <div style='float: right; text-align: right'>
-                    <form action="{% url 'chgkey' %}" method="post" class="form-inline">
+                    <form action="{% url 'chgkey' %}" method="post" class="form-inline submit-confirm">
                         {% csrf_token %}
                         <a class="btn btn-outline-primary h-75" data-bs-toggle="collapse" href="#collapseSecretKey"
                             role="button" aria-expanded="false" aria-controls="collapseSecretKey">
@@ -105,7 +104,7 @@
             <td>{% trans 'expirationDate' %}
                 {% if authenticated_method != "gfkey" %}
                 <div style='float: right; text-align: right'>
-                    <form action="{% url 'reauth' %}" method="post" class="form-inline">
+                    <form action="{% url 'reauth' %}" method="post" class="form-inline submit-once">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-outline-primary h-75" value="Launch">
                             {% trans 'updateCertificate' %}
