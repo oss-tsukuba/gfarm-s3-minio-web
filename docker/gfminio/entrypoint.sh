@@ -199,7 +199,7 @@ EOF
 
     ### resume minio
     sudo -u "${GFARM_S3_USERNAME}" gfarm-s3-login --quiet --authenticated "DUMMY_AUTH_METHOD" resume "${GFARM_USERNAME}" "DUMMY_PASSWORD" > /dev/null &
-    ##### backgroud
+    ##### backgroud (may fail, ignore)
 done
 ### wait for resuming minio
 wait
