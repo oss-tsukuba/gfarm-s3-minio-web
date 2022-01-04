@@ -66,6 +66,14 @@ RUN mkdir -p ${WORKDIR} \
 
 RUN python3 -m pip install 'Django<=4' gunicorn boto3
 
+RUN AWSCLI_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+    && AWSCLI_ZIP=awscliv2.zip \
+    && apt-get install -y unzip \
+    && curl ${AWSCLI_URL} -o ${AWSCLI_ZIP} \
+    && unzip -q -o ${AWSCLI_ZIP} \
+    && ./aws/install --update \
+    && /usr/local/bin/aws --version
+
 COPY ${BASEDIR}/nginx-gfarm-s3.conf /etc/nginx/sites-available/gfarm
 RUN ln -s /etc/nginx/sites-available/gfarm /etc/nginx/sites-enabled/gfarm \
     && rm -f /etc/nginx/sites-enabled/default
