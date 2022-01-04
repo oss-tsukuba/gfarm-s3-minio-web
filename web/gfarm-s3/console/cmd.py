@@ -70,7 +70,7 @@ def get_bucket_list(username):
     except Exception as e:
         logger.error(f"get_bucket_list: exception: {e}")
         return None
-    retcode, reason = _communicate(p, "get_bucket_list")
+    retcode, stdout = _communicate(p, "get_bucket_list")
     if retcode != 0:
         return None
     return split_lines(stdout.decode())
