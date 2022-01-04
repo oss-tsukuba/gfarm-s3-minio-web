@@ -58,6 +58,7 @@ def accept_request(environ):
 #    logger.debug(f"@@@ ACCEPT {myformat()}")
     method = environ.get("REQUEST_METHOD")
     path = environ.get("RAW_URI")
+    # convert HTTP_ABC -> ABC
     request_hdr = [(h[5:].replace('_', '-'), environ.get(h))
                       for h in environ if h.startswith("HTTP_")]
 ###    logger.debug(f"@@@ ^ {method} {check_xAccelBuffering(request_hdr)} {path}")
@@ -69,6 +70,11 @@ def accept_request(environ):
     if content_length is not None:
         request_hdr["CONTENT-LENGTH"] = content_length
         #logger.debug(f"@@@ +++ CONTENT-LENGTH: {content_length}")
+
+    content_type = environ.get("CONTENT_TYPE")
+    if content_type is not None:
+        request_hdr["CONTENT-TYPE"] = content_type
+        #logger.debug(f"@@@ +++ CONTENT-TYPE: {content_type}")
 
     input = environ["wsgi.input"]
     file_wrapper = environ.get("wsgi.file_wrapper", None)
