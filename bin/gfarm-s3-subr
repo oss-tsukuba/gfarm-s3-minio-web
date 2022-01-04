@@ -864,7 +864,7 @@ generate_apache_conf() {
 		-F : \
 		'! /^#/ {
 			printf("RewriteCond \"%%{HTTP:Authorization}\" \"Credential=%s/\"\n", $1)
-			printf("RewriteRule \"^/(.*)$\" \"http://${GFARMS3_ADDR}:%s/$1\" [P]\n", $2)
+			printf("RewriteRule \"^/(.*)$\" \"http://127.0.0.1:%s/$1\" [P]\n", $2)
 		}'
 	rm $local_user_map_tmp $user_port_map_tmp
 }
@@ -879,7 +879,7 @@ generate_reverse_proxy_routes() {
 		$local_user_map_tmp $user_port_map_tmp | awk \
 		-F : \
 		'! /^#/ {
-			printf("%s\thttp://${GFARMS3_ADDR}:%s\n", $1, $2)
+			printf("%s\thttp://127.0.0.1:%s\n", $1, $2)
 		}'
 	rm $local_user_map_tmp $user_port_map_tmp
 }
