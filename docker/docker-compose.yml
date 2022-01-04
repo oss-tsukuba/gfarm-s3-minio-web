@@ -61,6 +61,20 @@ services:
       - 61080:80
       - 61443:443
 
+  copy_home:
+    hostname: copy_home
+    build:
+      context: ./copy_home/
+      args:
+        - http_proxy=${http_proxy:-}
+        - https_proxy=${https_proxy:-}
+    volumes:
+      - /home:/host_home:ro
+      - copy_home:/copy_home:rw
+      - ./mnt:/mnt:rw
+
 volumes:
+  copy_home:
+  # TOOD s3secret -> copy_home
   s3secret:
   build_cache:

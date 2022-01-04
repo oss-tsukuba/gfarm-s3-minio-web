@@ -49,6 +49,9 @@ restart-withlog:
 shell:
 	$(COMPOSE) exec gfminio bash
 
+shell-copy_home:
+	$(COMPOSE) exec copy_home bash
+
 logs:
 	$(COMPOSE) logs
 
