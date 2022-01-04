@@ -44,9 +44,9 @@ ALLOWED_HOSTS=${ALLOWED_HOSTS:-${SERVER_NAME}}
 CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-${SERVER_URL}}
 
 HOME_BASE=/home
-HOST_HOME_BASE=/host_home
 USERMAP=/gfarm-s3-usermap.conf
-SECRET_VOLUME=/s3secret
+
+COPY_HOME_INITIALIZED_FILE="${HOME_BASE}/_copy_home_initialized"
 
 #TODO gfarm branch
 GFARM_S3_MINIO_BRANCH=gfarmmerge
@@ -136,11 +136,20 @@ group_exist() {
     grep -q ":x:${gid}:" /etc/group
 }
 
-mksym() {
-    SRC="$1"
-    DST="$2"
-    [ -h "${DST}" ] || ln -s "${SRC}" "${DST}"
+# mksym() {
+#     SRC="$1"
+#     DST="$2"
+#     [ -h "${DST}" ] || ln -s "${SRC}" "${DST}"
+# }
+
+wait_for_copy_home() {
+    while [ ! -e $COPY_HOME_INITIALIZED_FILE ]; do
+        echo "wait for initializing copy_home container"
+        sleep 1
+    done
 }
+
+wait_for_copy_home
 
 SAVE_IFS="$IFS"
 IFS=$'\n'
@@ -152,60 +161,26 @@ for line in $(cat "${USERMAP}"); do
     [ -z "${GFARM_USERNAME}" ] && continue
     [ "${GFARM_USERNAME:0:1}" = "#" ] && continue
 
-    HOST_HOMEDIR="${HOST_HOME_BASE}/${LOCAL_USERNAME}"
-    if [ ! -d "${HOST_HOMEDIR}" ]; then
-       echo "WARNING: ${HOST_HOMEDIR} not found" >&2
-       continue
-    fi
-
-    USER_UID=$(stat -c %u "${HOST_HOMEDIR}")
-    USER_GID=$(stat -c %g "${HOST_HOMEDIR}")
+    HOMEDIR="${HOME_BASE}/${LOCAL_USERNAME}"
+    USER_UID=$(stat -c %u "${HOMEDIR}")
+    USER_GID=$(stat -c %g "${HOMEDIR}")
     GROUP_NAME="gid${USER_GID}"
 
-    HOMEDIR="${HOME_BASE}/${LOCAL_USERNAME}"
-    if [ ! -d "${HOMEDIR}" ]; then
-        if group_exist "${USER_GID}"; then
-            :
-        else
-            groupadd -g ${USER_GID} "${GROUP_NAME}"
-        fi
-        useradd -m -s /bin/bash -g ${USER_GID} -b "${HOME_BASE}" -u "${USER_UID}" "${LOCAL_USERNAME}"
-        echo "INFO: create ${HOMEDIR}" >&2
-    fi
-    usermod -a -G "${GFARM_S3_GROUPNAME}" "${LOCAL_USERNAME}"
-
-    ### .globus
-    DOTGLOBUS="${HOMEDIR}/.globus"
-    HOST_DOTGLOBUS="${HOST_HOMEDIR}/.globus"
-    mksym "${HOST_DOTGLOBUS}" "${DOTGLOBUS}"
-
-    ### .gfarm_shared_key
-    GFARM_SHARED_KEY="${HOMEDIR}/.gfarm_shared_key"
-    HOST_GFARM_SHARED_KEY="${HOST_HOMEDIR}/.gfarm_shared_key"
-    # XXX TODO? cannot use .gfarm_shared_key on read only file system
-    ### mksym "${HOST_GFARM_SHARED_KEY}" "${GFARM_SHARED_KEY}"
-    if [ -f "${HOST_GFARM_SHARED_KEY}" ]; then
-        cp -f "${HOST_GFARM_SHARED_KEY}" "${GFARM_SHARED_KEY}"
-        # XXX must be writable
-        chmod 700 "${GFARM_SHARED_KEY}"
-        chown "${LOCAL_USERNAME}":"${USER_GID}" "${GFARM_SHARED_KEY}"
+    if group_exist "${USER_GID}"; then
+        :
+    else
+        groupadd -g "${USER_GID}" "${GROUP_NAME}"
     fi
 
-    ### .gfarm2rc
-    GFARM2RC="${HOMEDIR}/.gfarm2rc"
-    HOST_GFARM2RC="${HOST_HOMEDIR}/.gfarm2rc"
-    mksym "${HOST_GFARM2RC}" "${GFARM2RC}"
+    if id -u "${LOCAL_USERNAME}" > /dev/null; then
+        :
+    else
+        useradd -m -s /bin/bash -g "${USER_GID}" -b "${HOME_BASE}" \
+                -u "${USER_UID}" "${LOCAL_USERNAME}"
+        usermod -a -G "${GFARM_S3_GROUPNAME}" "${LOCAL_USERNAME}"
+    fi
 
-    ### .gfarm-s3/
-    SECRET_DIR="${HOMEDIR}/.gfarm-s3"
-    SECRET_DIR_VOLUME="${SECRET_VOLUME}/${LOCAL_USERNAME}"
-    mkdir -p "${SECRET_DIR_VOLUME}"
-    chmod 700 "${SECRET_DIR_VOLUME}"
-    [ -d "${SECRET_DIR_VOLUME}" ] || echo "WARNING: ${SECRET_DIR_VOLUME} is not a directory"
-    chown "${LOCAL_USERNAME}":root "${SECRET_DIR_VOLUME}"
-    mksym "${SECRET_DIR_VOLUME}" "${SECRET_DIR}"
-
-    ### create myproxy-logon script
+    ### create myproxy-logon script for the user
     if [ -n "${MYPROXY_SERVER}" ]; then
         MYPROXY_LOGON="${HOMEDIR}/myproxy-logon"
         cat <<EOF > "${MYPROXY_LOGON}"

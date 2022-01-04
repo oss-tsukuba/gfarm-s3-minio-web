@@ -39,8 +39,7 @@ services:
       #TODO supervisord
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
-      - /home:/host_home:ro
-      - s3secret:/s3secret:rw
+      - copy_home:/home:rw
       - build_cache:/build_cache:rw
 
       - ./mnt:/mnt:rw
@@ -75,6 +74,4 @@ services:
 
 volumes:
   copy_home:
-  # TOOD s3secret -> copy_home
-  s3secret:
   build_cache:

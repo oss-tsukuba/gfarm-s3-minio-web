@@ -2,29 +2,48 @@
 
 set -eu -o pipefail
 #set -x
+DEBUG=0
+
+# usage:
+# inotify_copy.sh <timeout>
+
+### interval to add new directories and synchronize all
+### (default 30min.)
+timeout=${1:-1800}
 
 src="/host_home"
 dst="/copy_home"
 
-# under ${src}
-### directory: .../
+INITIALIZED_FILE="$dst/_copy_home_initialized"
+
+rm -f "$INITIALIZED_FILE"
+
+### under ${src}
+# directory is: .../
+# copy_targets is also used in [[ ... =~ $patt ]]
 copy_targets=(
     /*/.gfarm_shared_key
     /*/.gfarm2rc
     /*/.globus/
 )
 
-### interval to add new directories and synchronize all
-### (default 30min.)
-timeout=1800
+debug() {
+    [ $DEBUG -eq 1 ] && echo "DEBUG: $1"
+}
 
 watch_list=$(mktemp)
 
-watch_list_create() {
-    truncate --size 0 "$watch_list"
+watch_list_init() {
+    #truncate --size 0 "$watch_list"
+    # watch directly under $src and $src/*
+    echo "${src}/" > "$watch_list"
+    # Do not use double quote
+    for p in $(find ${src}/ -maxdepth 1); do
+        echo "${p}" >> "$watch_list"
+    done
     for L in "${copy_targets[@]}"; do
         # Do not use double quote
-        for p in $(ls -1 -d ${src}${L} 2> /dev/null || true); do
+        for p in $(find ${src}${L} 2> /dev/null || true); do
             echo "${p}" >> "$watch_list"
         done
     done
@@ -35,6 +54,7 @@ opt_events=(
     -e MODIFY
     -e MOVED_TO
     -e DELETE
+    -e ATTRIB
 )
 
 sync_list=$(mktemp)
@@ -49,7 +69,8 @@ copy_all() {
         echo "${L}" >> "$sync_list"
     done
     #cat $sync_list  # debug
-    rsync -q -amv --include-from="$sync_list" --exclude='*' "$src/" "$dst/"
+    rsync -q -amv --delete \
+          --include-from="$sync_list" --exclude='*' "$src/" "$dst/"
 }
 
 stop() {
@@ -60,19 +81,22 @@ stop() {
 
 trap stop EXIT 1 2 15
 
-watch_list_create
+watch_list_init
 copy_all
+
+touch "$INITIALIZED_FILE"
 
 FORMAT='%T	%w	%e	%Xe	%f'
 TIME_FORMAT='%F-%T'
 
 while true; do
     # new files may be created
-    watch_list_create
+    watch_list_init
     # cat "$watch_list" # debug
     SAVE_IFS=$IFS
     IFS='	'
-    if inotifywait --quiet --recursive \
+    # Do not use --recursive
+    if inotifywait --quiet \
         "${opt_events[@]}" \
         --timeout $timeout \
         --timefmt "$TIME_FORMAT" --format "$FORMAT" \
@@ -83,12 +107,39 @@ while true; do
             # echo "$ev1"
             # echo "$ev2"
             # echo "$event_fname"
-            echo "[$t] $ev1: {$watched_path} {$event_fname}"
+
+            debug "[$t] $ev1: {$watched_path} {$event_fname}"
+            found=0
+            # find home-directories and copy_targets
+            for patt in "${copy_targets[@]}" "${src}/[^/]+/?$"; do
+                last_char=${patt: -1}
+                if [ $last_char != "/" -a $last_char != "$" ]; then
+                    # is file
+                    patt="${patt}$"
+                fi
+                debug "check: ${watched_path}${event_fname} =~ $patt"
+                if [[ "${watched_path}${event_fname}" =~ $patt ]]; then
+                    found=1
+                    break
+                fi
+            done
+            if [ $found -eq 0 ]; then
+                continue
+            fi
+            echo "copy_all: $ev1: {$watched_path} {$event_fname}"
             copy_all
+            case "$ev1" in
+            MODIFY*|ATTRIB*)
+                ;;
+            *)
+                debug "A file may be created or deleted. re-set inotifywait"
+                break
+                ;;
+            esac
         done
     then
         :
-    else # timeout
+    else # timeout or break
         copy_all
     fi
     IFS=$SAVE_IFS
