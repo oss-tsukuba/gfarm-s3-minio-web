@@ -6,8 +6,7 @@ ARG BASEDIR=./docker/gfminio
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get -y install \
-    systemd \
-    systemd-sysv \
+    supervisor \
     sudo \
     rsyslog \
     build-essential \
@@ -73,14 +72,11 @@ RUN ln -s /etc/nginx/sites-available/gfarm /etc/nginx/sites-enabled/gfarm \
 RUN mkdir -p ${HTTPD_DOCUMENT_ROOT}
 COPY ${BASEDIR}/index.html ${HTTPD_DOCUMENT_ROOT}/index.html
 
-# ARG GFARM_S3_MINIO_WEB_BRANCH=router
-# RUN cd ${WORKDIR} \
-#    && git clone https://github.com/oss-tsukuba/gfarm-s3-minio-web.git \
-#    && git checkout ${GFARM_S3_MINIO_WEB_BRANCH}
 COPY ./ ${WORKDIR}/gfarm-s3-minio-web
 
 COPY ${BASEDIR}/entrypoint.sh /entrypoint.sh
+COPY ${BASEDIR}/supervisord.conf /supervisord.conf
 
 ENV WORKDIR=${WORKDIR}
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/sbin/init"]
+CMD ["supervisord", "-c", "/supervisord.conf"]

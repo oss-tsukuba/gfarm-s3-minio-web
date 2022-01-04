@@ -25,20 +25,15 @@ services:
       # empty means using SERVER_URL
       - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS-}
 
-      ### TODO MYPROXY_SERVERS=
       - MYPROXY_SERVER=
       - GFARM_S3_BUILD_DIR=/build_cache
       - GFARM_S3_SHARED_DIR=/share
       - GFARM_S3_USERNAME=_gfarm_s3
       - GFARM_S3_GROUPNAME=_gfarm_s3
-      ### TODO GFARM_S3_LOCALTMP
       - CACHE_DIR=/var/cache/gfarm-s3
       - CACHE_SIZE=1024
 
     volumes:
-      #TODO supervisord
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
       - copy_home:/home:rw
       - build_cache:/build_cache:rw
 
@@ -48,13 +43,6 @@ services:
       - ./certificates:/etc/grid-security/certificates:ro
       - ./gfarm-s3-usermap.conf:/gfarm-s3-usermap.conf:ro
 
-    security_opt:
-      - seccomp:unconfined
-      - apparmor:unconfined
-    cap_add:
-      - SYS_ADMIN
-    devices:
-      - /dev/fuse:/dev/fuse
     privileged: false
     ports:
       - 61080:80

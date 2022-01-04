@@ -44,7 +44,7 @@ restart:
 
 restart-withlog:
 	$(MAKE) restart
-	$(COMPOSE) logs --follow
+	$(COMPOSE) logs -t --follow
 
 shell:
 	$(COMPOSE) exec gfminio bash
@@ -53,7 +53,7 @@ shell-copy_home:
 	$(COMPOSE) exec copy_home bash
 
 logs:
-	$(COMPOSE) logs
+	$(COMPOSE) logs -t
 
 logs-follow:
-	$(COMPOSE) logs --follow
+	$(COMPOSE) logs -t --follow

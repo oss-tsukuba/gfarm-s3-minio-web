@@ -26,29 +26,34 @@ def gfarm_s3_login(action, username, passwd, stdin = None, authenticated = None,
     gfarm_s3_login_bin = os.path.join(GFARM_S3_BIN, "gfarm-s3-login")
     return Popen([gfarm_s3_login_bin] + args, stdin = stdin, stdout = PIPE, stderr = PIPE, env = {})
 
+def _communicate(p, name):
+    try:
+        stdout, stderr = p.communicate()
+        p.wait()
+        if stderr:
+            stderr = stderr.decode()
+            if p.returncode == 0:
+                for l in stderr.splitlines():
+                    logger.info(f"{l}")
+            else:
+                for l in stderr.splitlines():
+                    logger.error(f"{l}")
+        return p.returncode, stdout
+    except Exception as e:
+        logger.error(f"{name}: {e}")
+        return -1, f"{e}"
+
 def cmd(action, username, passwd, authenticated = None, remote_addr = None, lang = None):
-    #logger.error(f"@@@ CMD: START")
     try:
         p = gfarm_s3_login(action, username, passwd, authenticated = authenticated, remote_addr = remote_addr)
     except Exception as e:
-        #logger.debug("ERROR 1")
         logger.error(f"cmd: ERROR 1: {e}")
         return {"status": "ERROR 1", "reason": "Popen failed"}
-    try:
-        stdout, stderr = p.communicate()
-        #ret = p.wait()
-        p.wait()
-        if stderr != b"":
-            for l in stderr.splitlines():
-                logger.error(f"{l}")
-    except Exception as e:
-        #logger.debug("ERROR 2 --- RETCODE = {} STDERR = None".format(p.returncode))
-        logger.error(f"cmd: ERROR 2: {e}")
-        return {"status": "ERROR 2", "reason": "retcode = {}".format(p.returncode)}
-    #if ret != 0:
-        #logger.debug("ERROR 3 --- RETVAL = {} --- STDERR = {}".format(ret, stderr.decode()))
-        #logger.error(f"@@@ CMD: ERROR3: ret={ret} stdout={stdout}")
-        #return {"status": "ERROR 3", "reason": stderr.decode()}
+
+    retcode, stdout = _communicate(p, f"cmd:{action}")
+    if retcode != 0:
+        return {"status": "ERROR 2",
+                "reason": f"{action}, retcode = {retcode}, {stdout}"}
 
     try:
         result = json.loads(stdout.decode().strip())
@@ -57,7 +62,6 @@ def cmd(action, username, passwd, authenticated = None, remote_addr = None, lang
         return {"status": "ERROR 4", "reason": f"{e}"}
     if "expiration_date" in result.keys():
         result["expiration_date_calendar_datetime"] = myctime(result["expiration_date"], lang)
-    #logger.error(f"@@@ CMD: OK: {result}")
     return result
 
 def get_bucket_list(username):
@@ -66,14 +70,8 @@ def get_bucket_list(username):
     except Exception as e:
         logger.error(f"get_bucket_list: exception: {e}")
         return None
-    try:
-        stdout, stderr = p.communicate()
-        p.wait()
-        if stderr != b"":
-            for l in stderr.splitlines():
-                logger.error(f"{l}")
-    except Exception as e:
-        logger.error(f"get_bucket_list: exception: {e}")
+    retcode, reason = _communicate(p, "get_bucket_list")
+    if retcode != 0:
         return None
     return split_lines(stdout.decode())
 
@@ -83,14 +81,8 @@ def get_bucket_acl(username, bucket):
     except Exception as e:
         logger.error(f"get_bucket_acl: exception: {e}")
         return None
-    try:
-        stdout, stderr = p.communicate()
-        p.wait()
-        if stderr != b"":
-            for l in stderr.splitlines():
-                logger.error(f"{l}")
-    except Exception as e:
-        logger.error(f"get_bucket_acl: exception: {e}")
+    retcode, stdout = _communicate(p, "get_bucket_acl")
+    if retcode != 0:
         return None
     #logger.debug("GET_BUCKET_ACL: [{}]".format(stdout.decode() + "\n"))
     return split_lines(stdout.decode())
@@ -158,16 +150,8 @@ def set_bucket_acl(username, bucket, acl_1, acl_2):
     except Exception as e:
         logger.error(f"set_bucket_acl: exception: {e}")
         return None
-    try:
-        stdout, stderr = p.communicate(input = acl.encode())
-### ignore error for now
-#       if p.wait() != 0:
-#           return stderr.decode()
-        if stderr != b"":
-            for l in stderr.splitlines():
-                logger.error(f"{l}")
-    except Exception as e:
-        logger.error(f"set_bucket_acl: exception: {e}")
+    retcode, stdout = _communicate(p, "set_bucket_acl")
+    if retcode != 0:
         return None
     return stdout.decode()
 
@@ -177,14 +161,8 @@ def get_group_list(username):
     except Exception as e:
         logger.error(f"get_group_list: exception: {e}")
         return None
-    try:
-        stdout, stderr = p.communicate()
-        p.wait()
-        if stderr != b"":
-            for l in stderr.splitlines():
-                logger.error(f"{l}")
-    except Exception as e:
-        logger.error(f"get_group_list: exception: {e}")
+    retcode, stdout = _communicate(p, "get_group_list")
+    if retcode != 0:
         return None
     return split_lines(stdout.decode())
 
@@ -194,14 +172,8 @@ def get_user_list(username):
     except Exception as e:
         logger.error(f"get_user_list: exception: {e}")
         return None
-    try:
-        stdout, stderr = p.communicate()
-        p.wait()
-        if stderr != b"":
-            for l in stderr.splitlines():
-                logger.error(f"{l}")
-    except Exception as e:
-        logger.error(f"get_user_list: exception: {e}")
+    retcode, stdout = _communicate(p, "get_user_list")
+    if retcode != 0:
         return None
     return split_lines(stdout.decode())
 

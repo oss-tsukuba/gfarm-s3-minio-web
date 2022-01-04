@@ -9,6 +9,8 @@ TIMEOUT=180
 #RELOAD="--reload"
 RELOAD=""
 
+export no_proxy="${GFARMS3_ADDR}"
+
 exec "${GUNICORN_DIR}/bin/gunicorn" \
      --error-logfile - \
      --capture-output \

@@ -104,6 +104,8 @@ install_gf_s3() {
     #TODO rename?: gfarm-s3.conf
     CONF_OVERWRITE=${SYSCONFDIR}/gfarm-s3-overwrite.conf
     cat <<EOF > "${CONF_OVERWRITE}"
+#GFARM_S3_LOG_OUTPUT=stderr
+
 DJANGO_DEBUG=${DJANGO_DEBUG}
 ALLOWED_HOSTS=${ALLOWED_HOSTS}
 
@@ -111,8 +113,10 @@ ALLOWED_HOSTS=${ALLOWED_HOSTS}
 CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
 EOF
 
-    systemctl enable gfarm-s3-webui.service \
-    && systemctl enable gfarm-s3-router.service
+    if which systemctl > /dev/null 2>&1; then
+        systemctl enable gfarm-s3-webui.service
+        systemctl enable gfarm-s3-router.service
+    fi
 }
 
 ### runs only once

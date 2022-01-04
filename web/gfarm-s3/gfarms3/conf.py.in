@@ -1,3 +1,5 @@
+import os
+import sys
 import json
 from subprocess import Popen, PIPE
 
@@ -58,13 +60,18 @@ def get_logger(name):
 
     logger = getLogger(name)
     logger.setLevel(level_str.upper())
+
+    devlog = "/dev/log"
+    if not os.path.exists(devlog):
+        output_str = "stderr"
+
     if "syslog" in output_str:
-        handler = SysLogHandler(address="/dev/log")
+        handler = SysLogHandler(address=devlog)
         handler.encodePriority(facility_str, level_str)
         logger.addHandler(handler)
     if "stderr" in output_str:
-        handler = StreamHandler()
-        formatter = Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        handler = StreamHandler(stream=sys.stderr)
+        formatter = Formatter("[%(asctime)s] [%(name)s] %(levelname)s: %(message)s")
         handler.setFormatter(formatter)
         logger.addHandler(handler)
     return logger

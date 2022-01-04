@@ -105,7 +105,7 @@ def send_request(method, url, request_hdr, input):
 #        logger.debug(f"@@@ EXCEPT {e}")
         #logger.debug(f"@@@ EXCEPT response = {response}")
         response = None
-        status = f"{e.status}"
+        status = f"{e}"
         response_hdr = []
 
     return (response, status, response_hdr)
