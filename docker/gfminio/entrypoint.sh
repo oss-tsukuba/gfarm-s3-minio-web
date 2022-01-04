@@ -176,17 +176,17 @@ for line in $(cat "${USERMAP}"); do
         groupadd -g "${USER_GID}" "${GROUP_NAME}"
     fi
 
-    if id -u "${LOCAL_USERNAME}" > /dev/null; then
+    if id -u "${LOCAL_USERNAME}" > /dev/null 2>&1; then
         :
     else
-        useradd -m -s /bin/bash -g "${USER_GID}" -b "${HOME_BASE}" \
-                -u "${USER_UID}" "${LOCAL_USERNAME}"
+        useradd -s /bin/bash -g "${USER_GID}" -b "${HOME_BASE}" \
+                --no-create-home -u "${USER_UID}" "${LOCAL_USERNAME}"
         usermod -a -G "${GFARM_S3_GROUPNAME}" "${LOCAL_USERNAME}"
     fi
 
     ### create myproxy-logon script for the user
     if [ -n "${MYPROXY_SERVER}" ]; then
-        MYPROXY_LOGON="${HOMEDIR}/myproxy-logon"
+        MYPROXY_LOGON="${HOMEDIR}/myproxy-logon-${GFARM_USERNAME}"
         cat <<EOF > "${MYPROXY_LOGON}"
 #/bin/sh
 myproxy-logon -s "${MYPROXY_SERVER}" -l "${GFARM_USERNAME}" \$@
