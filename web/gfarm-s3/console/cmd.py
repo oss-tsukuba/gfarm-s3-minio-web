@@ -26,19 +26,24 @@ def gfarm_s3_login(action, username, passwd, stdin = None, authenticated = None,
     gfarm_s3_login_bin = os.path.join(GFARM_S3_BIN, "gfarm-s3-login")
     return Popen([gfarm_s3_login_bin] + args, stdin = stdin, stdout = PIPE, stderr = PIPE, env = {})
 
+def decode(s):
+    if isinstance(s, bytes):
+        return s.decode()
+    return s
+
 def _communicate(p, name):
     try:
         stdout, stderr = p.communicate()
         p.wait()
         if stderr:
-            stderr = stderr.decode()
+            stderr = decode(stderr)
             if p.returncode == 0:
                 for l in stderr.splitlines():
                     logger.info(f"{l}")
             else:
                 for l in stderr.splitlines():
                     logger.error(f"{l}")
-        return p.returncode, stdout
+        return p.returncode, decode(stdout)
     except Exception as e:
         logger.error(f"{name}: {e}")
         return -1, f"{e}"
@@ -56,7 +61,7 @@ def cmd(action, username, passwd, authenticated = None, remote_addr = None, lang
                 "reason": f"{action}, retcode = {retcode}, {stdout}"}
 
     try:
-        result = json.loads(stdout.decode().strip())
+        result = json.loads(decode(stdout).strip())
     except Exception as e:
         logger.error(f"cmd: ERROR 4 (parse JSON): {e} [{stdout}]")
         return {"status": "ERROR 4", "reason": f"{e}"}
@@ -73,7 +78,7 @@ def get_bucket_list(username):
     retcode, stdout = _communicate(p, "get_bucket_list")
     if retcode != 0:
         return None
-    return split_lines(stdout.decode())
+    return split_lines(decode(stdout))
 
 def get_bucket_acl(username, bucket):
     try:
@@ -84,8 +89,8 @@ def get_bucket_acl(username, bucket):
     retcode, stdout = _communicate(p, "get_bucket_acl")
     if retcode != 0:
         return None
-    #logger.debug("GET_BUCKET_ACL: [{}]".format(stdout.decode() + "\n"))
-    return split_lines(stdout.decode())
+    #logger.debug("GET_BUCKET_ACL: [{}]".format(decode(stdout) + "\n"))
+    return split_lines(decode(stdout))
 
 def need_default(s):
     return (s.startswith("group:") or s.startswith("user:")) and ("::" not in s)
@@ -153,7 +158,7 @@ def set_bucket_acl(username, bucket, acl_1, acl_2):
     retcode, stdout = _communicate(p, "set_bucket_acl")
     if retcode != 0:
         return None
-    return stdout.decode()
+    return decode(stdout)
 
 def get_group_list(username):
     try:
@@ -164,7 +169,7 @@ def get_group_list(username):
     retcode, stdout = _communicate(p, "get_group_list")
     if retcode != 0:
         return None
-    return split_lines(stdout.decode())
+    return split_lines(decode(stdout))
 
 def get_user_list(username):
     try:
@@ -175,7 +180,7 @@ def get_user_list(username):
     retcode, stdout = _communicate(p, "get_user_list")
     if retcode != 0:
         return None
-    return split_lines(stdout.decode())
+    return split_lines(decode(stdout))
 
 def split_lines(s):
     return [e.strip() for e in s.split('\n') if e.strip() != ""]
