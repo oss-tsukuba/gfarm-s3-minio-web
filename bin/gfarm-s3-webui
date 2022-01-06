@@ -12,7 +12,10 @@ TIMEOUT=180
 #RELOAD="--reload"
 RELOAD=""
 
+loglevel=$(echo "$GFARM_S3_LOG_LEVEL" | tr [:upper:] [:lower:])
+
 exec "${GUNICORN_DIR}/bin/gunicorn" \
+     --log-level "$loglevel" \
      --error-logfile - \
      --capture-output \
      --threads $threads \
