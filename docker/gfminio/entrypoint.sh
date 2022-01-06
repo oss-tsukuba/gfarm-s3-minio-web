@@ -54,6 +54,9 @@ COPY_HOME_INITIALIZED_FILE="${HOME_BASE}/_copy_home_initialized"
 #TODO gfarm branch
 GFARM_S3_MINIO_BRANCH=gfarmmerge
 
+WEBUI_ADDR="unix:/tmp/gfarm-s3-webui.sock"
+ROUTER_ADDR="unix:/tmp/gfarm-s3-router.sock"
+
 ### cache files in GFARM_S3_BUILD_DIR to build.
 install_gf_s3() {
     groupadd -K GID_MIN=100 ${GFARM_S3_GROUPNAME} && \
@@ -88,6 +91,8 @@ install_gf_s3() {
     --with-myproxy-server=${MYPROXY_SERVER} \
     --with-gfarm-shared-dir=${GFARM_S3_SHARED_DIR} \
     --with-minio-builddir=${GFARM_S3_BUILD_DIR} \
+    --with-webui-addr=${WEBUI_ADDR} \
+    --with-router-addr=${ROUTER_ADDR} \
     && make \
     && make install \
     && mkdir -p ${CACHE_DIR} \
@@ -104,7 +109,6 @@ install_gf_s3() {
         chown ${GFARM_S3_USERNAME}:root "${DJANGO_SECRET_KEY}"
     fi
 
-    #TODO rename?: gfarm-s3.conf
     CONF_OVERWRITE=${SYSCONFDIR}/gfarm-s3-overwrite.conf
     cat <<EOF > "${CONF_OVERWRITE}"
 #GFARM_S3_LOG_OUTPUT=stderr
@@ -114,6 +118,9 @@ ALLOWED_HOSTS=${ALLOWED_HOSTS}
 
 # required by Django 4 or later
 CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
+
+WEBUI_ADDR=${WEBUI_ADDR}
+ROUTER_ADDR=${ROUTER_ADDR}
 EOF
 
     if which systemctl > /dev/null 2>&1; then
