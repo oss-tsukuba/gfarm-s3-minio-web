@@ -556,10 +556,10 @@ mysudo() {
 	local local_user=$1
 	shift
 	if [ -z "$local_user" ]; then
-		#echo sudo $iflag "$@" 1>&2
 		sudo $iflag "$@"
+	elif [ "$local_user" = $(whoami) ]; then
+		"$@"
 	else
-		#echo sudo $iflag -u "$local_user" "$@" 1>&2
 		sudo $iflag -u "$local_user" "$@"
 	fi
 }

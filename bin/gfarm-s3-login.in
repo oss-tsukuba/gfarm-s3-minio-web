@@ -67,6 +67,8 @@ EOF
 bfa_check_addr() {
     ADDR="$1"
 
+    [ -z "ADDR" ] && return 0
+
     if [ ! -f "${GFARM_S3_LOGIN_CHALLENGE_LOG}" ]; then
         touch "${GFARM_S3_LOGIN_CHALLENGE_LOG}"
         if [ ! -r "${GFARM_S3_LOGIN_CHALLENGE_LOG}" \
@@ -88,12 +90,16 @@ bfa_check_addr() {
 bfa_log_addr() {
     ADDR="$1"
 
+    [ -z "ADDR" ] && return 0
+
     # atomic operation
     echo "${ADDR}" >> "${GFARM_S3_LOGIN_CHALLENGE_LOG}"
 }
 
 bfa_log_clear() {
     ADDR="$1"
+
+    [ -z "ADDR" ] && return 0
 
     # If bfa_log_addr and bfa_log_clear are called simultaneously,
     # ADDR may not be cleared or may not be added. (optimistically)
@@ -129,7 +135,7 @@ elif authenticated_method=$(challenge_auth "$global_username" "$user_password" "
     log_info "login ($authenticated_method): $global_username $local_username $remote_addr"
     bfa_log_clear "$remote_addr"
 else
-    log_info "login failed: $global_username $local_username $remote_addr"
+    log_info "login failed: incorrect password: $global_username $local_username $remote_addr"
     login_failed
     bfa_log_addr "$remote_addr"
     exit 1

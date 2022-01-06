@@ -45,9 +45,17 @@ def login(request):
         passwd = request.POST["passwd"]
         http_x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR", None)
         if http_x_forwarded_for is not None:
-            remote_addr = http_x_forwarded_for
+            remote_addr = http_x_forwarded_for.split(',')[0]
         else:
             remote_addr = request.META.get("REMOTE_ADDR", None)
+
+        if not remote_addr:
+            reason = "remote_addr is None"
+            logger.error(reason)
+            request.session["reason"] = reason
+            request.session["global_username"] = ""
+            return HttpResponseRedirect(reverse("login"))
+
         ### challenge authenticateion
         cmd_result = cmd.cmd("info", username, passwd, remote_addr = remote_addr)
         ### logger.debug(f"@@@ cmd_result = {cmd_result}")
