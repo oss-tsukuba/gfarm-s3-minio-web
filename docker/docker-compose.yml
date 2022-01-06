@@ -19,6 +19,8 @@ services:
       - SERVER_URL=${SERVER_URL:?SERVER_URL}
 
       ### optional
+      - http_proxy=${http_proxy:-}
+      - https_proxy=${https_proxy:-}
       - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
       # empty means using SERVER_NAME from SERVER_URL
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
@@ -44,9 +46,9 @@ services:
       - ./gfarm-s3-usermap.conf:/gfarm-s3-usermap.conf:ro
 
     privileged: false
-    ports:
-      - 61080:80
-      - 61443:443
+    # ports:
+    #   - 61080:80
+    #   - 61443:443
 
   copy_home:
     hostname: copy_home
