@@ -23,6 +23,9 @@ set -o pipefail
 : CACHE_DIR=${CACHE_DIR}
 : CACHE_SIZE=${CACHE_SIZE}
 
+TZ=${TZ:-Asia/Tokyo}
+export TZ
+
 GFARM_S3_HOMEDIR=/home/${GFARM_S3_USERNAME}
 
 URL_REGEXP="^([^/:]+?)://([^/:]+?):?([[:digit:]]+)?(/.*)?"

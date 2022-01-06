@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3'
 
 # use variables from .env
 
@@ -19,6 +19,7 @@ services:
       - SERVER_URL=${SERVER_URL:?SERVER_URL}
 
       ### optional
+      - TZ=${TZ:-Asia/Tokyo}
       - http_proxy=${http_proxy:-}
       - https_proxy=${https_proxy:-}
       - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
