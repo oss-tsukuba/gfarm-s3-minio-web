@@ -190,22 +190,19 @@ esac
 AC_MSG_RESULT([$with_gfarm_shared_dir])
 AC_SUBST(with_gfarm_shared_dir)
 
-### --with-cache-basedir=CACHE_BASEDIR
-AC_MSG_CHECKING([minio cache basedir])
-AC_ARG_WITH([cache-basedir],
-  AC_HELP_STRING([--with-cache-basedir=CACHE_BASEDIR], [cache directory [/var/tmp]]))
-case x$with_cache_basedir in
-  x|xyes|xno) with_cache_basedir=/var/tmp ;;
+### MINIO_LOCALTEMP_DIR
+AC_ARG_VAR(MINIO_LOCALTEMP_DIR, [Gfarm S3 MinIO local tempfile directory [/var/tmp]])
+case x$MINIO_LOCALTEMP_DIR in
+  x) MINIO_LOCALTEMP_DIR=/var/tmp ;;
 esac
-AC_MSG_RESULT([$with_cache_basedir])
-AC_SUBST(with_cache_basedir)
+AC_SUBST(MINIO_LOCALTEMP_DIR)
 
 ### MINIO_LOCALTEMP_SIZE_MB
-AC_ARG_VAR(MINIO_LOCALTEMP_SIZE_MB, [MinIO local tempfile size (MiB) [4096]])
+AC_ARG_VAR(MINIO_LOCALTEMP_SIZE_MB, [Gfarm S3 MinIO local tempfile size (MiB) [4096]])
 case x$MINIO_LOCALTEMP_SIZE_MB in
   x) MINIO_LOCALTEMP_SIZE_MB=4096 ;;
 esac
-AC_SUBST(MINIO_LOCALTEMP_SIZE)
+AC_SUBST(MINIO_LOCALTEMP_SIZE_MB)
 
 ### WEBUI_BASE_URL
 AC_ARG_VAR(WEBUI_BASE_URL, [WebUI base URL [gfarm_s3/]])
