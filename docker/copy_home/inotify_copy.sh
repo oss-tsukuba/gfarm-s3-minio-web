@@ -69,7 +69,7 @@ copy_all() {
         echo "${L}" >> "$sync_list"
     done
     #cat $sync_list  # debug
-    rsync -q -amv --delete \
+    rsync -q --one-file-system -amv --delete \
           --include-from="$sync_list" --exclude='*' "$src/" "$dst/"
 }
 
