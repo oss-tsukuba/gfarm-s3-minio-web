@@ -122,14 +122,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-#STATIC_URL = '/d/console/static/'
-STATIC_URL = '/static/'
+webui_base_url = conf.get_str('WEBUI_BASE_URL')
+STATIC_URL = '/' + webui_base_url + 'static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
-
-## Mon Aug 24 09:37:36 JST 2020 nis
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.file'
 

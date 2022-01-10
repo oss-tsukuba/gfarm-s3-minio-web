@@ -59,24 +59,25 @@ ROUTER_ADDR="unix:/tmp/gfarm-s3-router.sock"
 
 ### cache files in GFARM_S3_BUILD_DIR to build.
 install_gf_s3() {
-    groupadd -K GID_MIN=100 ${GFARM_S3_GROUPNAME} && \
+    groupadd -K GID_MIN=100 ${GFARM_S3_GROUPNAME}
     useradd -K UID_MIN=100 -m ${GFARM_S3_USERNAME} -g ${GFARM_S3_GROUPNAME} -d ${GFARM_S3_HOMEDIR} -s /bin/bash
 
     MINIO_WORKDIR=${GFARM_S3_BUILD_DIR}/minio/work/build
     GFARM_S3_MINIO_DIR=${MINIO_WORKDIR}/gfarm-s3-minio
     if [ ! -d "${GFARM_S3_MINIO_DIR}" ]; then
         mkdir -p ${MINIO_WORKDIR} \
-        && cd ${MINIO_WORKDIR} \
-        && git clone https://github.com/oss-tsukuba/gfarm-s3-minio.git \
-        && cd gfarm-s3-minio \
-        && git checkout ${GFARM_S3_MINIO_BRANCH}
+        cd ${MINIO_WORKDIR} \
+        git clone https://github.com/oss-tsukuba/gfarm-s3-minio.git \
+        cd gfarm-s3-minio \
+        git checkout ${GFARM_S3_MINIO_BRANCH}
     fi
 
     PREFIX=/usr/local
     SYSCONFDIR=${PREFIX}/etc
 
-    cd ${WORKDIR}/gfarm-s3-minio-web \
-    && ./configure \
+    cd ${WORKDIR}/gfarm-s3-minio-web
+    WEBUI_BASE_URL="gf_s3/" \
+    ./configure \
     --prefix=${PREFIX} \
     --sysconfdir=${SYSCONFDIR} \
     --with-gfarm=/usr/local \
@@ -92,11 +93,11 @@ install_gf_s3() {
     --with-gfarm-shared-dir=${GFARM_S3_SHARED_DIR} \
     --with-minio-builddir=${GFARM_S3_BUILD_DIR} \
     --with-webui-addr=${WEBUI_ADDR} \
-    --with-router-addr=${ROUTER_ADDR} \
-    && make \
-    && make install \
-    && mkdir -p ${CACHE_DIR} \
-    && chmod 1777 ${CACHE_DIR}
+    --with-router-addr=${ROUTER_ADDR}
+    make
+    make install
+    mkdir -p ${CACHE_DIR}
+    chmod 1777 ${CACHE_DIR}
 
     #TODO in "make install"
     DJANGO_SECRET_KEY=${SYSCONFDIR}/django_secret_key.txt
