@@ -200,28 +200,17 @@ esac
 AC_MSG_RESULT([$with_cache_basedir])
 AC_SUBST(with_cache_basedir)
 
-### --with-cache-size=CACHE_SIZE (MB)
-AC_MSG_CHECKING([minio cache size])
-AC_ARG_WITH([cache-size],
-  AC_HELP_STRING([--with-cache-size=CACHE_SIZE], [cache size [4096]]))
-case x$with_cache_size in
-  x|xyes|xno) with_cache_size=4096 ;;
+### MINIO_LOCALTEMP_SIZE_MB
+AC_ARG_VAR(MINIO_LOCALTEMP_SIZE_MB, [MinIO local tempfile size (MiB) [4096]])
+case x$MINIO_LOCALTEMP_SIZE_MB in
+  x) MINIO_LOCALTEMP_SIZE_MB=4096 ;;
 esac
-AC_MSG_RESULT([$with_cache_size])
-AC_SUBST(with_cache_size)
+AC_SUBST(MINIO_LOCALTEMP_SIZE)
 
-dnl ### --with-webui-base-url=WEBUI_BASE_URL
-dnl AC_MSG_CHECKING([WebUI base URL])
-dnl AC_ARG_WITH([webui-base-url],
-dnl   AC_HELP_STRING([--with-webui-base-url=WEBUI_BASE_URL], [ [gfarm_s3/]]))
-dnl case x$webui_base_url in
-dnl   x|xyes|xno) webui_base_url=gfarm_s3 ;;
-dnl esac
-dnl AC_MSG_RESULT([$webui_base_url])
-
+### WEBUI_BASE_URL
 AC_ARG_VAR(WEBUI_BASE_URL, [WebUI base URL [gfarm_s3/]])
 case x$WEBUI_BASE_URL in
-  x|xyes|xno) WEBUI_BASE_URL=gfarm_s3/ ;;
+  x) WEBUI_BASE_URL=gfarm_s3/ ;;
 esac
 AC_SUBST(WEBUI_BASE_URL)
 

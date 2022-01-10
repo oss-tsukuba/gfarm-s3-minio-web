@@ -76,6 +76,7 @@ install_gf_s3() {
     SYSCONFDIR=${PREFIX}/etc
 
     cd ${WORKDIR}/gfarm-s3-minio-web
+    MINIO_LOCALTEMP_SIZE_MB=2048 \
     WEBUI_BASE_URL="gf_s3/" \
     ./configure \
     --prefix=${PREFIX} \
