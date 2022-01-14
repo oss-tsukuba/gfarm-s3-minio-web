@@ -46,6 +46,9 @@ restart-withlog:
 	$(MAKE) restart
 	$(COMPOSE) logs --follow
 
+restart-proxy:
+	$(COMPOSE) restart proxy
+
 shell:
 	$(COMPOSE) exec gfminio bash
 
