@@ -63,3 +63,6 @@ logs:
 
 logs-follow:
 	$(COMPOSE) logs --follow
+
+_COMPOSE:
+	@echo $(COMPOSE)
