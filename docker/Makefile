@@ -28,6 +28,7 @@ reborn update:
 	$(COMPOSE) build
 	$(MAKE) down
 	$(COMPOSE) up -d
+	$(COMPOSE) restart proxy
 
 reborn-withlog:
 	$(MAKE) reborn
@@ -41,6 +42,7 @@ stop:
 
 restart:
 	$(COMPOSE) restart
+	$(COMPOSE) restart proxy
 
 restart-withlog:
 	$(MAKE) restart
