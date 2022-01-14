@@ -57,6 +57,11 @@ GFARM_S3_MINIO_BRANCH=gfarmmerge
 WEBUI_ADDR="unix:/tmp/gfarm-s3-webui.sock"
 ROUTER_ADDR="unix:/tmp/gfarm-s3-router.sock"
 
+debug_sleep() {
+    # TODO if [ $DEBUG -eq 1 ]; then
+    sleep infinity
+}
+
 ### cache files in GFARM_S3_BUILD_DIR to build.
 install_gf_s3() {
     groupadd -K GID_MIN=100 ${GFARM_S3_GROUPNAME}
@@ -77,7 +82,7 @@ install_gf_s3() {
 
     cd ${WORKDIR}/gfarm-s3-minio-web
     MINIO_LOCALTEMP_DIR=/tmp \
-    MINIO_LOCALTEMP_SIZE_MB=2048 \
+    MINIO_LOCALTEMP_SIZE_MB=512 \
     WEBUI_BASE_URL="gf_s3/" \
     ./configure \
     --prefix=${PREFIX} \
@@ -96,7 +101,7 @@ install_gf_s3() {
     --with-minio-builddir=${GFARM_S3_BUILD_DIR} \
     --with-webui-addr=${WEBUI_ADDR} \
     --with-router-addr=${ROUTER_ADDR}
-    make
+    make || debug_sleep
     make install
     mkdir -p ${CACHE_DIR}
     chmod 1777 ${CACHE_DIR}
@@ -150,7 +155,8 @@ fi
 
 group_exist() {
     gid=$1
-    grep -q ":x:${gid}:" /etc/group
+    #grep -q ":x:${gid}:" /etc/group
+    getent group ${gid} > /dev/null
 }
 
 # mksym() {
