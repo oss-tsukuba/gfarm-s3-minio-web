@@ -249,6 +249,9 @@ def getReverseProxyRoutesDict():
         _dict = reverseProxyRoutes["dict"]
         timestamp = reverseProxyRoutes["timestamp"]
 
+    if not os.path.isfile(path):
+        return {}
+
     timestamp_file = os.stat(path).st_mtime
     if _dict is None or timestamp < timestamp_file:
 #        logger.debug(f"@@@ getReverseProxyRoutesDict: loadReverseProxyRoutesDict()")
