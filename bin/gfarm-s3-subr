@@ -666,7 +666,7 @@ challenge_auth() {
 }
 
 spawn_per_user_server_common() {
-	local user="$1"
+	local user="$1"   # == local username
 	local gfarm_shared_dir="$2"
 	local resume="$3"
 	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
@@ -675,6 +675,7 @@ spawn_per_user_server_common() {
 		return 1
 	fi
 	local local_username=$(get_local_username "$usermap_entry")
+	local global_username=$(get_global_username "$usermap_entry")
 	local access_key=$(get_access_key "$usermap_entry")
 	local resume_opt=""
 	if [ $resume -eq 1 ]; then
@@ -688,11 +689,11 @@ spawn_per_user_server_common() {
 	local status=0
 
 	if [ "$port_pid" = "$NOT_STARTED" ]; then
-		log_info "MinIO (for $user) is not enabled"
+		log_info "MinIO (for ${user}|${global_username}) is not enabled"
 	elif [ -n "$port_pid" ]; then
 		local port="${port_pid%:*}"
 		local pid="${port_pid#*:}"
-		log_info "MinIO started (for $user)"
+		log_info "MinIO started (for ${user}|${global_username})"
 		## No need to check `port' confliction,
 		## as a port # that returned by gfarm-s3-server is
 		## actually allocated for current user.
@@ -724,11 +725,12 @@ stop_per_user_server() {
 		return 1
 	fi
 	local local_username=$(get_local_username "$usermap_entry")
+	local global_username=$(get_global_username "$usermap_entry")
 	## assert $user == $local_username
 	local access_key=$(get_access_key "$usermap_entry")
 	local status=0
 	if local port=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --stop --access_key "$access_key"); then
-		log_info "MinIO stopped (for $user)"
+		log_info "MinIO stopped (for ${user}|${global_username})"
 	else
 		echo "Stop MinIO failed" 1>&2
 		status=1
