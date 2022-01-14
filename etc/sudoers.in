@@ -1,5 +1,9 @@
 Defaults env_keep += "X509_USER_PROXY"
-Runas_Alias GFARMS3 = %@with_gfarm_s3_group@
+
+### restrict gfarm_s3-access only to users in one specific group
+#Runas_Alias GFARMS3 = %@with_gfarm_s3_group@
+### not root
+Runas_Alias GFARMS3 = ALL,!root
 
 @with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @prefix@/bin/gfarm-s3-server
 @with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @with_globus@/bin/grid-proxy-info

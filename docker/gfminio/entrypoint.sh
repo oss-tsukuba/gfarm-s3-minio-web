@@ -200,7 +200,10 @@ for line in $(cat "${USERMAP}"); do
     else
         useradd -s /bin/bash -g "${USER_GID}" -b "${HOME_BASE}" \
                 --no-create-home -u "${USER_UID}" "${LOCAL_USERNAME}"
-        usermod -a -G "${GFARM_S3_GROUPNAME}" "${LOCAL_USERNAME}"
+
+        # restrict gfarm_s3-access only to users in one specific group
+        # (SEE ALSO: gfarm-s3-minio-web/etc/sudoers.in)
+        #usermod -a -G "${GFARM_S3_GROUPNAME}" "${LOCAL_USERNAME}"
     fi
 
     ### create myproxy-logon script for the user
