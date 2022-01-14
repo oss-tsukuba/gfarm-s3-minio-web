@@ -68,7 +68,8 @@ RUN python3 -m pip install 'Django<=4' gunicorn boto3
 
 RUN AWSCLI_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
     && AWSCLI_ZIP=awscliv2.zip \
-    && apt-get install -y unzip \
+    && apt-get -y update \
+    && apt-get install -y unzip groff-base \
     && curl ${AWSCLI_URL} -o ${AWSCLI_ZIP} \
     && unzip -q -o ${AWSCLI_ZIP} \
     && ./aws/install --update \
