@@ -204,9 +204,12 @@ for line in $(cat "${USERMAP}"); do
         #usermod -a -G "${GFARM_S3_GROUPNAME}" "${LOCAL_USERNAME}"
     fi
 
+    HOMEBIN="${HOMEDIR}/bin"
+    mkdir -p ${HOMEBIN}
+
     ### create myproxy-logon script for the user
     if [ -n "${MYPROXY_SERVER}" ]; then
-        MYPROXY_LOGON="${HOMEDIR}/myproxy-logon-${GFARM_USERNAME}"
+        MYPROXY_LOGON="${HOMEBIN}/myproxy-logon-${GFARM_USERNAME}.sh"
         cat <<EOF > "${MYPROXY_LOGON}"
 #/bin/sh
 myproxy-logon -s "${MYPROXY_SERVER}" -l "${GFARM_USERNAME}" \$@
@@ -215,9 +218,54 @@ EOF
         chmod u+x "${MYPROXY_LOGON}"
     fi
 
-    gfarm-s3-useradd "${GFARM_USERNAME}" "${LOCAL_USERNAME}" "${ACCESSKEY_ID}" || true  ## may fail
+    AWS_S3="${HOMEBIN}/aws-s3.sh"
+    cat <<EOF > "${AWS_S3}"
+#!/bin/bash
 
-    ### resume minio
+set -eu
+
+GFARM_USERNAME=${GFARM_USERNAME}
+
+SERVER_NAME=proxy
+SERVER_PORT=${SERVER_PORT}
+SERVER_URL=https://\${SERVER_NAME}:\${SERVER_PORT}
+
+PROF="gfarm_s3"
+SECRET=\$(gfarm-s3-server --show-secret-key)
+
+NO_VERIFY_SSL="--no-verify-ssl"
+#NO_VERIFY_SSL=""
+
+AWS="aws --profile \${PROF}"
+
+\${AWS} configure set aws_access_key_id \${GFARM_USERNAME} &
+p1=\$!
+\${AWS} configure set aws_secret_access_key \${SECRET} &
+p2=\$!
+#\${AWS} configure set s3.multipart_threshold 300MB &
+#p3=\$!
+#\${AWS} configure set s3.multipart_chunksize 300MB &
+#p4=\$!
+#\${AWS} configure set s3.max_concurrent_requests 2 &
+#p5=\$!
+
+wait \$p1
+wait \$p2
+#wait \$p3
+#wait \$p4
+#wait \$p5
+
+no_proxy=\${SERVER_NAME} \
+AWS_EC2_METADATA_DISABLED=true \
+\${AWS} \${NO_VERIFY_SSL} \
+--endpoint-url \${SERVER_URL} s3 \$@
+EOF
+    chown "${LOCAL_USERNAME}" "${AWS_S3}"
+    chmod u+x "${AWS_S3}"
+
+    gfarm-s3-useradd "${GFARM_USERNAME}" "${LOCAL_USERNAME}" "${ACCESSKEY_ID}" || true  ## fail when the user already exists
+
+    ### resume minio (start minio if it was previously started)
     sudo -u "${GFARM_S3_USERNAME}" gfarm-s3-login --quiet --authenticated "DUMMY_AUTH_METHOD" resume "${GFARM_USERNAME}" "DUMMY_PASSWORD" > /dev/null &
     ##### backgroud (may fail, ignore)
 done
