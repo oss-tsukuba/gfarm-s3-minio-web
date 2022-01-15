@@ -1,0 +1,19 @@
+location / {
+  # s3 protocol
+  if ($http_authorization ~ "AWS4-HMAC-SHA256.*") {
+    proxy_pass http://router;
+    break;
+  }
+
+  # from browser
+  rewrite ^/$ $proxy_x_forwarded_proto://$http_host/@WEBUI_BASE_URL@console permanent;
+}
+
+location /@WEBUI_BASE_URL@static/ {
+  alias @with_gfarm_s3_homedir@/static/;
+  autoindex off;
+}
+
+location /@WEBUI_BASE_URL@ {
+  proxy_pass http://webui;
+}

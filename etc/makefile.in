@@ -56,9 +56,10 @@ install:
 	@echo systemctl enable --now gfarm-s3-router.service
 
 	$(INSTALL) -D -m 644 nginx-gfarm-s3.conf $(GFARMS3_CONF_DIR)/nginx-gfarm-s3.conf
+	$(INSTALL) -D -m 644 nginx-gfarm-s3-generated.conf $(GFARMS3_CONF_DIR)/nginx-gfarm-s3-generated.conf
 
 clean:
 
 distclean:
-	$(RM) -f apache-gfarm-s3.conf gfarm-s3.conf gfarm-s3-webui.service gfarm-s3-router.service sudoers
+	$(RM) -f apache-gfarm-s3.conf nginix-gfarm-s3-generated.conf gfarm-s3.conf gfarm-s3-webui.service gfarm-s3-router.service sudoers
 	$(RM) -f makefile

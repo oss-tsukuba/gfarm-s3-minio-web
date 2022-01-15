@@ -75,16 +75,17 @@ RUN AWSCLI_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
     && ./aws/install --update \
     && /usr/local/bin/aws --version
 
-COPY ${BASEDIR}/nginx-gfarm-s3.conf /etc/nginx/sites-available/gfarm
+COPY ${BASEDIR}/nginx-gfarm-s3-site.conf /usr/local/etc/nginx-gfarm-s3-site.conf
+COPY ${BASEDIR}/nginx-gfarm-s3-include.conf /etc/nginx/sites-available/gfarm
 RUN ln -s /etc/nginx/sites-available/gfarm /etc/nginx/sites-enabled/gfarm \
     && rm -f /etc/nginx/sites-enabled/default
 RUN mkdir -p ${HTTPD_DOCUMENT_ROOT}
 COPY ${BASEDIR}/index.html ${HTTPD_DOCUMENT_ROOT}/index.html
 
-COPY ./ ${WORKDIR}/gfarm-s3-minio-web
-
 COPY ${BASEDIR}/entrypoint.sh /entrypoint.sh
 COPY ${BASEDIR}/supervisord.conf /supervisord.conf
+
+COPY ./ ${WORKDIR}/gfarm-s3-minio-web
 
 ENV WORKDIR=${WORKDIR}
 ENTRYPOINT ["/entrypoint.sh"]

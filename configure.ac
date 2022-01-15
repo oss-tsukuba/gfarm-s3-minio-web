@@ -233,7 +233,7 @@ etc/gfarm-s3.conf
 etc/gfarm-s3-webui.service
 etc/gfarm-s3-router.service
 etc/makefile
-etc/nginx-gfarm-s3.conf
+etc/nginx-gfarm-s3-generated.conf
 etc/sudoers
 minio/makefile
 web/makefile
