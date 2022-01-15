@@ -4,7 +4,10 @@
 
 set -eu
 set -o pipefail
-#set -x
+
+if [ ${DEBUG} -eq 1 ]; then
+    set -x
+fi
 
 ### from build args
 : WORKDIR=${WORKDIR}
@@ -22,9 +25,13 @@ set -o pipefail
 # TODO GFARM_S3_LOCALTMP
 : CACHE_DIR=${CACHE_DIR}
 : CACHE_SIZE=${CACHE_SIZE}
+: ${GFARM_S3_MINIO_SRC_GIT}
+: ${GFARM_S3_MINIO_BRANCH}
 
 TZ=${TZ:-Asia/Tokyo}
 export TZ
+
+GFARM_S3_MINIO_SRC_DIR=/gfarm-s3-minio
 
 GFARM_S3_HOMEDIR=/home/${GFARM_S3_USERNAME}
 
@@ -51,8 +58,6 @@ USERMAP=/gfarm-s3-usermap.conf
 
 COPY_HOME_INITIALIZED_FILE="${HOME_BASE}/_copy_home_initialized"
 
-#TODO gfarm branch
-GFARM_S3_MINIO_BRANCH=gfarmmerge
 
 WEBUI_ADDR="unix:/tmp/gfarm-s3-webui.sock"
 ROUTER_ADDR="unix:/tmp/gfarm-s3-router.sock"
@@ -68,12 +73,23 @@ install_gf_s3() {
     useradd -K UID_MIN=100 -m ${GFARM_S3_USERNAME} -g ${GFARM_S3_GROUPNAME} -d ${GFARM_S3_HOMEDIR} -s /bin/bash
 
     MINIO_WORKDIR=${GFARM_S3_BUILD_DIR}/minio/work/build
-    GFARM_S3_MINIO_DIR=${MINIO_WORKDIR}/gfarm-s3-minio
-    if [ ! -d "${GFARM_S3_MINIO_DIR}" ]; then
-        mkdir -p ${MINIO_WORKDIR} \
-        cd ${MINIO_WORKDIR} \
-        git clone https://github.com/oss-tsukuba/gfarm-s3-minio.git \
-        cd gfarm-s3-minio \
+    GFARM_S3_MINIO_DIRNAME=gfarm-s3-minio
+    GFARM_S3_MINIO_WORKDIR=${MINIO_WORKDIR}/${GFARM_S3_MINIO_DIRNAME}
+    mkdir -p ${MINIO_WORKDIR}
+    if [ ! -d "${GFARM_S3_MINIO_WORKDIR}" ]; then
+        if [ -d "${GFARM_S3_MINIO_SRC_DIR}" ]; then
+            mkdir -p "${GFARM_S3_MINIO_WORKDIR}"
+        else
+            git clone "${GFARM_S3_MINIO_SRC_GIT}" "${GFARM_S3_MINIO_WORKDIR}"
+        fi
+    fi
+
+    if [ -d "${GFARM_S3_MINIO_SRC_DIR}" ]; then
+        # from local directory (for developpers)
+        rsync --delete -rlptD "${GFARM_S3_MINIO_SRC_DIR}"/ "${GFARM_S3_MINIO_WORKDIR}"/
+    else
+        cd "${GFARM_S3_MINIO_WORKDIR}"
+        git pull
         git checkout ${GFARM_S3_MINIO_BRANCH}
     fi
 
@@ -262,6 +278,16 @@ AWS_EC2_METADATA_DISABLED=true \
 EOF
     chown "${LOCAL_USERNAME}" "${AWS_S3}"
     chmod u+x "${AWS_S3}"
+
+    # copy skel
+    SKEL=/etc/skel/
+    for f in $(find ${SKEL} -type f); do
+        dst=${HOMEDIR}/$(basename $f)
+        if [ ! -e "$dst" ]; then
+            cp -f "$f" "$dst"
+            chown "${LOCAL_USERNAME}" "$dst"
+        fi
+    done
 
     gfarm-s3-useradd "${GFARM_USERNAME}" "${LOCAL_USERNAME}" "${ACCESSKEY_ID}" || true  ## fail when the user already exists
 

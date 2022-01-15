@@ -3,10 +3,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ARG BASEDIR=./docker/gfminio
 
+### from docker-compose.yml or docker-compose.override.yml
+ARG GFARM_SRC_URL
+ARG GFARM2FS_SRC_URL
+ARG WORKDIR=/root
+ARG HTTPD_DOCUMENT_ROOT=/var/www/html
+
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get -y install \
     supervisor \
+    rsync \
     sudo \
     rsyslog \
     build-essential \
@@ -32,18 +39,9 @@ RUN apt-get update \
     npm \
     language-pack-ja \
     language-pack-en \
-    vim
-# RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-### from docker-compose.yml or docker-compose.override.yml
-ARG GFARM_SRC_URL
-ARG GFARM2FS_SRC_URL
-ARG WORKDIR=/root
-ARG HTTPD_DOCUMENT_ROOT=/var/www/html
-
-### install gfarm
-
-RUN mkdir -p ${WORKDIR} \
+    vim \
+    \
+    && mkdir -p ${WORKDIR} \
     && cd ${WORKDIR} \
     && curl -sLJO ${GFARM_SRC_URL} \
     && ARCH=`ls -1 gfarm-*.tar.gz` \
@@ -62,13 +60,13 @@ RUN mkdir -p ${WORKDIR} \
     && cd ${DIRNAME} \
     && ./configure \
     && make -j \
-    && make -j install
-
-RUN python3 -m pip install 'Django<=4' gunicorn boto3
-
-RUN AWSCLI_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+    && make -j install \
+    \
+    && python3 -m pip install 'Django<=4' gunicorn boto3 \
+    \
+    && cd ${WORKDIR} \
+    && AWSCLI_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
     && AWSCLI_ZIP=awscliv2.zip \
-    && apt-get -y update \
     && apt-get install -y unzip groff-base \
     && curl ${AWSCLI_URL} -o ${AWSCLI_ZIP} \
     && unzip -q -o ${AWSCLI_ZIP} \
@@ -78,8 +76,8 @@ RUN AWSCLI_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
 COPY ${BASEDIR}/nginx-gfarm-s3-site.conf /usr/local/etc/nginx-gfarm-s3-site.conf
 COPY ${BASEDIR}/nginx-gfarm-s3-include.conf /etc/nginx/sites-available/gfarm
 RUN ln -s /etc/nginx/sites-available/gfarm /etc/nginx/sites-enabled/gfarm \
-    && rm -f /etc/nginx/sites-enabled/default
-RUN mkdir -p ${HTTPD_DOCUMENT_ROOT}
+    && rm -f /etc/nginx/sites-enabled/default \
+    && mkdir -p ${HTTPD_DOCUMENT_ROOT}
 COPY ${BASEDIR}/index.html ${HTTPD_DOCUMENT_ROOT}/index.html
 
 COPY ${BASEDIR}/entrypoint.sh /entrypoint.sh

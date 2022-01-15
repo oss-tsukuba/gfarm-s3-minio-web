@@ -19,10 +19,16 @@ services:
       - SERVER_URL=${SERVER_URL:?SERVER_URL}
 
       ### optional
+      - DEBUG=${DEBUG:-0}
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+
       - TZ=${TZ:-Asia/Tokyo}
       - http_proxy=${http_proxy:-}
       - https_proxy=${https_proxy:-}
-      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+      - GFARM_S3_MINIO_SRC_GIT=${GFARM_S3_MINIO_SRC_GIT:-https://github.com/oss-tsukuba/gfarm-s3-minio.git}
+      #TODO change to master branch
+      - GFARM_S3_MINIO_BRANCH=${GFARM_S3_MINIO_BRANCH:-gfarmmerge}
+
       # empty means using SERVER_NAME from SERVER_URL
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
       # empty means using SERVER_URL
@@ -40,8 +46,13 @@ services:
       - copy_home:/home:rw
       - build_cache:/build_cache:rw
 
+      # /dev/null means downloading from GFARM_S3_MINIO_SRC_GIT
+      - ${GFARM_S3_MINIO_SRC_DIR:-/dev/null}:/gfarm-s3-minio
+
+      #TODO  ${SHARE_HOSTDIR:-/dev/null}:/share_host
       - ./mnt:/mnt:rw
 
+      #TODO
       - ./gfarm2.conf:/usr/local/etc/gfarm2.conf:ro
       - ./certificates:/etc/grid-security/certificates:ro
       - ./gfarm-s3-usermap.conf:/gfarm-s3-usermap.conf:ro
