@@ -5,12 +5,14 @@ version: '3'
 services:
   gfminio:
     hostname: gfminio
+    privileged: false
     build:
       context: ../
       dockerfile: ./docker/gfminio/Dockerfile
       args:
-        - GFARM_SRC_URL=https://github.com/oss-tsukuba/gfarm/archive/refs/tags/2.7.19.tar.gz
-        - GFARM2FS_SRC_URL=https://github.com/oss-tsukuba/gfarm2fs/archive/refs/tags/1.2.15.tar.gz
+        #- GFARM_SRC_URL=${GFARM_SRC_URL:-https://github.com/oss-tsukuba/gfarm/archive/refs/tags/2.7.19.tar.gz}
+        - GFARM_SRC_GIT_URL=${GFARM_SRC_GIT_UR:-https://github.com/oss-tsukuba/gfarm.git}
+        - GFARM_SRC_GIT_BRANCH=${GFARM_SRC_GIT_BRANCH:-2.7}
         ### optional
         - http_proxy=${http_proxy:-}
         - https_proxy=${https_proxy:-}
@@ -25,9 +27,9 @@ services:
       - TZ=${TZ:-Asia/Tokyo}
       - http_proxy=${http_proxy:-}
       - https_proxy=${https_proxy:-}
-      - GFARM_S3_MINIO_SRC_GIT=${GFARM_S3_MINIO_SRC_GIT:-https://github.com/oss-tsukuba/gfarm-s3-minio.git}
+      - GFARM_S3_MINIO_SRC_GIT_URL=${GFARM_S3_MINIO_SRC_GIT_URL:-https://github.com/oss-tsukuba/gfarm-s3-minio.git}
       #TODO change to master branch
-      - GFARM_S3_MINIO_BRANCH=${GFARM_S3_MINIO_BRANCH:-gfarmmerge}
+      - GFARM_S3_MINIO_SRC_GIT_BRANCH=${GFARM_S3_MINIO_SRC_GIT_BRANCH:-gfarmmerge}
 
       # empty means using SERVER_NAME from SERVER_URL
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
@@ -46,7 +48,7 @@ services:
       - copy_home:/home:rw
       - build_cache:/build_cache:rw
 
-      # /dev/null means downloading from GFARM_S3_MINIO_SRC_GIT
+      # /dev/null means downloading from GFARM_S3_MINIO_SRC_GIT_URL
       - ${GFARM_S3_MINIO_SRC_DIR:-/dev/null}:/gfarm-s3-minio
 
       #TODO  ${SHARE_HOSTDIR:-/dev/null}:/share_host
@@ -56,11 +58,6 @@ services:
       - ./gfarm2.conf:/usr/local/etc/gfarm2.conf:ro
       - ./certificates:/etc/grid-security/certificates:ro
       - ./gfarm-s3-usermap.conf:/gfarm-s3-usermap.conf:ro
-
-    privileged: false
-    # ports:
-    #   - 61080:80
-    #   - 61443:443
 
   copy_home:
     hostname: copy_home

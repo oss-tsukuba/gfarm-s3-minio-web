@@ -5,7 +5,9 @@ ARG BASEDIR=./docker/gfminio
 
 ### from docker-compose.yml or docker-compose.override.yml
 ARG GFARM_SRC_URL
-ARG GFARM2FS_SRC_URL
+ARG GFARM_SRC_GIT_URL
+ARG GFARM_SRC_GIT_BRANCH
+
 ARG WORKDIR=/root
 ARG HTTPD_DOCUMENT_ROOT=/var/www/html
 
@@ -43,22 +45,18 @@ RUN apt-get update \
     \
     && mkdir -p ${WORKDIR} \
     && cd ${WORKDIR} \
-    && curl -sLJO ${GFARM_SRC_URL} \
-    && ARCH=`ls -1 gfarm-*.tar.gz` \
-    && tar xf ${ARCH} \
-    && DIRNAME=`echo ${ARCH} | sed 's/\.tar\.gz$//g'` \
+    && if [ -n "${GFARM_SRC_URL}" ]; then \
+        curl -sLJO ${GFARM_SRC_URL} \
+        && ARCH=`ls -1 gfarm-*.tar.gz` \
+        && tar xf ${ARCH} \
+        && DIRNAME=`echo ${ARCH} | sed 's/\.tar\.gz$//g'` \
+     ; else \
+        DIRNAME=gfarm \
+        && git clone -b ${GFARM_SRC_GIT_BRANCH} --depth 1 ${GFARM_SRC_GIT_URL} ${DIRNAME} \
+     ; fi \
+    && echo DIRNAME=${DIRNAME} \
     && cd ${DIRNAME} \
     && ./configure --with-globus --without-openldap --without-postgresql \
-    && make -j \
-    && make -j install \
-    && ldconfig \
-    && cd ${WORKDIR} \
-    && curl -sLJO ${GFARM2FS_SRC_URL} \
-    && ARCH=`ls -1 gfarm2fs-*.tar.gz` \
-    && tar xf ${ARCH} \
-    && DIRNAME=`echo ${ARCH} | sed 's/\.tar\.gz$//g'` \
-    && cd ${DIRNAME} \
-    && ./configure \
     && make -j \
     && make -j install \
     \
