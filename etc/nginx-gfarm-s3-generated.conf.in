@@ -12,6 +12,7 @@ location / {
 location /@WEBUI_BASE_URL@static/ {
   alias @with_gfarm_s3_homedir@/static/;
   autoindex off;
+  access_log off;
 }
 
 location /@WEBUI_BASE_URL@ {
