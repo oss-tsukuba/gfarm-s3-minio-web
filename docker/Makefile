@@ -66,5 +66,8 @@ logs:
 logs-follow:
 	$(COMPOSE) logs --follow
 
+logs-less:
+	$(COMPOSE) logs | less -R
+
 _COMPOSE:
 	@echo $(COMPOSE)
