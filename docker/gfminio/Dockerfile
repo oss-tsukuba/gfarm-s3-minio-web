@@ -80,6 +80,7 @@ COPY ${BASEDIR}/index.html ${HTTPD_DOCUMENT_ROOT}/index.html
 
 COPY ${BASEDIR}/entrypoint.sh /entrypoint.sh
 COPY ${BASEDIR}/supervisord.conf /supervisord.conf
+COPY ${BASEDIR}/logtail.sh /logtail.sh
 
 COPY ./ ${WORKDIR}/gfarm-s3-minio-web
 
