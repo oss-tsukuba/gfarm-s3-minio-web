@@ -9,6 +9,12 @@ location / {
   rewrite ^/$ $proxy_x_forwarded_proto://$http_host/@WEBUI_BASE_URL@console permanent;
 }
 
+location = /favicon.ico {
+  empty_gif;
+  access_log off;
+  log_not_found off;
+}
+
 location /@WEBUI_BASE_URL@static/ {
   alias @with_gfarm_s3_homedir@/static/;
   autoindex off;
