@@ -15,6 +15,7 @@ RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get -y install \
     supervisor \
+    dumb-init \
     rsync \
     sudo \
     rsyslog \
@@ -81,9 +82,11 @@ COPY ${BASEDIR}/index.html ${HTTPD_DOCUMENT_ROOT}/index.html
 COPY ${BASEDIR}/entrypoint.sh /entrypoint.sh
 COPY ${BASEDIR}/supervisord.conf /supervisord.conf
 COPY ${BASEDIR}/logtail.sh /logtail.sh
+COPY ${BASEDIR}/run.sh /run.sh
 
 COPY ./ ${WORKDIR}/gfarm-s3-minio-web
 
 ENV WORKDIR=${WORKDIR}
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["supervisord", "-c", "/supervisord.conf"]
+STOPSIGNAL 15
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/entrypoint.sh", "supervisord", "-c", "/supervisord.conf"]
