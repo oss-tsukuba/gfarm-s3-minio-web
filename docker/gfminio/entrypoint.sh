@@ -54,13 +54,24 @@ ALLOWED_HOSTS=${ALLOWED_HOSTS:-${SERVER_NAME}}
 CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-${SERVER_URL}}
 
 HOME_BASE=/home
-USERMAP=/gfarm-s3-usermap.conf
 
 COPY_HOME_INITIALIZED_FILE="${HOME_BASE}/_copy_home_initialized"
 
-
 WEBUI_ADDR="unix:/tmp/gfarm-s3-webui.sock"
 ROUTER_ADDR="unix:/tmp/gfarm-s3-router.sock"
+
+GFARM_CONF_DIR="/gfarm_conf"
+PREFIX="/usr/local/etc"
+
+GFARM2_CONF_ORIG="${GFARM_CONF_DIR}/gfarm2.conf"
+GFARM2_CONF="${PREFIX}/gfarm2.conf"
+
+### <Gfarm Username>:<Local Username>:<S3 Accesskey ID>
+GFARM_S3_USERMAP_ORIG="${GFARM_CONF_DIR}/gfarm-s3-usermap.conf"
+GFARM_S3_USERMAP="/gfarm-s3-usermap.conf"
+
+cp -fa "${GFARM2_CONF_ORIG}" "${GFARM2_CONF}"
+cp -fa "${GFARM_S3_USERMAP_ORIG}" "${GFARM_S3_USERMAP}"
 
 debug_sleep() {
     # TODO if [ $DEBUG -eq 1 ]; then
@@ -190,7 +201,7 @@ wait_for_copy_home
 
 SAVE_IFS="$IFS"
 IFS=$'\n'
-for line in $(cat "${USERMAP}"); do
+for line in $(cat "${GFARM_S3_USERMAP}"); do
     GFARM_USERNAME=$(echo "${line}" | awk -F : '{print $1}' | sed "s/\s//g")
     LOCAL_USERNAME=$(echo "${line}" | awk -F : '{print $2}' | sed "s/\s//g")
     ACCESSKEY_ID=$(echo "${line}" | awk -F : '{print $3}' | sed "s/\s//g")

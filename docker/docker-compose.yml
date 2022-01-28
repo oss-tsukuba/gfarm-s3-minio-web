@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 
 # use variables from .env
 
@@ -6,6 +6,9 @@ services:
   gfminio:
     hostname: gfminio
     privileged: false
+    networks:
+      - mynet1
+      - mynet2
     build:
       context: ../
       dockerfile: ./docker/gfminio/Dockerfile
@@ -19,6 +22,7 @@ services:
     environment:
       ### mandatory
       - SERVER_URL=${SERVER_URL:?SERVER_URL}
+      - GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR:?GFARM_S3_SHARED_DIR}
 
       ### optional
       - DEBUG=${DEBUG:-0}
@@ -31,46 +35,70 @@ services:
       #TODO change to master branch
       - GFARM_S3_MINIO_SRC_GIT_BRANCH=${GFARM_S3_MINIO_SRC_GIT_BRANCH:-gfarmmerge}
 
+      - MYPROXY_SERVER=${MYPROXY_USER:-}
+
       # empty means using SERVER_NAME from SERVER_URL
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
       # empty means using SERVER_URL
       - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS-}
 
-      - MYPROXY_SERVER=
+      #TODO GFARM_S3_
+      - CACHE_DIR=/var/cache/gfarm-s3
+      - CACHE_SIZE=1024
+
+      ### constant
       - GFARM_S3_BUILD_DIR=/build_cache
       - GFARM_S3_SHARED_DIR=/share
       - GFARM_S3_USERNAME=_gfarm_s3
       - GFARM_S3_GROUPNAME=_gfarm_s3
-      - CACHE_DIR=/var/cache/gfarm-s3
-      - CACHE_SIZE=1024
 
     volumes:
       - copy_home:/home:rw
       - build_cache:/build_cache:rw
 
+      ### mandatory
+      - ${GFARM_CONF_DIR:?GFARM_CONF_DIR}:/gfarm_conf:ro
+
+      ### optional
+      - ${GSI_CERTIFICATES_DIR:-/dev/null}:/etc/grid-security/certificates:ro
       # /dev/null means downloading from GFARM_S3_MINIO_SRC_GIT_URL
       - ${GFARM_S3_MINIO_SRC_DIR:-/dev/null}:/gfarm-s3-minio
 
-      #TODO  ${SHARE_HOSTDIR:-/dev/null}:/share_host
-      - ./mnt:/mnt:rw
+      - ${SHARE_HOSTDIR:-/dev/null}:/share_host
 
       #TODO
-      - ./gfarm2.conf:/usr/local/etc/gfarm2.conf:ro
-      - ./certificates:/etc/grid-security/certificates:ro
-      - ./gfarm-s3-usermap.conf:/gfarm-s3-usermap.conf:ro
+      #- ./gfarm2.conf:/usr/local/etc/gfarm2.conf:ro
+      #- ./certificates:/etc/grid-security/certificates:ro
+      #- ./gfarm-s3-usermap.conf:/gfarm-s3-usermap.conf:ro
 
   copy_home:
     hostname: copy_home
+    networks:
+      - mynet1
     build:
       context: ./copy_home/
       args:
         - http_proxy=${http_proxy:-}
         - https_proxy=${https_proxy:-}
     volumes:
-      - /home:/host_home:ro
+      - ${HOMEDIR_BASE:-/home}:/host_home:ro
       - copy_home:/copy_home:rw
-      - ./mnt:/mnt:rw
+      - ${SHARE_HOSTDIR:-/dev/null}:/share_host
 
 volumes:
   copy_home:
   build_cache:
+
+networks:
+  mynet1:
+    # (internal tier)
+    # external (outside of Docker Compose) network name
+    # overridable
+    name: ${NETWORK1_NAME:-gfarm-s3_internal}
+    external: ${NETWORK1_EXTERNAL:-false}
+  mynet2:
+    # (reverse proxy tier)
+    # overridable
+    # external (outside of Docker Compose) network name
+    name: ${NETWORK2_NAME:-gfarm-s3_revproxy}
+    external: ${NETWORK2_EXTERNAL:-false}
