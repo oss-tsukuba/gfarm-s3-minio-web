@@ -51,6 +51,9 @@ restart-withlog:
 restart-proxy:
 	$(COMPOSE) restart proxy
 
+restart-copy_home:
+	$(COMPOSE) restart copy_home
+
 shell:
 	$(COMPOSE) exec gfminio bash
 
