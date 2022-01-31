@@ -40,7 +40,6 @@ reborn update:
 	$(COMPOSE) build
 	$(MAKE) down
 	$(COMPOSE) up -d
-	$(COMPOSE) restart proxy
 
 reborn-withlog:
 	$(MAKE) reborn
@@ -54,14 +53,13 @@ stop:
 
 restart:
 	$(COMPOSE) restart
-	$(COMPOSE) restart proxy
 
 restart-withlog:
 	$(MAKE) restart
 	$(COMPOSE) logs --follow
 
 restart-proxy:
-	$(COMPOSE) restart proxy
+	$(COMPOSE) restart revproxy
 
 restart-copy_home:
 	$(COMPOSE) restart copy_home
@@ -72,8 +70,8 @@ shell:
 shell-copy_home:
 	$(COMPOSE) exec copy_home bash
 
-shell-proxy:
-	$(COMPOSE) exec proxy bash
+shell-revproxy:
+	$(COMPOSE) exec revproxy bash
 
 logs:
 	$(COMPOSE) logs

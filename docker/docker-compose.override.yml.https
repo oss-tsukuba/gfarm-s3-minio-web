@@ -7,8 +7,8 @@ services:
     environment:
       - VIRTUAL_HOST=${SERVER_NAME}
 
-  proxy:
-    build: ./proxy
+  revproxy:
+    build: ./revproxy
     networks:
       - mynet2
     ports:
