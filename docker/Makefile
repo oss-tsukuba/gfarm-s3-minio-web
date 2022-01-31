@@ -8,6 +8,9 @@ COMPOSE_V2 = docker compose
 COMPOSE_SW = $(shell ${COMPOSE_V2} version > /dev/null 2>&1 && echo ${COMPOSE_V2} || echo ${COMPOSE_V1})
 COMPOSE = $(SUDO) COMPOSE_PROJECT_NAME=$(COMPOSE_PROJECT_NAME) $(COMPOSE_SW)
 
+# use selfsigned certificate
+SSC_COMPOSE = $(COMPOSE) -f docker-compose.selfsigned.yml
+
 ps:
 	$(COMPOSE) ps
 
@@ -16,6 +19,15 @@ config-check:
 
 prune:
 	$(DOCKER) system prune -f
+
+selfsigned-cert-generate:
+	$(SSC_COMPOSE) up
+
+selfsigned-cert-ps:
+	$(SSC_COMPOSE) ps
+
+selfsigned-cert-config:
+	$(SSC_COMPOSE) config
 
 down:
 	$(COMPOSE) down --remove-orphans
