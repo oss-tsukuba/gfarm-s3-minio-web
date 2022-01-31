@@ -72,6 +72,11 @@ RUN apt-get update \
     && ./aws/install --update \
     && /usr/local/bin/aws --version
 
+# shut up the following error:
+#   rsyslogd: imklog: cannot open kernel log (/proc/kmsg): Operation
+#   not permitted.
+RUN sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
+
 COPY ${BASEDIR}/nginx-gfarm-s3-site.conf /usr/local/etc/nginx-gfarm-s3-site.conf
 COPY ${BASEDIR}/nginx-gfarm-s3-include.conf /etc/nginx/sites-available/gfarm
 RUN ln -s /etc/nginx/sites-available/gfarm /etc/nginx/sites-enabled/gfarm \
