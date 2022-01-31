@@ -66,11 +66,6 @@ services:
 
       - ${SHARE_HOSTDIR:-/dev/null}:/share_host
 
-      #TODO
-      #- ./gfarm2.conf:/usr/local/etc/gfarm2.conf:ro
-      #- ./certificates:/etc/grid-security/certificates:ro
-      #- ./gfarm-s3-usermap.conf:/gfarm-s3-usermap.conf:ro
-
   copy_home:
     hostname: copy_home
     networks:
