@@ -144,6 +144,7 @@ install_gf_s3() {
 
     CONF_OVERWRITE=${SYSCONFDIR}/gfarm-s3-overwrite.conf
     cat <<EOF > "${CONF_OVERWRITE}"
+#GFARM_S3_LOG_LEVEL=debug
 GFARM_S3_LOG_OUTPUT=stderr
 
 DJANGO_DEBUG=${DJANGO_DEBUG}

@@ -7,6 +7,8 @@ DEFAULT_ADDR=0.0.0.0:51000
 DEFAULT_DIR=/data/$(gfwhoami)
 DEFAULT_CACHE_DIR=/tmp
 DEFAULT_CACHE_SIZE=1024
+DEFAULT_FACILITY=local0
+DEFAULT_LOGLEVEL=info
 
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
@@ -22,19 +24,21 @@ USAGE
   MINIO_ROOT_USER=... MINIO_ROOT_PASSWORD=... $0 [options]
 
 OPTIONS
-  -a address     : bind address (default: ${DEFAULT_ADDR})
-  -d gfarm_dir   : gfarm directory for S3 service (default: ${DEFAULT_DIR})
-  -c cache_dir   : working directory for CompleteMultipartUpload
-                   (default: ${DEFAULT_CACHE_DIR})
-  -s size(MB)    : size of working directory for CompleteMultipartUpload
-                   (default: ${DEFAULT_CACHE_SIZE})
-  -D             : DEBUG mode (set access key for debug)
-  -q             : disable startup information
+  -a address      : bind address (default: ${DEFAULT_ADDR})
+  -d gfarm_dir    : gfarm directory for S3 service (default: ${DEFAULT_DIR})
+  -c localtmp_dir : local working directory for CompleteMultipartUpload
+                    (default: ${DEFAULT_CACHE_DIR})
+  -s size(MB)     : size of working directory for CompleteMultipartUpload
+                    (default: ${DEFAULT_CACHE_SIZE})
+  -D              : DEBUG mode (set access key for debug)
+  -q              : disable startup information
 
 ENVIRONMENT
   MINIO_ROOT_USER       : Access Key ID for the service (mandatory)
   MINIO_ROOT_PASSWORD   : Secret Access Key for the service (mandatory)
   MINIO_OPTIONS         : options for minio gateway gfarm
+  MINIO_GFARM_SYSLOG_FACILITY : syslog facility (default: ${DEFAULT_FACILITY})
+  MINIO_GFARM_SYSLOG_LEVEL    : syslog level (default: ${DEFAULT_LOGLEVEL})
 
 SEE ALSO
   $minio gateway gfarm -h
@@ -81,15 +85,18 @@ CACHE_DIR_TEMPLATE=${cache_dir}/gfarm-s3_$(whoami)-XXXXXX
 
 export MINIO_OPTIONS=${MINIO_OPTIONS:-}
 
-export MINIO_GFARMS3_CACHEDIR=$(mktemp -d $CACHE_DIR_TEMPLATE)
-export MINIO_GFARMS3_CACHEDIR_SIZE_MB=$cache_size
+export MINIO_GFARM_LOCALTMP_DIR=$(mktemp -d $CACHE_DIR_TEMPLATE)
+export MINIO_GFARM_LOCALTMP_SIZE_MB=$cache_size
+
+export MINIO_GFARM_SYSLOG_FACILITY=${MINIO_GFARM_SYSLOG_FACILITY:-${DEFAULT_FACILITY}}
+export MINIO_GFARM_SYSLOG_LEVEL=${MINIO_GFARM_SYSLOG_LEVEL:-${DEFAULT_LOGLEVEL}}
 
 export MINIO_ROOT_USER
 export MINIO_ROOT_PASSWORD
 
 cleanup() {
-	rm -rf "$MINIO_GFARMS3_CACHEDIR"
-	exit 0
+    rm -rf "$MINIO_GFARM_LOCALTMP_DIR"
+    exit 0
 }
 
 trap cleanup EXIT

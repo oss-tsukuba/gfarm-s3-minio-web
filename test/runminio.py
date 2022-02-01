@@ -60,9 +60,9 @@ def runminio(pipe = True):
         "PATH": os.environ["PATH"],
         "TZ": os.environ["TZ"],
         "USER": os.environ["USER"],
-        "MINIO_GFARMS3_CACHEDIR": GfarmS3_Cache_Basedir,
-        "MINIO_GFARMS3_CACHEDIR_SIZE_MB": GfarmS3_Cache_Size_MB,
-	"GFARMS3_PARTFILE_DIGEST": "yes",
+        "MINIO_GFARM_LOCALTMP_DIR": GfarmS3_Cache_Basedir,
+        "MINIO_GFARM_LOCALTMP_SIZE_MB": GfarmS3_Cache_Size_MB,
+        "GFARMS3_PARTFILE_DIGEST": "yes",
     }
 
     cmd = [minio_path, "gateway", "gfarm", "--address", minioAddress, GfarmS3_Gfarm_Shared_Dir, GfarmS3_Gfarm_Shared_Virtual_Name]

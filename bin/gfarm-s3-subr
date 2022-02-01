@@ -1074,10 +1074,10 @@ try_start_a_server() {
 	local tmpfile=$(mktemp $GFARM_S3_TMP/minio-log.XXXXXX) || return $ABORT
 	local pidfile=$(mktemp $GFARM_S3_TMP/minio-pid.XXXXXX) || (rm -f $tmpfile; return $ABORT)
 	( \
-	 export MINIO_GFARMS3_CACHEDIR=$(mktemp -d $GFARMS3_CACHE_BASEDIR/gfarm-s3-XXXXXXXX) || exit 1; \
-	 export MINIO_GFARMS3_CACHEDIR_SIZE_MB="$GFARMS3_CACHE_SIZE_MB_PER_USER"; \
-	 export GFARMS3_PARTFILE_DIGEST="$GFARMS3_PARTFILE_DIGEST"; \
-	 if ! chmod 700 $MINIO_GFARMS3_CACHEDIR; then exit 1; fi; \
+	 export MINIO_GFARM_LOCALTMP_DIR=$(mktemp -d $GFARMS3_LOCALTMP_DIR/gfarm-s3-XXXXXXXX) || exit 1; \
+	 export MINIO_GFARM_LOCALTMP_SIZE_MB="$GFARMS3_LOCALTMP_SIZE_MB_PER_USER"; \
+	 export MINIO_GFARM_PARTFILE_DIGEST="$GFARMS3_PARTFILE_DIGEST"; \
+	 if ! chmod 700 $MINIO_GFARM_LOCALTMP_DIR; then exit 1; fi; \
 	 X509_USER_PROXY="$(get_x509_user_proxy $USER)" \
 	 HOME="$(get_user_metadir $USER)" \
 	 $MINIO_PATH gateway $GATEWAY \
@@ -1086,7 +1086,7 @@ try_start_a_server() {
 		$GFARMS3_GFARM_SHARED_VIRTUAL_NAME & \
 	 echo "$port:$!" 1>&3; \
 	 wait; \
-	 rm -rf "$MINIO_GFARMS3_CACHEDIR"; \
+	 rm -rf "$MINIO_GFARM_LOCALTMP_DIR"; \
 	 echo "Minio Exited") <&- >$tmpfile 2>&1 3>$pidfile &
 	RETRY_MAX=60  # sec.
 	for i in $(seq 1 1 $RETRY_MAX); do
