@@ -1,7 +1,5 @@
-#from http.client import HTTPResponse
 import threading
 import os
-#import socket
 from subprocess import Popen, PIPE
 import time
 from urllib.request import Request, urlopen
@@ -12,11 +10,11 @@ from gfarms3 import conf
 logger = conf.get_logger(__name__)
 
 def app(environ, start_response):
-    (method, path, request_hdr, input, file_wrapper) = accept_request(environ)
+    (method, path, request_hdr, _input, file_wrapper) = accept_request(environ)
 
     destURL, AccessKeyID = getDestURL(request_hdr)
     if isinstance(destURL, int):
-#        logger.debug(f"@@@ {myformat()} [1] START_RESPONSE {destURL}")
+        #logger.debug(f"@@@ {myformat()} [1] START_RESPONSE {destURL}")
         start_response(f"{destURL}", [])
         return []
     url = destURL + path
@@ -25,43 +23,37 @@ def app(environ, start_response):
     logger.debug(f"request_hdr = {request_hdr}")
 
     #logger.debug(f"@@@ METHOD {method}")
-    #logger.debug(f"@@@ {method} {url} {input}")
+    #logger.debug(f"@@@ {method} {url} {_input}")
 
     (response, status, response_hdr) = \
-	send_request(method, url, request_hdr, input)
+        send_request(method, url, request_hdr, _input)
 
     #for (k, v) in response_hdr:
         #logger.debug(f"@@@ << {k}: {v}")
 
     if response is None:
-#        logger.debug(f"@@@ {myformat()} [2] START_RESPONSE {status}")
+        #logger.debug(f"@@@ {myformat()} [2] START_RESPONSE {status}")
         start_response(f"{status}", [])
         return []
 
     #logger.debug(f"@@@ RESPONSE {response}")
     #logger.debug(f"@@@ RESPONSE FP = {response.fp}")
 
-    #(chunked, xAccelBuffering) = check_xAccelBuffering(response_hdr)
-    xAccelBuffering = check_xAccelBuffering(response_hdr)
-###    logger.debug(f"@@@ V {method} {xAccelBuffering} {path}")
-#    logger.debug(f"@@@ {myformat()} [3] START_RESPONSE {status}")
+    buffering = is_buffering(response_hdr)
+    #logger.debug(f"@@@ buffering = {buffering}")
     start_response(status, response_hdr)
 
-    respiter = \
-        gen_respiter(response, xAccelBuffering, file_wrapper)
-        #gen_respiter(response, chunked, xAccelBuffering, file_wrapper)
-#    logger.debug(f"@@@ respiter = {respiter}")
-    return respiter
+    return switch_reader(response, buffering, file_wrapper)
 
 
 def accept_request(environ):
-#    logger.debug(f"@@@ ACCEPT {myformat()}")
+    #logger.debug(f"@@@ ACCEPT {myformat()}")
     method = environ.get("REQUEST_METHOD")
     path = environ.get("RAW_URI")
     # convert HTTP_ABC -> ABC
     request_hdr = [(h[5:].replace('_', '-'), environ.get(h))
                       for h in environ if h.startswith("HTTP_")]
-###    logger.debug(f"@@@ ^ {method} {check_xAccelBuffering(request_hdr)} {path}")
+    ###logger.debug(f"@@@ ^ {method} {check_xAccelBuffering(request_hdr)} {path}")
     request_hdr = dict(request_hdr)
     #for k in request_hdr:
         #logger.debug(f"@@@ >> {k}: {request_hdr[k]}")
@@ -76,23 +68,23 @@ def accept_request(environ):
         request_hdr["CONTENT-TYPE"] = content_type
         #logger.debug(f"@@@ +++ CONTENT-TYPE: {content_type}")
 
-    input = environ["wsgi.input"]
+    _input = environ["wsgi.input"]
     file_wrapper = environ.get("wsgi.file_wrapper", None)
 
     #logger.debug(f"@@@ getDestURL => {destURL}")
     #logger.debug(f"@@@ PATH => {path}")
     #logger.debug(f"@@@ URL => {url}")
 
-    #logger.debug(f"@@@ INPUT = {type(input)}")
+    #logger.debug(f"@@@ INPUT = {type(_input)}")
 
-    return (method, path, request_hdr, input, file_wrapper)
+    return (method, path, request_hdr, _input, file_wrapper)
 
 
-def send_request(method, url, request_hdr, input):
-#    logger.debug(f"@@@ SEND REQUEST {method} {url} [request_hdr] {input}")
+def send_request(method, url, request_hdr, _input):
+#    logger.debug(f"@@@ SEND REQUEST {method} {url} [request_hdr] {_input}")
     try:
-        req = Request(url, input, request_hdr, method=method)
-#        logger.debug(f"@@@ SEND_REQUEST {type(input)}")
+        req = Request(url, _input, request_hdr, method=method)
+#        logger.debug(f"@@@ SEND_REQUEST {type(_input)}")
         response = urlopen(req, timeout=86400)
         status = f"{response.status}"
         response_hdr = response.getheaders()
@@ -117,60 +109,62 @@ def send_request(method, url, request_hdr, input):
     return (response, status, response_hdr)
 
 
-def check_xAccelBuffering(hdr):
-    #chunked = None
-    xAccelBuffering = None
+def is_buffering(hdr):
+    content_length_found = False
     for (k, v) in hdr:
         #logger.debug(f"@@@ RESPONSE HEADER k = {k}, v = {v}")
-        #if k.lower() == "transfer-encoding":
-            #chunked = v.lower() == "chunked"
-        if k.lower() == "x-accel-buffering":
-            xAccelBuffering = v.lower() != "no"
+        key = k.lower()
+        val = v.lower()
+        if key == "x-accel-buffering" and val == "no":
+            return False
+        if key == "content-length":
+            content_length_found = True
 
-#    logger.debug(f"@@@ RESPONSE X-Accel-Buffering: {xAccelBuffering}")
-    #logger.debug(f"@@@ RESPONSE Transfer-Encoding: chunked = {chunked}")
-    #return (chunked, xAccelBuffering)
-    return xAccelBuffering
+    # if content_length_found is False:
+    #     logger.debug("@@@ content-length not found")
+
+    return content_length_found
 
 
-#def gen_respiter(response, chunked, xAccelBuffering, file_wrapper):
-def gen_respiter(response, xAccelBuffering, file_wrapper):
-    if file_wrapper is None or xAccelBuffering == False:
-#        logger.debug(f"@@@ READ1READER")
-        respiter = read1Reader(response)
+def switch_reader(response, buffering, file_wrapper):
+    if file_wrapper is None or buffering == False:
+        #logger.debug(f"@@@ UnbufferedReader")
+        reader = UnbufferedReader(response)
     else:
-#        logger.debug(f"@@@ FILE_WRAPPER")
-        respiter = file_wrapper(response)
-    return respiter
+        #logger.debug(f"@@@ FILE_WRAPPER")
+        reader = file_wrapper(response)
+    return reader
 
 
-class read1Reader():
+class UnbufferedReader():
     def __init__(self, response):
-#        logger.debug(f"@@@ READ1 READER __INIT__")
+        #logger.debug(f"@@@ UnbufferedReader __INIT__")
         self.response = response
 
-#    def __del__(self):
-#        logger.debug(f"@@@ READ1 READER __DEL__")
-#        try:
-#            self.fp.close()
-#        except:
-#            pass
+    # def __del__(self):
+    #     logger.debug(f"@@@ UnbufferedReader __DEL__")
+    #     try:
+    #         self.fp.close()
+    #     except:
+    #         pass
 
     def __iter__(self):
-#        logger.debug(f"@@@ READ1 READER __ITER__")
+        #logger.debug(f"@@@ UnbufferedReader __ITER__")
         return self
 
     def __next__(self):
-#        logger.debug(f"@@@ READ1 READER __NEXT__")
+        #logger.debug(f"@@@ UnbufferedReader __NEXT__")
         amt = 8192	## same size with HTTPResponse.read()
         try:
+            # https://docs.python.org/3/library/http.client.html#httpresponse-objects
+            # https://docs.python.org/3/library/io.html#io.BufferedIOBase.read1
             b = self.response.read1(amt)
-            #logger.debug(f"@@@ READ1 READER b = [{debug_dumps(b)}]")
+            #logger.debug(f"@@@ UnbufferedReader b = [{debug_dumps(b)}]")
         except Exception as e:
-#            logger.debug(f"@@@ READ1 READER EXCEPTION {e}")
+            #logger.debug(f"@@@ UnbufferedReader EXCEPTION {e}")
             b = b''
         if len(b) == 0:
-#            logger.debug(f"@@@ READ1 READER @@@ StopIteration")
+            #logger.debug(f"@@@ UnbufferedReader StopIteration")
             raise StopIteration
         return b
 
@@ -281,12 +275,12 @@ def get_gfarms3_env(key):
     return conf.get_str(key)
 
 
-def myformat(t=None):
-    if t is None:
-        t = time.time()
-    i = time.strftime("%Y%m%dT%H%M%S", time.gmtime(t))
-    f = (int)((t % 1) * 1000000)
-    return "{}.{:06d}Z".format(i, f)
+# def myformat(t=None):
+#     if t is None:
+#         t = time.time()
+#     i = time.strftime("%Y%m%dT%H%M%S", time.gmtime(t))
+#     f = (int)((t % 1) * 1000000)
+#     return "{}.{:06d}Z".format(i, f)
 
 
 #def debug_dumps(s):
