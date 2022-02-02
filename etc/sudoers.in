@@ -1,18 +1,18 @@
 Defaults env_keep += "X509_USER_PROXY"
 
 ### restrict gfarm_s3-access only to users in one specific group
-#Runas_Alias GFARMS3 = %@with_gfarm_s3_group@
+#Runas_Alias GFARMS3 = %@GFARM_S3_GROUPNAME@
 ### not root
 Runas_Alias GFARMS3 = ALL,!root
 
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @prefix@/bin/gfarm-s3-server
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @with_globus@/bin/grid-proxy-info
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @with_globus@/bin/grid-proxy-init
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @with_myproxy@/bin/myproxy-logon
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfkey
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfuser
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfgroup
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfls
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfgetfacl
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfsetfacl
-@with_gfarm_s3_user@ ALL=(GFARMS3) NOPASSWD: @prefix@/bin/gfarm-s3-sharedsecret-password
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @prefix@/bin/gfarm-s3-server
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @with_globus@/bin/grid-proxy-info
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @with_globus@/bin/grid-proxy-init
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @with_myproxy@/bin/myproxy-logon
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfkey
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfuser
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfgroup
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfls
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfgetfacl
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @with_gfarm@/bin/gfsetfacl
+@GFARM_S3_USERNAME@ ALL=(GFARMS3) NOPASSWD: @prefix@/bin/gfarm-s3-sharedsecret-password

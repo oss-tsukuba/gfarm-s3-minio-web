@@ -643,8 +643,8 @@ with_router_port
 with_router_addr
 with_webui_port
 with_webui_addr
-with_gfarm_s3_group
-with_gfarm_s3_user
+GFARM_S3_GROUPNAME
+GFARM_S3_USERNAME
 GFARM_S3_HOMEDIR
 GSI_PROXY_HOURS
 MYPROXY_SERVER
@@ -745,8 +745,6 @@ with_gfarm
 with_globus
 with_myproxy
 with_gunicorn
-with_gfarm_s3_user
-with_gfarm_s3_group
 with_webui_addr
 with_router_addr
 with_router_nthreads
@@ -767,6 +765,8 @@ CPP
 MYPROXY_SERVER
 GSI_PROXY_HOURS
 GFARM_S3_HOMEDIR
+GFARM_S3_USERNAME
+GFARM_S3_GROUPNAME
 MINIO_LOCALTEMP_DIR
 MINIO_LOCALTEMP_SIZE_MB
 WEBUI_BASE_URL'
@@ -1417,10 +1417,6 @@ Optional Packages:
                           Myproxy root directory [/usr]
   --with-gunicorn=GUNICORN_ROOT
                           gunicorn root directory [/usr]
-  --with-gfarm-s3-user=GFARM_S3_USER
-                          Gfarm S3 username [_gfarm_s3]
-  --with-gfarm-s3-group=GFARM_S3_GROUP
-                          Gfarm S3 groupname [_gfarm_s3]
   --with-webui-addr=WEBUI_ADDR
                           Gfarm S3 WebUI addr [127.0.0.1:8000]
   --with-router-addr=ROUTER_ADDR
@@ -1451,6 +1447,10 @@ Some influential environment variables:
               GSI proxy certificate lifetime [168] hours
   GFARM_S3_HOMEDIR
               Gfarm S3 homedir [/home/_gfarm_s3]
+  GFARM_S3_USERNAME
+              Gfarm S3 user name [_gfarm_s3]
+  GFARM_S3_GROUPNAME
+              Gfarm S3 group name [_gfarm_s3]
   MINIO_LOCALTEMP_DIR
               Gfarm S3 MinIO local tempfile directory [/var/tmp]
   MINIO_LOCALTEMP_SIZE_MB
@@ -11429,36 +11429,18 @@ case x$GFARM_S3_HOMEDIR in
 esac
 
 
-### --with-gfarm-s3-user=GFARM_S3_USER
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Gfarm S3 user" >&5
-$as_echo_n "checking for Gfarm S3 user... " >&6; }
+### GFARM_S3_USERNAME
 
-# Check whether --with-gfarm-s3-user was given.
-if test "${with_gfarm_s3_user+set}" = set; then :
-  withval=$with_gfarm_s3_user;
-fi
-
-case x$with_gfarm_s3_user in
-  x|xyes|xno) with_gfarm_s3_user=_gfarm_s3 ;;
+case x$ in
+  x) GFARM_S3_USERNAME= ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gfarm_s3_user" >&5
-$as_echo "$with_gfarm_s3_user" >&6; }
 
 
-### --with-gfarm-s3-group=GFARM_S3_GROUP
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Gfarm S3 group" >&5
-$as_echo_n "checking for Gfarm S3 group... " >&6; }
+### GFARM_S3_GROUPNAME
 
-# Check whether --with-gfarm-s3-group was given.
-if test "${with_gfarm_s3_group+set}" = set; then :
-  withval=$with_gfarm_s3_group;
-fi
-
-case x$with_gfarm_s3_group in
-  x|xyes|xno) with_gfarm_s3_group=_gfarm_s3 ;;
+case x$GFARM_S3_GROUPNAME in
+  x) GFARM_S3_GROUPNAME= ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gfarm_s3_group" >&5
-$as_echo "$with_gfarm_s3_group" >&6; }
 
 
 ### --with-webui-addr=WEBUI_ADDR

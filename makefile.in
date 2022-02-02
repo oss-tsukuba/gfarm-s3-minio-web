@@ -1,9 +1,7 @@
 # prefix=@prefix@
-
+# with_gfarm=@with_gfarm@
 # with_globus=@with_globus@
 # with_myproxy=@with_myproxy@
-# with_gfarm=@with_gfarm@
-# with_gfarm_s3_user=@with_gfarm_s3_user@
 
 RM=rm
 

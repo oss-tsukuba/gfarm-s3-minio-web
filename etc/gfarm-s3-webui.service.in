@@ -4,8 +4,8 @@ After = network.target
 
 [Service]
 Type = simple
-User = @with_gfarm_s3_user@
-Group = @with_gfarm_s3_group@
+User = @GFARM_S3_USERNAME@
+Group = @GFARM_S3_GROUPNAME@
 RuntimeDirectory = gfarm-s3-webui
 WorkingDirectory = /
 ExecStart = @prefix@/bin/gfarm-s3-webui

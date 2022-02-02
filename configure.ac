@@ -77,25 +77,19 @@ case x$GFARM_S3_HOMEDIR in
 esac
 AC_SUBST(GFARM_S3_HOMEDIR)
 
-### --with-gfarm-s3-user=GFARM_S3_USER
-AC_MSG_CHECKING([for Gfarm S3 user])
-AC_ARG_WITH([gfarm-s3-user],
-  AC_HELP_STRING([--with-gfarm-s3-user=GFARM_S3_USER], [Gfarm S3 username [_gfarm_s3]]))
-case x$with_gfarm_s3_user in
-  x|xyes|xno) with_gfarm_s3_user=_gfarm_s3 ;;
+### GFARM_S3_USERNAME
+AC_ARG_VAR(GFARM_S3_USERNAME, [Gfarm S3 user name [_gfarm_s3]])
+case x$ in
+  x) GFARM_S3_USERNAME= ;;
 esac
-AC_MSG_RESULT([$with_gfarm_s3_user])
-AC_SUBST(with_gfarm_s3_user)
+AC_SUBST(GFARM_S3_USERNAME)
 
-### --with-gfarm-s3-group=GFARM_S3_GROUP
-AC_MSG_CHECKING([for Gfarm S3 group])
-AC_ARG_WITH([gfarm-s3-group],
-  AC_HELP_STRING([--with-gfarm-s3-group=GFARM_S3_GROUP], [Gfarm S3 groupname [_gfarm_s3]]))
-case x$with_gfarm_s3_group in
-  x|xyes|xno) with_gfarm_s3_group=_gfarm_s3 ;;
+### GFARM_S3_GROUPNAME
+AC_ARG_VAR(GFARM_S3_GROUPNAME, [Gfarm S3 group name [_gfarm_s3]])
+case x$GFARM_S3_GROUPNAME in
+  x) GFARM_S3_GROUPNAME= ;;
 esac
-AC_MSG_RESULT([$with_gfarm_s3_group])
-AC_SUBST(with_gfarm_s3_group)
+AC_SUBST(GFARM_S3_GROUPNAME)
 
 ### --with-webui-addr=WEBUI_ADDR
 AC_MSG_CHECKING([for Gfarm S3 WebUI addr])
