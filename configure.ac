@@ -60,16 +60,6 @@ case x$GSI_PROXY_HOURS in
 esac
 AC_SUBST(GSI_PROXY_HOURS)
 
-### --with-apache=APACHE_ROOT
-AC_MSG_CHECKING([for Apache HTTP Server])
-AC_ARG_WITH([apache],
-  AC_HELP_STRING([--with-apache=APACHE_ROOT], [Apache root directory [/usr]]))
-case x$with_apache in
-  x|xyes|xno) with_apache=/usr ;;
-esac
-AC_MSG_RESULT([$with_apache])
-AC_SUBST(with_apache)
-
 ### --with-gunicorn=GUNICORN_ROOT
 AC_MSG_CHECKING([for Gunicorn - Python WSGI HTTP Server for UNIX])
 AC_ARG_WITH([gunicorn],
@@ -222,7 +212,6 @@ bin/gfarm-s3-update-reverse-proxy
 bin/gfarm-s3-useradd
 bin/gfarm-s3-viusermap
 bin/makefile
-etc/apache-gfarm-s3.conf
 etc/gfarm-s3.conf
 etc/gfarm-s3-webui.service
 etc/gfarm-s3-router.service

@@ -3,7 +3,6 @@
 # with_globus=@with_globus@
 # with_myproxy=@with_myproxy@
 # with_gfarm=@with_gfarm@
-# with_apache=@with_apache@
 # with_gfarm_s3_user=@with_gfarm_s3_user@
 
 RM=rm

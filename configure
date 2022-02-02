@@ -647,7 +647,6 @@ with_gfarm_s3_group
 with_gfarm_s3_user
 with_gfarm_s3_homedir
 with_gunicorn
-with_apache
 GSI_PROXY_HOURS
 MYPROXY_SERVER
 with_myproxy
@@ -745,7 +744,6 @@ enable_libtool_lock
 with_gfarm
 with_globus
 with_myproxy
-with_apache
 with_gunicorn
 with_gfarm_s3_homedir
 with_gfarm_s3_user
@@ -1417,8 +1415,6 @@ Optional Packages:
                           Globus root directory [/usr]
   --with-myproxy=MYPROXY_ROOT
                           Myproxy root directory [/usr]
-  --with-apache=APACHE_ROOT
-                          Apache root directory [/usr]
   --with-gunicorn=GUNICORN_ROOT
                           gunicorn root directory [/usr]
   --with-gfarm-s3-homedir=GFARM_S3_HOMEDIR
@@ -11410,22 +11406,6 @@ case x$GSI_PROXY_HOURS in
 esac
 
 
-### --with-apache=APACHE_ROOT
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Apache HTTP Server" >&5
-$as_echo_n "checking for Apache HTTP Server... " >&6; }
-
-# Check whether --with-apache was given.
-if test "${with_apache+set}" = set; then :
-  withval=$with_apache;
-fi
-
-case x$with_apache in
-  x|xyes|xno) with_apache=/usr ;;
-esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_apache" >&5
-$as_echo "$with_apache" >&6; }
-
-
 ### --with-gunicorn=GUNICORN_ROOT
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Gunicorn - Python WSGI HTTP Server for UNIX" >&5
 $as_echo_n "checking for Gunicorn - Python WSGI HTTP Server for UNIX... " >&6; }
@@ -11723,7 +11703,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-minio bin/gfarm-s3-readconf bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/apache-gfarm-s3.conf etc/gfarm-s3.conf etc/gfarm-s3-webui.service etc/gfarm-s3-router.service etc/makefile etc/nginx-gfarm-s3-generated.conf etc/sudoers minio/makefile web/makefile web/rungunicorn web/runserver web/gfarm-s3/gfarms3/conf.py"
+ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-minio bin/gfarm-s3-readconf bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/gfarm-s3.conf etc/gfarm-s3-webui.service etc/gfarm-s3-router.service etc/makefile etc/nginx-gfarm-s3-generated.conf etc/sudoers minio/makefile web/makefile web/rungunicorn web/runserver web/gfarm-s3/gfarms3/conf.py"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -12730,7 +12710,6 @@ do
     "bin/gfarm-s3-useradd") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-useradd" ;;
     "bin/gfarm-s3-viusermap") CONFIG_FILES="$CONFIG_FILES bin/gfarm-s3-viusermap" ;;
     "bin/makefile") CONFIG_FILES="$CONFIG_FILES bin/makefile" ;;
-    "etc/apache-gfarm-s3.conf") CONFIG_FILES="$CONFIG_FILES etc/apache-gfarm-s3.conf" ;;
     "etc/gfarm-s3.conf") CONFIG_FILES="$CONFIG_FILES etc/gfarm-s3.conf" ;;
     "etc/gfarm-s3-webui.service") CONFIG_FILES="$CONFIG_FILES etc/gfarm-s3-webui.service" ;;
     "etc/gfarm-s3-router.service") CONFIG_FILES="$CONFIG_FILES etc/gfarm-s3-router.service" ;;

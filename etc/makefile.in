@@ -10,7 +10,6 @@ GFARMS3_CONF_DIR=$(PREFIX)/etc
 GFARMS3_CONF_OVERWRITE=$(GFARMS3_CONF_DIR)/gfarm-s3-overwrite.conf
 GFARMS3_LOCAL_USER_MAP=$(PREFIX)/etc/gfarm_s3_local_user_map
 GFARMS3_USER_PORT_MAP=$(GFARM_S3_VAR)/gfarm_s3_user_port_map
-GFARMS3_APACHE_REWRITE_CONF=$(GFARM_S3_VAR)/rewrite.conf
 GFARM_S3_VAR=$(PREFIX)/var/gfarm-s3
 
 INSTALL=install
@@ -43,15 +42,9 @@ install:
 	$(TOUCH) $(GFARMS3_USER_PORT_MAP)
 	$(CHOWN) $(GFARM_S3_USERNAME) $(GFARMS3_USER_PORT_MAP)
 
-	$(MKDIR) -p $$(dirname $(GFARMS3_APACHE_REWRITE_CONF))
-	$(CHOWN) $(GFARM_S3_USERNAME) $$(dirname $(GFARMS3_APACHE_REWRITE_CONF))
-	$(TOUCH) $(GFARMS3_APACHE_REWRITE_CONF)
-	$(CHOWN) $(GFARM_S3_USERNAME) $(GFARMS3_APACHE_REWRITE_CONF)
-
 	$(INSTALL) -D -m 644 gfarm-s3-webui.service $(SYSTEMD_SYSTEM)/gfarm-s3-webui.service
 	$(INSTALL) -D -m 644 gfarm-s3-router.service $(SYSTEMD_SYSTEM)/gfarm-s3-router.service
 
-	#@echo please add apache-gfarm-s3.conf content to your httpd.conf
 	@echo systemctl enable --now gfarm-s3-webui.service
 	@echo systemctl enable --now gfarm-s3-router.service
 
@@ -61,5 +54,5 @@ install:
 clean:
 
 distclean:
-	$(RM) -f apache-gfarm-s3.conf nginix-gfarm-s3-generated.conf gfarm-s3.conf gfarm-s3-webui.service gfarm-s3-router.service sudoers
+	$(RM) -f nginix-gfarm-s3-generated.conf gfarm-s3.conf gfarm-s3-webui.service gfarm-s3-router.service sudoers
 	$(RM) -f makefile

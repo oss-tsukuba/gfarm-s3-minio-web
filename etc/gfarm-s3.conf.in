@@ -54,9 +54,7 @@ GFLS=@with_gfarm@/bin/gfls
 GFGETFACL=@with_gfarm@/bin/gfgetfacl
 GFSETFACL=@with_gfarm@/bin/gfsetfacl
 
-GFARMS3_APACHE_REWRITE_CONF=$GFARM_S3_VAR/rewrite.conf
 GFARMS3_REVERSE_PROXY_ROUTES=$GFARM_S3_VAR/reverse-proxy-routes.txt
-APACHECTL=@with_apache@/sbin/apachectl
 
 # gfarm-s3-server
 MINIO_PATH=$GFARM_S3_PREFIX/bin/minio

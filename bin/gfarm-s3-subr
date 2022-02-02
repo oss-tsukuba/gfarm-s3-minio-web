@@ -856,22 +856,6 @@ sort_portmap_by_local_username() {
 	sort -t: -k "$PORTMAP_FIELD_LOCAL_USERNAME"
 }
 
-generate_apache_conf() {
-	local local_user_map_tmp=$(mktemp $GFARM_S3_TMP/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
-	local user_port_map_tmp=$(mktemp $GFARM_S3_TMP/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
-	grep -v "^#" "$GFARMS3_LOCAL_USER_MAP" | sort_usermap_by_local_username >$local_user_map_tmp
-	grep -v "^#" "$GFARMS3_USER_PORT_MAP" | sort_portmap_by_local_username >$user_port_map_tmp
-	join -t: -1"$USERMAP_FIELD_LOCAL_USERNAME" -2"$PORTMAP_FIELD_LOCAL_USERNAME" \
-		-o "1.$USERMAP_FIELD_ACCESS_KEY,2.$PORTMAP_FIELD_PORT" \
-		$local_user_map_tmp $user_port_map_tmp | awk \
-		-F : \
-		'! /^#/ {
-			printf("RewriteCond \"%%{HTTP:Authorization}\" \"Credential=%s/\"\n", $1)
-			printf("RewriteRule \"^/(.*)$\" \"http://127.0.0.1:%s/$1\" [P]\n", $2)
-		}'
-	rm $local_user_map_tmp $user_port_map_tmp
-}
-
 generate_reverse_proxy_routes() {
 	local local_user_map_tmp=$(mktemp $GFARM_S3_TMP/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
 	local user_port_map_tmp=$(mktemp $GFARM_S3_TMP/gfarm-s3-update-reverse-proxy.XXXXXX) || return 1
@@ -885,40 +869,6 @@ generate_reverse_proxy_routes() {
 			printf("%s\thttp://127.0.0.1:%s\n", $1, $2)
 		}'
 	rm $local_user_map_tmp $user_port_map_tmp
-}
-
-generate_nginx_conf() {
-	return 0
-}
-
-restart_apache() {
-	#local how=restart
-	local how=graceful
-	sudo $APACHECTL $how
-}
-
-restart_nginx() {
-	return 0
-}
-
-update_reverse_proxy_for_apache() {
-	local tmpfile=$(mktemp "$GFARMS3_APACHE_REWRITE_CONF.XXXXXX") || return 1
-	local status=0
-	if ! generate_apache_conf > "$tmpfile"; then
-		return 1
-	fi
-
-	if cmp -s "$tmpfile" "$GFARMS3_APACHE_REWRITE_CONF"; then
-		#echo "no change" 1>&2
-		rm "$tmpfile"
-	else
-		mv "$tmpfile" "$GFARMS3_APACHE_REWRITE_CONF"
-		if ! restart_apache; then
-			status=1
-		fi
-	fi
-
-	return $status
 }
 
 update_reverse_proxy_for_router() {
@@ -940,14 +890,6 @@ update_reverse_proxy_for_router() {
 }
 
 update_reverse_proxy() {
-	### not used
-	### /etc/sudoers.d/gfarm-s3
-	#@with_gfarm_s3_user@ ALL=(root) NOPASSWD: @with_apache@/sbin/apachectl
-	#if [ -f $APACHECTL ]; then
-	#	update_reverse_proxy_for_apache
-	#	return $?
-	#fi
-
 	update_reverse_proxy_for_router
 	return $?
 }
