@@ -35,7 +35,7 @@ services:
       #TODO change to master branch
       - GFARM_S3_MINIO_SRC_GIT_BRANCH=${GFARM_S3_MINIO_SRC_GIT_BRANCH:-gfarmmerge}
 
-      - MYPROXY_SERVER=${MYPROXY_USER:-}
+      - MYPROXY_SERVER=${MYPROXY_SERVER:-}
 
       # empty means using SERVER_NAME from SERVER_URL
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}

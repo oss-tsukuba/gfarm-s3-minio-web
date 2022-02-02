@@ -46,15 +46,12 @@ esac
 AC_MSG_RESULT([$with_myproxy])
 AC_SUBST(with_myproxy)
 
-### --with-myproxy-server=MYPROXY_SERVER
-AC_MSG_CHECKING([for myproxy server])
-AC_ARG_WITH([myproxy-server],
-  AC_HELP_STRING([--with-myproxy-server=MYPROXY_SERVER(host:port)], [myproxy servername [<not specified>]]))
-case x$with_myproxy_server in
-  x|xyes|xno) with_myproxy_server= ;;
+### MYPROXY_SERVER
+AC_ARG_VAR(MYPROXY_SERVER, [myproxy server name [<not specified (disabled)>]])
+case x$MYPROXY_SERVER in
+  x) MYPROXY_SERVER= ;;
 esac
-AC_MSG_RESULT([$with_myproxy_server])
-AC_SUBST(with_myproxy_server)
+AC_SUBST(MYPROXY_SERVER)
 
 ### --with-proxy-lifetime=PROXY_LIFETIME
 AC_MSG_CHECKING([for proxy lifetime])

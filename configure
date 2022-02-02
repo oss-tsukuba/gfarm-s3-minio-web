@@ -649,7 +649,7 @@ with_gfarm_s3_homedir
 with_gunicorn
 with_apache
 with_proxy_lifetime
-with_myproxy_server
+MYPROXY_SERVER
 with_myproxy
 with_globus
 with_gfarm
@@ -745,7 +745,6 @@ enable_libtool_lock
 with_gfarm
 with_globus
 with_myproxy
-with_myproxy_server
 with_proxy_lifetime
 with_apache
 with_gunicorn
@@ -769,6 +768,7 @@ LDFLAGS
 LIBS
 CPPFLAGS
 CPP
+MYPROXY_SERVER
 MINIO_LOCALTEMP_DIR
 MINIO_LOCALTEMP_SIZE_MB
 WEBUI_BASE_URL'
@@ -1417,8 +1417,6 @@ Optional Packages:
                           Globus root directory [/usr]
   --with-myproxy=MYPROXY_ROOT
                           Myproxy root directory [/usr]
-  --with-myproxy-server=MYPROXY_SERVER(host:port)
-                          myproxy servername [<not specified>]
   --with-proxy-lifetime=PROXY_LIFETIME
                           proxy lifetime [168]
   --with-apache=APACHE_ROOT
@@ -1455,6 +1453,8 @@ Some influential environment variables:
   CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
               you have headers in a nonstandard directory <include dir>
   CPP         C preprocessor
+  MYPROXY_SERVER
+              myproxy server name [<not specified (disabled)>]
   MINIO_LOCALTEMP_DIR
               Gfarm S3 MinIO local tempfile directory [/var/tmp]
   MINIO_LOCALTEMP_SIZE_MB
@@ -11396,20 +11396,11 @@ esac
 $as_echo "$with_myproxy" >&6; }
 
 
-### --with-myproxy-server=MYPROXY_SERVER
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for myproxy server" >&5
-$as_echo_n "checking for myproxy server... " >&6; }
+### MYPROXY_SERVER
 
-# Check whether --with-myproxy-server was given.
-if test "${with_myproxy_server+set}" = set; then :
-  withval=$with_myproxy_server;
-fi
-
-case x$with_myproxy_server in
-  x|xyes|xno) with_myproxy_server= ;;
+case x$MYPROXY_SERVER in
+  x) MYPROXY_SERVER= ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_myproxy_server" >&5
-$as_echo "$with_myproxy_server" >&6; }
 
 
 ### --with-proxy-lifetime=PROXY_LIFETIME
