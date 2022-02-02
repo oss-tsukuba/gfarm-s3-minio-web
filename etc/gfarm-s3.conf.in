@@ -1,3 +1,7 @@
+####################
+# default parameters
+####################
+
 # logging (see man logger)
 GFARM_S3_LOG_LEVEL=info
 #GFARM_S3_LOG_LEVEL=debug
@@ -38,9 +42,9 @@ GFARM_S3_LOCKDIR=$GFARM_S3_VAR
 
 GFARM_S3_ACCESS_KEY_MIN_LEN=8
 
+GSI_PROXY_HOURS=@GSI_PROXY_HOURS@
 MYPROXY_LOGON=@with_myproxy@/bin/myproxy-logon
 MYPROXY_SERVER=@MYPROXY_SERVER@
-PROXY_LIFETIME=@with_proxy_lifetime@
 GRID_PROXY_INIT=@with_globus@/bin/grid-proxy-init
 GRID_PROXY_INFO=@with_globus@/bin/grid-proxy-info
 GFKEY=@with_gfarm@/bin/gfkey

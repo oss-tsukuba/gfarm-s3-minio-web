@@ -648,7 +648,7 @@ with_gfarm_s3_user
 with_gfarm_s3_homedir
 with_gunicorn
 with_apache
-with_proxy_lifetime
+GSI_PROXY_HOURS
 MYPROXY_SERVER
 with_myproxy
 with_globus
@@ -745,7 +745,6 @@ enable_libtool_lock
 with_gfarm
 with_globus
 with_myproxy
-with_proxy_lifetime
 with_apache
 with_gunicorn
 with_gfarm_s3_homedir
@@ -769,6 +768,7 @@ LIBS
 CPPFLAGS
 CPP
 MYPROXY_SERVER
+GSI_PROXY_HOURS
 MINIO_LOCALTEMP_DIR
 MINIO_LOCALTEMP_SIZE_MB
 WEBUI_BASE_URL'
@@ -1417,8 +1417,6 @@ Optional Packages:
                           Globus root directory [/usr]
   --with-myproxy=MYPROXY_ROOT
                           Myproxy root directory [/usr]
-  --with-proxy-lifetime=PROXY_LIFETIME
-                          proxy lifetime [168]
   --with-apache=APACHE_ROOT
                           Apache root directory [/usr]
   --with-gunicorn=GUNICORN_ROOT
@@ -1455,6 +1453,8 @@ Some influential environment variables:
   CPP         C preprocessor
   MYPROXY_SERVER
               myproxy server name [<not specified (disabled)>]
+  GSI_PROXY_HOURS
+              GSI proxy certificate lifetime [168] hours
   MINIO_LOCALTEMP_DIR
               Gfarm S3 MinIO local tempfile directory [/var/tmp]
   MINIO_LOCALTEMP_SIZE_MB
@@ -11403,20 +11403,11 @@ case x$MYPROXY_SERVER in
 esac
 
 
-### --with-proxy-lifetime=PROXY_LIFETIME
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for proxy lifetime" >&5
-$as_echo_n "checking for proxy lifetime... " >&6; }
+### GSI_PROXY_HOURS
 
-# Check whether --with-proxy-lifetime was given.
-if test "${with_proxy_lifetime+set}" = set; then :
-  withval=$with_proxy_lifetime;
-fi
-
-case x$with_proxy_lifetime in
-  x|xyes|xno) with_proxy_lifetime=168 ;;
+case x$GSI_PROXY_HOURS in
+  x) GSI_PROXY_HOURS=168 ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_proxy_lifetime" >&5
-$as_echo "$with_proxy_lifetime" >&6; }
 
 
 ### --with-apache=APACHE_ROOT

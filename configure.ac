@@ -53,15 +53,12 @@ case x$MYPROXY_SERVER in
 esac
 AC_SUBST(MYPROXY_SERVER)
 
-### --with-proxy-lifetime=PROXY_LIFETIME
-AC_MSG_CHECKING([for proxy lifetime])
-AC_ARG_WITH([proxy-lifetime],
-  AC_HELP_STRING([--with-proxy-lifetime=PROXY_LIFETIME], [proxy lifetime [168]]))
-case x$with_proxy_lifetime in
-  x|xyes|xno) with_proxy_lifetime=168 ;;
+### GSI_PROXY_HOURS
+AC_ARG_VAR(GSI_PROXY_HOURS, [GSI proxy certificate lifetime [168] hours])
+case x$GSI_PROXY_HOURS in
+  x) GSI_PROXY_HOURS=168 ;;
 esac
-AC_MSG_RESULT([$with_proxy_lifetime])
-AC_SUBST(with_proxy_lifetime)
+AC_SUBST(GSI_PROXY_HOURS)
 
 ### --with-apache=APACHE_ROOT
 AC_MSG_CHECKING([for Apache HTTP Server])
