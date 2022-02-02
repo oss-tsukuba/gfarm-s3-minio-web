@@ -95,20 +95,15 @@ AC_SUBST(GFARM_S3_GROUPNAME)
 AC_ARG_VAR(GFARM_S3_WEBUI_ADDR, [Gfarm S3 WebUI address [unix:/tmp/gfarm-s3-webui.sock]])
 case x$GFARM_S3_WEBUI_ADDR in
   x) GFARM_S3_WEBUI_ADDR=unix:/tmp/gfarm-s3-webui.sock ;;
-  esac
-  AC_SUBST(GFARM_S3_WEBUI_ADDR)
-
-### --with-router-addr=ROUTER_ADDR
-AC_MSG_CHECKING([for Gfarm S3 ROUTER addr])
-AC_ARG_WITH([router-addr],
-  AC_HELP_STRING([--with-router-addr=ROUTER_ADDR], [router bind address [127.0.0.1:8001]]))
-case x$with_router_addr in
-  x|xyes|xno) with_router_addr=127.0.0.1:8001 ;;
 esac
-AC_MSG_RESULT([$with_router_addr])
-AC_SUBST(with_router_addr)
-with_router_port=${with_router_addr#*:}
-AC_SUBST(with_router_port)
+AC_SUBST(GFARM_S3_WEBUI_ADDR)
+
+### GFARM_S3_ROUTER_ADDR
+AC_ARG_VAR(GFARM_S3_ROUTER_ADDR, [Gfarm S3 router address [unix:/tmp/gfarm-s3-router.sock]])
+case x$GFARM_S3_ROUTER_ADDR in
+  x) GFARM_S3_ROUTER_ADDR=unix:/tmp/gfarm-s3-router.sock ;;
+esac
+AC_SUBST(GFARM_S3_ROUTER_ADDR)
 
 ### --with-router-nthreads=ROUTER_NTHREADS
 AC_MSG_CHECKING([number of router threads])

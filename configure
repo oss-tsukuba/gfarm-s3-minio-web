@@ -639,8 +639,7 @@ with_minio_builddir
 with_go_archive
 router_nworkers
 router_nthreads
-with_router_port
-with_router_addr
+GFARM_S3_ROUTER_ADDR
 GFARM_S3_WEBUI_ADDR
 GFARM_S3_GROUPNAME
 GFARM_S3_USERNAME
@@ -744,7 +743,6 @@ with_gfarm
 with_globus
 with_myproxy
 with_gunicorn
-with_router_addr
 with_router_nthreads
 with_router_nworkers
 with_go_archive
@@ -766,6 +764,7 @@ GFARM_S3_HOMEDIR
 GFARM_S3_USERNAME
 GFARM_S3_GROUPNAME
 GFARM_S3_WEBUI_ADDR
+GFARM_S3_ROUTER_ADDR
 MINIO_LOCALTEMP_DIR
 MINIO_LOCALTEMP_SIZE_MB
 WEBUI_BASE_URL'
@@ -1416,8 +1415,6 @@ Optional Packages:
                           Myproxy root directory [/usr]
   --with-gunicorn=GUNICORN_ROOT
                           gunicorn root directory [/usr]
-  --with-router-addr=ROUTER_ADDR
-                          router bind address [127.0.0.1:8001]
   --with-router-nthreads=ROUTER_NTHREADS
                           number of threads [10]
   --with-router-nworkers=ROUTER_NWORKERS
@@ -1450,6 +1447,8 @@ Some influential environment variables:
               Gfarm S3 group name [_gfarm_s3]
   GFARM_S3_WEBUI_ADDR
               Gfarm S3 WebUI address [unix:/tmp/gfarm-s3-webui.sock]
+  GFARM_S3_ROUTER_ADDR
+              Gfarm S3 router address [unix:/tmp/gfarm-s3-router.sock]
   MINIO_LOCALTEMP_DIR
               Gfarm S3 MinIO local tempfile directory [/var/tmp]
   MINIO_LOCALTEMP_SIZE_MB
@@ -11446,25 +11445,14 @@ esac
 
 case x$GFARM_S3_WEBUI_ADDR in
   x) GFARM_S3_WEBUI_ADDR=unix:/tmp/gfarm-s3-webui.sock ;;
-  esac
-
-
-### --with-router-addr=ROUTER_ADDR
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Gfarm S3 ROUTER addr" >&5
-$as_echo_n "checking for Gfarm S3 ROUTER addr... " >&6; }
-
-# Check whether --with-router-addr was given.
-if test "${with_router_addr+set}" = set; then :
-  withval=$with_router_addr;
-fi
-
-case x$with_router_addr in
-  x|xyes|xno) with_router_addr=127.0.0.1:8001 ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_router_addr" >&5
-$as_echo "$with_router_addr" >&6; }
 
-with_router_port=${with_router_addr#*:}
+
+### GFARM_S3_ROUTER_ADDR
+
+case x$GFARM_S3_ROUTER_ADDR in
+  x) GFARM_S3_ROUTER_ADDR=unix:/tmp/gfarm-s3-router.sock ;;
+esac
 
 
 ### --with-router-nthreads=ROUTER_NTHREADS

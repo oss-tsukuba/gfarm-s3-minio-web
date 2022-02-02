@@ -59,7 +59,7 @@ HOME_BASE=/home
 COPY_HOME_INITIALIZED_FILE="${HOME_BASE}/_copy_home_initialized"
 
 GFARM_S3_WEBUI_ADDR="unix:/tmp/gfarm-s3-webui.sock"
-ROUTER_ADDR="unix:/tmp/gfarm-s3-router.sock"
+GFARM_S3_ROUTER_ADDR="unix:/tmp/gfarm-s3-router.sock"
 
 GFARM_CONF_DIR="/gfarm_conf"
 PREFIX="/usr/local/etc"
@@ -115,6 +115,7 @@ install_gf_s3() {
     GFARM_S3_USERNAME=${GFARM_S3_USERNAME} \
     GFARM_S3_GROUPNAME=${GFARM_S3_GROUPNAME} \
     GFARM_S3_WEBUI_ADDR=${GFARM_S3_WEBUI_ADDR} \
+    GFARM_S3_ROUTER_ADDR=${GFARM_S3_ROUTER_ADDR} \
     MINIO_LOCALTEMP_DIR=/tmp \
     MINIO_LOCALTEMP_SIZE_MB=512 \
     WEBUI_BASE_URL="gf_s3/" \
@@ -126,8 +127,7 @@ install_gf_s3() {
     --with-myproxy=/usr \
     --with-gunicorn=/usr/local \
     --with-gfarm-shared-dir=${GFARM_S3_SHARED_DIR} \
-    --with-minio-builddir=${GFARM_S3_BUILD_DIR} \
-    --with-router-addr=${ROUTER_ADDR}
+    --with-minio-builddir=${GFARM_S3_BUILD_DIR}
     make || debug_sleep
     make install
     mkdir -p ${CACHE_DIR}
