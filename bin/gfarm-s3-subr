@@ -1023,6 +1023,7 @@ try_start_a_server() {
 	 if ! chmod 700 $MINIO_GFARM_LOCALTMP_DIR; then exit 1; fi; \
 	 X509_USER_PROXY="$(get_x509_user_proxy $USER)" \
 	 HOME="$(get_user_metadir $USER)" \
+	 MINIO_BROWSER=off \
 	 $MINIO_PATH gateway $GATEWAY \
 		--address "$address" \
 		"$gfarm_shared_dir" \
