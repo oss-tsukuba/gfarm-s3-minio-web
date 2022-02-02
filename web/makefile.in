@@ -1,7 +1,7 @@
 PREFIX=@prefix@
 GFARM_S3_USER=@with_gfarm_s3_user@
 GFARM_S3_GROUP=@with_gfarm_s3_group@
-GFARM_S3_HOMEDIR=@with_gfarm_s3_homedir@
+GFARM_S3_HOMEDIR=@GFARM_S3_HOMEDIR@
 
 MKDIR=mkdir
 TAR=tar

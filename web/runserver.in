@@ -1,3 +1,3 @@
 #! /bin/sh
-cd @with_gfarm_s3_homedir@/gfarm-s3
+cd @GFARM_S3_HOMEDIR@/gfarm-s3
 /usr/bin/python3 manage.py runserver

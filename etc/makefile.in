@@ -4,7 +4,7 @@ SYS_HTTPD_CONF=/etc/httpd/conf/httpd.conf
 SYS_HTTPD_CONF_D=/etc/httpd/conf.d
 GFARM_S3_USERNAME=@with_gfarm_s3_user@
 GFARM_S3_GROUPNAME=@with_gfarm_s3_group@
-ROUTER_HOMEDIR=@with_gfarm_s3_homedir@/gfarm-s3
+# ROUTER_HOMEDIR=@GFARM_S3_HOMEDIR@/gfarm-s3
 
 GFARMS3_CONF_DIR=$(PREFIX)/etc
 GFARMS3_CONF_OVERWRITE=$(GFARMS3_CONF_DIR)/gfarm-s3-overwrite.conf

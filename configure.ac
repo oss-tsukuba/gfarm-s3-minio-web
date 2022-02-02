@@ -46,6 +46,16 @@ esac
 AC_MSG_RESULT([$with_myproxy])
 AC_SUBST(with_myproxy)
 
+### --with-gunicorn=GUNICORN_ROOT
+AC_MSG_CHECKING([for Gunicorn - Python WSGI HTTP Server for UNIX])
+AC_ARG_WITH([gunicorn],
+  AC_HELP_STRING([--with-gunicorn=GUNICORN_ROOT], [gunicorn root directory [/usr]]))
+case x$with_gunicorn in
+  x|xyes|xno) with_gunicorn=/usr/local ;;
+esac
+AC_MSG_RESULT([$with_gunicorn])
+AC_SUBST(with_gunicorn)
+
 ### MYPROXY_SERVER
 AC_ARG_VAR(MYPROXY_SERVER, [myproxy server name [<not specified (disabled)>]])
 case x$MYPROXY_SERVER in
@@ -60,25 +70,12 @@ case x$GSI_PROXY_HOURS in
 esac
 AC_SUBST(GSI_PROXY_HOURS)
 
-### --with-gunicorn=GUNICORN_ROOT
-AC_MSG_CHECKING([for Gunicorn - Python WSGI HTTP Server for UNIX])
-AC_ARG_WITH([gunicorn],
-  AC_HELP_STRING([--with-gunicorn=GUNICORN_ROOT], [gunicorn root directory [/usr]]))
-case x$with_gunicorn in
-  x|xyes|xno) with_gunicorn=/usr/local ;;
+### GFARM_S3_HOMEDIR
+AC_ARG_VAR(GFARM_S3_HOMEDIR, [Gfarm S3 homedir [/home/_gfarm_s3]])
+case x$GFARM_S3_HOMEDIR in
+  x) GFARM_S3_HOMEDIR=/home/_gfarm_s3 ;;
 esac
-AC_MSG_RESULT([$with_gunicorn])
-AC_SUBST(with_gunicorn)
-
-### --with-gfarm-s3-homedir=GFARM_S3_HOMEDIR
-AC_MSG_CHECKING([for GFARM_S3 homedir])
-AC_ARG_WITH([gfarm-s3-homedir],
-  AC_HELP_STRING([--with-gfarm-s3-homedir=GFARM_S3_HOMEDIR], [Gfarm S3 homedir [/home/_gfarm_s3]]))
-case x$with_gfarm_s3_homedir in
-  x|xyes|xno) with_gfarm_s3_homedir=/home/_gfarm_s3 ;;
-esac
-AC_MSG_RESULT([$with_gfarm_s3_homedir])
-AC_SUBST(with_gfarm_s3_homedir)
+AC_SUBST(GFARM_S3_HOMEDIR)
 
 ### --with-gfarm-s3-user=GFARM_S3_USER
 AC_MSG_CHECKING([for Gfarm S3 user])

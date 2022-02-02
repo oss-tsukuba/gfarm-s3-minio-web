@@ -111,6 +111,7 @@ install_gf_s3() {
     cd ${WORKDIR}/gfarm-s3-minio-web
     GSI_PROXY_HOURS=${GSI_PROXY_HOURS} \
     MYPROXY_SERVER=${MYPROXY_SERVER} \
+    GFARM_S3_HOMEDIR=${GFARM_S3_HOMEDIR} \
     MINIO_LOCALTEMP_DIR=/tmp \
     MINIO_LOCALTEMP_SIZE_MB=512 \
     WEBUI_BASE_URL="gf_s3/" \
@@ -121,7 +122,6 @@ install_gf_s3() {
     --with-globus=/usr \
     --with-myproxy=/usr \
     --with-gunicorn=/usr/local \
-    --with-gfarm-s3-homedir=${GFARM_S3_HOMEDIR} \
     --with-gfarm-s3-user=${GFARM_S3_USERNAME} \
     --with-gfarm-s3-group=${GFARM_S3_GROUPNAME} \
     --with-gfarm-shared-dir=${GFARM_S3_SHARED_DIR} \

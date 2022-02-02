@@ -16,7 +16,7 @@ location = /favicon.ico {
 }
 
 location /@WEBUI_BASE_URL@static/ {
-  alias @with_gfarm_s3_homedir@/static/;
+  alias @GFARM_S3_HOMEDIR@/static/;
   autoindex off;
   access_log off;
 }
