@@ -14,7 +14,8 @@ MINIO_PATH=$(PREFIX)/bin/minio
 MC_PATH=$(PREFIX)/bin/mc
 
 mc_git=https://github.com/minio/mc.git
-minio_git=https://github.com/oss-tsukuba/gfarm-s3-minio.git
+minio_gfarm_git=https://github.com/oss-tsukuba/gfarm-s3-minio.git
+minio_gfarm_branch=gfarm
 
 CGO_LDFLAGS="-Wl,-rpath,$(WITH_GFARM)/lib"
 PKG_CONFIG_PATH="$(WITH_GFARM)/lib/pkgconfig"
@@ -31,8 +32,11 @@ RACE=
 
 all::
 	[ -d $(BUILDDIR) ] || $(MKDIR) -p $(BUILDDIR)
-	[ -d $(BUILDDIR)/mc ] || (cd $(BUILDDIR) && $(GIT) clone $(mc_git))
-	[ -d $(BUILDDIR)/gfarm-s3-minio ] || (cd $(BUILDDIR) && $(GIT) clone $(minio_git) && cd gfarm-s3-minio && $(GIT) checkout gfarm && $(GIT) pull)
+	# fetch or update "mc"
+	[ -d $(BUILDDIR)/mc ] && (cd $(BUILDDIR)/mc && git pull || true) || (cd $(BUILDDIR) && $(GIT) clone --depth 1 $(mc_git))
+	# fetch or update "gfarm-s3-minio"
+	# (may fail when using private repository)
+	[ -d $(BUILDDIR)/gfarm-s3-minio ] && (cd $(BUILDDIR)/gfarm-s3-minio && git pull || true) || (cd $(BUILDDIR) && $(GIT) clone --depth 1 $(minio_gfarm_git) && cd gfarm-s3-minio && $(GIT) checkout $(minio_gfarm_branch))
 
 	cd $(BUILDDIR)/mc && GOPATH=$(GOPATH) $(GOPATH)/bin/go install
 
