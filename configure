@@ -641,8 +641,7 @@ router_nworkers
 router_nthreads
 with_router_port
 with_router_addr
-with_webui_port
-with_webui_addr
+GFARM_S3_WEBUI_ADDR
 GFARM_S3_GROUPNAME
 GFARM_S3_USERNAME
 GFARM_S3_HOMEDIR
@@ -745,7 +744,6 @@ with_gfarm
 with_globus
 with_myproxy
 with_gunicorn
-with_webui_addr
 with_router_addr
 with_router_nthreads
 with_router_nworkers
@@ -767,6 +765,7 @@ GSI_PROXY_HOURS
 GFARM_S3_HOMEDIR
 GFARM_S3_USERNAME
 GFARM_S3_GROUPNAME
+GFARM_S3_WEBUI_ADDR
 MINIO_LOCALTEMP_DIR
 MINIO_LOCALTEMP_SIZE_MB
 WEBUI_BASE_URL'
@@ -1417,8 +1416,6 @@ Optional Packages:
                           Myproxy root directory [/usr]
   --with-gunicorn=GUNICORN_ROOT
                           gunicorn root directory [/usr]
-  --with-webui-addr=WEBUI_ADDR
-                          Gfarm S3 WebUI addr [127.0.0.1:8000]
   --with-router-addr=ROUTER_ADDR
                           router bind address [127.0.0.1:8001]
   --with-router-nthreads=ROUTER_NTHREADS
@@ -1451,6 +1448,8 @@ Some influential environment variables:
               Gfarm S3 user name [_gfarm_s3]
   GFARM_S3_GROUPNAME
               Gfarm S3 group name [_gfarm_s3]
+  GFARM_S3_WEBUI_ADDR
+              Gfarm S3 WebUI address [unix:/tmp/gfarm-s3-webui.sock]
   MINIO_LOCALTEMP_DIR
               Gfarm S3 MinIO local tempfile directory [/var/tmp]
   MINIO_LOCALTEMP_SIZE_MB
@@ -11443,22 +11442,11 @@ case x$GFARM_S3_GROUPNAME in
 esac
 
 
-### --with-webui-addr=WEBUI_ADDR
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Gfarm S3 WebUI addr" >&5
-$as_echo_n "checking for Gfarm S3 WebUI addr... " >&6; }
+### GFARM_S3_WEBUI_ADDR
 
-# Check whether --with-webui-addr was given.
-if test "${with_webui_addr+set}" = set; then :
-  withval=$with_webui_addr;
-fi
-
-case x$with_webui_addr in
-  x|xyes|xno) with_webui_addr=127.0.0.1:8000 ;;
-esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_webui_addr" >&5
-$as_echo "$with_webui_addr" >&6; }
-
-with_webui_port=${with_webui_addr#*:}
+case x$GFARM_S3_WEBUI_ADDR in
+  x) GFARM_S3_WEBUI_ADDR=unix:/tmp/gfarm-s3-webui.sock ;;
+  esac
 
 
 ### --with-router-addr=ROUTER_ADDR
@@ -11676,7 +11664,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-minio bin/gfarm-s3-readconf bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/gfarm-s3.conf etc/gfarm-s3-webui.service etc/gfarm-s3-router.service etc/makefile etc/nginx-gfarm-s3-generated.conf etc/sudoers minio/makefile web/makefile web/rungunicorn web/runserver web/gfarm-s3/gfarms3/conf.py"
+ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-minio bin/gfarm-s3-readconf bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/gfarm-s3.conf etc/gfarm-s3-webui.service etc/gfarm-s3-router.service etc/makefile etc/nginx-gfarm-s3-generated.conf etc/sudoers minio/makefile web/makefile web/gfarm-s3/gfarms3/conf.py"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -12691,8 +12679,6 @@ do
     "etc/sudoers") CONFIG_FILES="$CONFIG_FILES etc/sudoers" ;;
     "minio/makefile") CONFIG_FILES="$CONFIG_FILES minio/makefile" ;;
     "web/makefile") CONFIG_FILES="$CONFIG_FILES web/makefile" ;;
-    "web/rungunicorn") CONFIG_FILES="$CONFIG_FILES web/rungunicorn" ;;
-    "web/runserver") CONFIG_FILES="$CONFIG_FILES web/runserver" ;;
     "web/gfarm-s3/gfarms3/conf.py") CONFIG_FILES="$CONFIG_FILES web/gfarm-s3/gfarms3/conf.py" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

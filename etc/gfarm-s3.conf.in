@@ -79,7 +79,7 @@ DJANGO_DEBUG=False
 
 # for gfarm-s3-webui
 GUNICORN_DIR=@with_gunicorn@
-WEBUI_ADDR=@with_webui_addr@
+WEBUI_ADDR=@GFARM_S3_WEBUI_ADDR@
 WEBUI_BASEDIR=@GFARM_S3_HOMEDIR@/gfarm-s3
 WEBUI_BASE_URL=@WEBUI_BASE_URL@
 

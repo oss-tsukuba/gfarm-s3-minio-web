@@ -91,17 +91,12 @@ case x$GFARM_S3_GROUPNAME in
 esac
 AC_SUBST(GFARM_S3_GROUPNAME)
 
-### --with-webui-addr=WEBUI_ADDR
-AC_MSG_CHECKING([for Gfarm S3 WebUI addr])
-AC_ARG_WITH([webui-addr],
-  AC_HELP_STRING([--with-webui-addr=WEBUI_ADDR], [Gfarm S3 WebUI addr [127.0.0.1:8000]]))
-case x$with_webui_addr in
-  x|xyes|xno) with_webui_addr=127.0.0.1:8000 ;;
-esac
-AC_MSG_RESULT([$with_webui_addr])
-AC_SUBST(with_webui_addr)
-with_webui_port=${with_webui_addr#*:}
-AC_SUBST(with_webui_port)
+### GFARM_S3_WEBUI_ADDR
+AC_ARG_VAR(GFARM_S3_WEBUI_ADDR, [Gfarm S3 WebUI address [unix:/tmp/gfarm-s3-webui.sock]])
+case x$GFARM_S3_WEBUI_ADDR in
+  x) GFARM_S3_WEBUI_ADDR=unix:/tmp/gfarm-s3-webui.sock ;;
+  esac
+  AC_SUBST(GFARM_S3_WEBUI_ADDR)
 
 ### --with-router-addr=ROUTER_ADDR
 AC_MSG_CHECKING([for Gfarm S3 ROUTER addr])
@@ -211,8 +206,6 @@ etc/nginx-gfarm-s3-generated.conf
 etc/sudoers
 minio/makefile
 web/makefile
-web/rungunicorn
-web/runserver
 web/gfarm-s3/gfarms3/conf.py
 ])
 AC_OUTPUT

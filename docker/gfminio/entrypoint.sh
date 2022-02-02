@@ -58,7 +58,7 @@ HOME_BASE=/home
 
 COPY_HOME_INITIALIZED_FILE="${HOME_BASE}/_copy_home_initialized"
 
-WEBUI_ADDR="unix:/tmp/gfarm-s3-webui.sock"
+GFARM_S3_WEBUI_ADDR="unix:/tmp/gfarm-s3-webui.sock"
 ROUTER_ADDR="unix:/tmp/gfarm-s3-router.sock"
 
 GFARM_CONF_DIR="/gfarm_conf"
@@ -114,6 +114,7 @@ install_gf_s3() {
     GFARM_S3_HOMEDIR=${GFARM_S3_HOMEDIR} \
     GFARM_S3_USERNAME=${GFARM_S3_USERNAME} \
     GFARM_S3_GROUPNAME=${GFARM_S3_GROUPNAME} \
+    GFARM_S3_WEBUI_ADDR=${GFARM_S3_WEBUI_ADDR} \
     MINIO_LOCALTEMP_DIR=/tmp \
     MINIO_LOCALTEMP_SIZE_MB=512 \
     WEBUI_BASE_URL="gf_s3/" \
@@ -126,7 +127,6 @@ install_gf_s3() {
     --with-gunicorn=/usr/local \
     --with-gfarm-shared-dir=${GFARM_S3_SHARED_DIR} \
     --with-minio-builddir=${GFARM_S3_BUILD_DIR} \
-    --with-webui-addr=${WEBUI_ADDR} \
     --with-router-addr=${ROUTER_ADDR}
     make || debug_sleep
     make install
@@ -154,9 +154,6 @@ ALLOWED_HOSTS=${ALLOWED_HOSTS}
 
 # required by Django 4 or later
 CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
-
-WEBUI_ADDR=${WEBUI_ADDR}
-ROUTER_ADDR=${ROUTER_ADDR}
 EOF
 
     if which systemctl > /dev/null 2>&1; then
