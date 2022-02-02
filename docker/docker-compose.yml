@@ -47,15 +47,17 @@ services:
       - CACHE_DIR=/var/cache/gfarm-s3
       - CACHE_SIZE=1024
 
-      ### constant
-      - GFARM_S3_BUILD_DIR=/build_cache
+      #TODO
       - GFARM_S3_SHARED_DIR=/share
+
+      ### constant
+      - GFARM_S3_BUILD_DIR=/build
       - GFARM_S3_USERNAME=_gfarm_s3
       - GFARM_S3_GROUPNAME=_gfarm_s3
 
     volumes:
       - copy_home:/home:rw
-      - build_cache:/build_cache:rw
+      - build_cache:/build:rw
 
       ### mandatory
       - ${GFARM_CONF_DIR:?GFARM_CONF_DIR}:/gfarm_conf:ro

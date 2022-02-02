@@ -1,9 +1,9 @@
 PREFIX=@prefix@
 WITH_GFARM=@with_gfarm@
 MINIO_BUILDDIR=@with_minio_builddir@
-GOPATH=$(MINIO_BUILDDIR)/minio/work/go
+GOPATH=$(MINIO_BUILDDIR)/go
 GOBIN=$(GOPATH)/bin
-BUILDDIR=$(MINIO_BUILDDIR)/minio/work/build
+BUILDDIR=$(MINIO_BUILDDIR)
 
 GO_ARCHIVE=@with_go_archive@
 GO_ARCHIVE_DIR=$$(dirname $(GOPATH))
@@ -40,7 +40,7 @@ all::
 
 	cd $(BUILDDIR)/mc && GOPATH=$(GOPATH) $(GOPATH)/bin/go install
 
-	cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(GOPATH)/bin/go install $(RACE)
+	cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(GOPATH)/bin/go install $(RACE) -ldflags '-w -s'
 
 	#cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) PATH=$(GOBIN):$${PATH} make
 
