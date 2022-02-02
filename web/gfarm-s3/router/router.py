@@ -110,20 +110,20 @@ def send_request(method, url, request_hdr, _input):
 
 
 def is_buffering(hdr):
-    content_length_found = False
+    lower_hdr = {}
     for (k, v) in hdr:
-        #logger.debug(f"@@@ RESPONSE HEADER k = {k}, v = {v}")
-        key = k.lower()
-        val = v.lower()
-        if key == "x-accel-buffering" and val == "no":
-            return False
-        if key == "content-length":
-            content_length_found = True
+        lower_hdr[k.lower()] = v
 
-    # if content_length_found is False:
-    #     logger.debug("@@@ content-length not found")
+    x_accel_buffering = lower_hdr.get("x-accel-buffering", None)
+    if x_accel_buffering is not None and x_accel_buffering.lower() == "no":
+        return False
 
-    return content_length_found
+    content_length = lower_hdr.get("content-length", None)
+    if content_length is None:
+        # logger.debug("@@@ content-length not found")
+        return False
+
+    return True
 
 
 def switch_reader(response, buffering, file_wrapper):
