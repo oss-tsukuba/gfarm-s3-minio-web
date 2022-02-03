@@ -140,15 +140,12 @@ case x$GO_URL in
 esac
 AC_SUBST(GO_URL)
 
-### --with-minio-builddir=MINIO_BUILDDIR
-AC_MSG_CHECKING([minio-builddir for build s3 server (MinIO)])
-AC_ARG_WITH([minio-builddir],
-  AC_HELP_STRING([--with-minio-builddir=MINIO_BUILDDIR], [work directory [$HOME/tmp]]))
-case x$with_minio_builddir in
-  x|xyes|xno) with_minio_builddir=$HOME/tmp ;;
+### GO_BUILDDIR
+AC_ARG_VAR(GO_BUILDDIR, [Golang build directory (minio, etc.) [/go_build]])
+case x$ in
+  x) GO_BUILDDIR=/go_build ;;
 esac
-AC_MSG_RESULT([$with_minio_builddir])
-AC_SUBST(with_minio_builddir)
+AC_SUBST(GO_BUILDDIR)
 
 ### --with-gfarm-shared-dir=SHARED_DIR
 AC_MSG_CHECKING([gfarm_shared_dir])

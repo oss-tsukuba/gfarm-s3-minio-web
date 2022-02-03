@@ -635,7 +635,7 @@ WEBUI_BASE_URL
 MINIO_LOCALTEMP_SIZE_MB
 MINIO_LOCALTEMP_DIR
 with_gfarm_shared_dir
-with_minio_builddir
+GO_BUILDDIR
 GO_URL
 GFARM_S3_ROUTER_WORKERS
 GFARM_S3_ROUTER_THREADS
@@ -745,7 +745,6 @@ with_gfarm
 with_globus
 with_myproxy
 with_gunicorn
-with_minio_builddir
 with_gfarm_shared_dir
 '
       ac_precious_vars='build_alias
@@ -769,6 +768,7 @@ GFARM_S3_WEBUI_WORKERS
 GFARM_S3_ROUTER_THREADS
 GFARM_S3_ROUTER_WORKERS
 GO_URL
+GO_BUILDDIR
 MINIO_LOCALTEMP_DIR
 MINIO_LOCALTEMP_SIZE_MB
 WEBUI_BASE_URL'
@@ -1419,8 +1419,6 @@ Optional Packages:
                           Myproxy root directory [/usr]
   --with-gunicorn=GUNICORN_ROOT
                           gunicorn root directory [/usr]
-  --with-minio-builddir=MINIO_BUILDDIR
-                          work directory [$HOME/tmp]
   --with-gfarm-shared-dir=SHARED_DIR
                           work directory [/share]
 
@@ -1456,6 +1454,7 @@ Some influential environment variables:
   GFARM_S3_ROUTER_WORKERS
               the number of workers of S3 router [2]
   GO_URL      go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]
+  GO_BUILDDIR Golang build directory (minio, etc.) [/go_build]
   MINIO_LOCALTEMP_DIR
               Gfarm S3 MinIO local tempfile directory [/var/tmp]
   MINIO_LOCALTEMP_SIZE_MB
@@ -11497,20 +11496,11 @@ case x$GO_URL in
 esac
 
 
-### --with-minio-builddir=MINIO_BUILDDIR
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking minio-builddir for build s3 server (MinIO)" >&5
-$as_echo_n "checking minio-builddir for build s3 server (MinIO)... " >&6; }
+### GO_BUILDDIR
 
-# Check whether --with-minio-builddir was given.
-if test "${with_minio_builddir+set}" = set; then :
-  withval=$with_minio_builddir;
-fi
-
-case x$with_minio_builddir in
-  x|xyes|xno) with_minio_builddir=$HOME/tmp ;;
+case x$ in
+  x) GO_BUILDDIR=/go_build ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_minio_builddir" >&5
-$as_echo "$with_minio_builddir" >&6; }
 
 
 ### --with-gfarm-shared-dir=SHARED_DIR

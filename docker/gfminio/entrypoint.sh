@@ -38,9 +38,12 @@ fi
 TZ=${TZ:-Asia/Tokyo}
 export TZ
 
-GFARM_S3_MINIO_SRC_DIR_ORIG=/gfarm-s3-minio
-
+GFARM_S3_USERNAME=_gfarm_s3
+GFARM_S3_GROUPNAME=_gfarm_s3
 GFARM_S3_HOMEDIR=/home/${GFARM_S3_USERNAME}
+GO_BUILDDIR=/build
+
+GFARM_S3_MINIO_SRC_DIR_ORIG=/gfarm-s3-minio
 
 URL_REGEXP="^([^/:]+?)://([^/:]+?):?([[:digit:]]+)?(/.*)?"
 [[ ${SERVER_URL} =~ ${URL_REGEXP} ]]
@@ -67,14 +70,15 @@ COPY_HOME_INITIALIZED_FILE="${HOME_BASE}/_copy_home_initialized"
 GFARM_S3_WEBUI_ADDR="unix:/tmp/gfarm-s3-webui.sock"
 GFARM_S3_ROUTER_ADDR="unix:/tmp/gfarm-s3-router.sock"
 
-GFARM_CONF_DIR="/gfarm_conf"
-PREFIX="/usr/local/etc"
+GFARM_CONF_DIR_ORIG="/gfarm_conf"
+PREFIX="/usr/local"
+SYSCONFDIR="${PREFIX}/etc"
 
-GFARM2_CONF_ORIG="${GFARM_CONF_DIR}/gfarm2.conf"
-GFARM2_CONF="${PREFIX}/gfarm2.conf"
+GFARM2_CONF_ORIG="${GFARM_CONF_DIR_ORIG}/gfarm2.conf"
+GFARM2_CONF="${PREFIX}/etc/gfarm2.conf"
 
 ### <Gfarm Username>:<Local Username>:<S3 Accesskey ID>
-GFARM_S3_USERMAP_ORIG="${GFARM_CONF_DIR}/gfarm-s3-usermap.conf"
+GFARM_S3_USERMAP_ORIG="${GFARM_CONF_DIR_ORIG}/gfarm-s3-usermap.conf"
 GFARM_S3_USERMAP="/gfarm-s3-usermap.conf"
 
 cp -fa "${GFARM2_CONF_ORIG}" "${GFARM2_CONF}"
@@ -111,8 +115,6 @@ install_gf_s3() {
         git checkout ${GFARM_S3_MINIO_SRC_GIT_BRANCH}
     fi
 
-    PREFIX=/usr/local
-    SYSCONFDIR=${PREFIX}/etc
 
     cd ${WORKDIR}/gfarm-s3-minio-web
     GSI_PROXY_HOURS=${GSI_PROXY_HOURS} \
@@ -127,6 +129,7 @@ install_gf_s3() {
     GFARM_S3_ROUTER_THREADS=${GFARM_S3_ROUTER_THREADS} \
     GFARM_S3_ROUTER_WORKERS=${GFARM_S3_ROUTER_WORKERS} \
     GO_URL=${GO_URL} \
+    GO_BUILDDIR=${GO_BUILDDIR} \
     MINIO_LOCALTEMP_DIR=/tmp \
     MINIO_LOCALTEMP_SIZE_MB=512 \
     WEBUI_BASE_URL="gf_s3/" \
@@ -144,7 +147,7 @@ install_gf_s3() {
     mkdir -p ${CACHE_DIR}
     chmod 1777 ${CACHE_DIR}
 
-    #TODO in "make install"
+    # generate DJANGO_SECRET_KEY
     DJANGO_SECRET_KEY=${SYSCONFDIR}/django_secret_key.txt
     if [ ! -f ${DJANGO_SECRET_KEY} ]; then
         #pip install django-generate-secret-key
