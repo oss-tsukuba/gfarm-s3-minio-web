@@ -61,7 +61,7 @@ restart-withlog:
 restart-proxy:
 	$(COMPOSE) restart revproxy
 
-restart-copy_home:
+restart-copy_home copy-home:
 	$(COMPOSE) restart copy_home
 
 shell:
