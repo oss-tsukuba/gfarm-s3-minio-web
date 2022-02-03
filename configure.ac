@@ -133,15 +133,12 @@ case x$GFARM_S3_ROUTER_WORKERS in
 esac
 AC_SUBST(GFARM_S3_ROUTER_WORKERS)
 
-### --with-go-archive=GO_ARCHIVE
-AC_MSG_CHECKING([go-archive that fetched from https://dl.google.com/go for build s3 server (MinIO)])
-AC_ARG_WITH([go-archive],
-  AC_HELP_STRING([--with-go-archive=GO_ARCHIVE], [go archive [go1.16.linux-amd64.tar.gz]]))
-case x$with_go_archive in
-  x|xyes|xno) with_go_archive=go1.16.linux-amd64.tar.gz ;;
+### GO_URL
+AC_ARG_VAR(GO_URL, [go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]])
+case x$GO_URL in
+  x) GO_URL=https://go.dev/dl/go1.16.13.linux-amd64.tar.gz ;;
 esac
-AC_MSG_RESULT([$with_go_archive])
-AC_SUBST(with_go_archive)
+AC_SUBST(GO_URL)
 
 ### --with-minio-builddir=MINIO_BUILDDIR
 AC_MSG_CHECKING([minio-builddir for build s3 server (MinIO)])

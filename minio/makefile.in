@@ -1,14 +1,14 @@
 PREFIX=@prefix@
 WITH_GFARM=@with_gfarm@
-MINIO_BUILDDIR=@with_minio_builddir@
-GOPATH=$(MINIO_BUILDDIR)/go
-GOBIN=$(GOPATH)/bin
-BUILDDIR=$(MINIO_BUILDDIR)
 
-GO_ARCHIVE=@with_go_archive@
+BUILDDIR=@with_minio_builddir@
+
+GOPATH=$(BUILDDIR)/go
+GOBIN=$(GOPATH)/bin
+GO_URL=@GO_URL@
+GO_ARCHIVE_NAME=$$(basename $(GO_URL))
 GO_ARCHIVE_DIR=$$(dirname $(GOPATH))
-GO_ARCHIVE_PATH=$(GO_ARCHIVE_DIR)/$(GO_ARCHIVE)
-GO_URL=https://dl.google.com/go/$(GO_ARCHIVE)
+GO_ARCHIVE_PATH=$(GO_ARCHIVE_DIR)/$(GO_ARCHIVE_NAME)
 
 MINIO_PATH=$(PREFIX)/bin/minio
 MC_PATH=$(PREFIX)/bin/mc
@@ -46,8 +46,8 @@ all::
 
 install-go::
 	-$(MKDIR) -p $$(dirname $(GOPATH))
-	[ -f $(GO_ARCHIVE_PATH) ] || $(CURL) -o $(GO_ARCHIVE_PATH) $(GO_URL)
-	cd $$(dirname $(GOPATH)) && $(TAR) xfzp $(GO_ARCHIVE_PATH)
+	[ -f $(GO_ARCHIVE_PATH) ] || $(CURL) -L -o $(GO_ARCHIVE_PATH) $(GO_URL)
+	cd $$(dirname $(GOPATH)) && $(TAR) xfzp $(GO_ARCHIVE_PATH) || (rm $(GO_ARCHIVE_PATH); false)
 
 install::
 	$(INSTALL) -D -c -m 555 $(GOBIN)/mc "$(MC_PATH)"

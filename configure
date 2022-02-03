@@ -636,7 +636,7 @@ MINIO_LOCALTEMP_SIZE_MB
 MINIO_LOCALTEMP_DIR
 with_gfarm_shared_dir
 with_minio_builddir
-with_go_archive
+GO_URL
 GFARM_S3_ROUTER_WORKERS
 GFARM_S3_ROUTER_THREADS
 GFARM_S3_WEBUI_WORKERS
@@ -745,7 +745,6 @@ with_gfarm
 with_globus
 with_myproxy
 with_gunicorn
-with_go_archive
 with_minio_builddir
 with_gfarm_shared_dir
 '
@@ -769,6 +768,7 @@ GFARM_S3_WEBUI_THREADS
 GFARM_S3_WEBUI_WORKERS
 GFARM_S3_ROUTER_THREADS
 GFARM_S3_ROUTER_WORKERS
+GO_URL
 MINIO_LOCALTEMP_DIR
 MINIO_LOCALTEMP_SIZE_MB
 WEBUI_BASE_URL'
@@ -1419,8 +1419,6 @@ Optional Packages:
                           Myproxy root directory [/usr]
   --with-gunicorn=GUNICORN_ROOT
                           gunicorn root directory [/usr]
-  --with-go-archive=GO_ARCHIVE
-                          go archive [go1.16.linux-amd64.tar.gz]
   --with-minio-builddir=MINIO_BUILDDIR
                           work directory [$HOME/tmp]
   --with-gfarm-shared-dir=SHARED_DIR
@@ -1457,6 +1455,7 @@ Some influential environment variables:
               the number of threads of S3 router [16]
   GFARM_S3_ROUTER_WORKERS
               the number of workers of S3 router [2]
+  GO_URL      go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]
   MINIO_LOCALTEMP_DIR
               Gfarm S3 MinIO local tempfile directory [/var/tmp]
   MINIO_LOCALTEMP_SIZE_MB
@@ -11491,20 +11490,11 @@ case x$GFARM_S3_ROUTER_WORKERS in
 esac
 
 
-### --with-go-archive=GO_ARCHIVE
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking go-archive that fetched from https://dl.google.com/go for build s3 server (MinIO)" >&5
-$as_echo_n "checking go-archive that fetched from https://dl.google.com/go for build s3 server (MinIO)... " >&6; }
+### GO_URL
 
-# Check whether --with-go-archive was given.
-if test "${with_go_archive+set}" = set; then :
-  withval=$with_go_archive;
-fi
-
-case x$with_go_archive in
-  x|xyes|xno) with_go_archive=go1.16.linux-amd64.tar.gz ;;
+case x$GO_URL in
+  x) GO_URL=https://go.dev/dl/go1.16.13.linux-amd64.tar.gz ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_go_archive" >&5
-$as_echo "$with_go_archive" >&6; }
 
 
 ### --with-minio-builddir=MINIO_BUILDDIR
