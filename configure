@@ -634,7 +634,7 @@ LIBOBJS
 WEBUI_BASE_URL
 MINIO_LOCALTEMP_SIZE_MB
 MINIO_LOCALTEMP_DIR
-with_gfarm_shared_dir
+GFARM_S3_SHARED_DIR
 GO_BUILDDIR
 GO_URL
 GFARM_S3_ROUTER_WORKERS
@@ -745,7 +745,6 @@ with_gfarm
 with_globus
 with_myproxy
 with_gunicorn
-with_gfarm_shared_dir
 '
       ac_precious_vars='build_alias
 host_alias
@@ -769,6 +768,7 @@ GFARM_S3_ROUTER_THREADS
 GFARM_S3_ROUTER_WORKERS
 GO_URL
 GO_BUILDDIR
+GFARM_S3_SHARED_DIR
 MINIO_LOCALTEMP_DIR
 MINIO_LOCALTEMP_SIZE_MB
 WEBUI_BASE_URL'
@@ -1419,8 +1419,6 @@ Optional Packages:
                           Myproxy root directory [/usr]
   --with-gunicorn=GUNICORN_ROOT
                           gunicorn root directory [/usr]
-  --with-gfarm-shared-dir=SHARED_DIR
-                          work directory [/share]
 
 Some influential environment variables:
   CC          C compiler command
@@ -1455,6 +1453,8 @@ Some influential environment variables:
               the number of workers of S3 router [2]
   GO_URL      go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]
   GO_BUILDDIR Golang build directory (minio, etc.) [/go_build]
+  GFARM_S3_SHARED_DIR
+              Shared Gfarm directory via Gfarm S3 [/share]
   MINIO_LOCALTEMP_DIR
               Gfarm S3 MinIO local tempfile directory [/var/tmp]
   MINIO_LOCALTEMP_SIZE_MB
@@ -11503,20 +11503,11 @@ case x$ in
 esac
 
 
-### --with-gfarm-shared-dir=SHARED_DIR
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking gfarm_shared_dir" >&5
-$as_echo_n "checking gfarm_shared_dir... " >&6; }
+### GFARM_S3_SHARED_DIR
 
-# Check whether --with-gfarm-shared-dir was given.
-if test "${with_gfarm_shared_dir+set}" = set; then :
-  withval=$with_gfarm_shared_dir;
-fi
-
-case x$with_gfarm_shared_dir in
-  x|xyes|xno) with_gfarm_shared_dir=/share ;;
+case x$GFARM_S3_SHARED_DIR in
+  x) GFARM_S3_SHARED_DIR=/share ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gfarm_shared_dir" >&5
-$as_echo "$with_gfarm_shared_dir" >&6; }
 
 
 ### MINIO_LOCALTEMP_DIR

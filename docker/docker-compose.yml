@@ -22,6 +22,7 @@ services:
     environment:
       ### mandatory
       - SERVER_URL=${SERVER_URL:?SERVER_URL}
+      # Gfarm directory to share files
       - GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR:?GFARM_S3_SHARED_DIR}
 
       ### optional
@@ -66,9 +67,6 @@ services:
       #TODO GFARM_S3_
       - CACHE_DIR=/var/cache/gfarm-s3
       - CACHE_SIZE=1024
-
-      #TODO
-      - GFARM_S3_SHARED_DIR=/share
 
     volumes:
       - copy_home:/home:rw

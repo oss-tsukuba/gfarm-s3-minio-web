@@ -147,15 +147,12 @@ case x$ in
 esac
 AC_SUBST(GO_BUILDDIR)
 
-### --with-gfarm-shared-dir=SHARED_DIR
-AC_MSG_CHECKING([gfarm_shared_dir])
-AC_ARG_WITH([gfarm-shared-dir],
-  AC_HELP_STRING([--with-gfarm-shared-dir=SHARED_DIR], [work directory [/share]]))
-case x$with_gfarm_shared_dir in
-  x|xyes|xno) with_gfarm_shared_dir=/share ;;
+### GFARM_S3_SHARED_DIR
+AC_ARG_VAR(GFARM_S3_SHARED_DIR, [Shared Gfarm directory via Gfarm S3 [/share]])
+case x$GFARM_S3_SHARED_DIR in
+  x) GFARM_S3_SHARED_DIR=/share ;;
 esac
-AC_MSG_RESULT([$with_gfarm_shared_dir])
-AC_SUBST(with_gfarm_shared_dir)
+AC_SUBST(GFARM_S3_SHARED_DIR)
 
 ### MINIO_LOCALTEMP_DIR
 AC_ARG_VAR(MINIO_LOCALTEMP_DIR, [Gfarm S3 MinIO local tempfile directory [/var/tmp]])

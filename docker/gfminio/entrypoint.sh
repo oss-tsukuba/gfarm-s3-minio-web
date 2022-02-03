@@ -19,14 +19,11 @@ fi
 : CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
 : GSI_PROXY_HOURS=${GSI_PROXY_HOURS}
 : MYPROXY_SERVER=${MYPROXY_SERVER}
-: GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR}
-: GFARM_S3_BUILD_DIR=${GFARM_S3_BUILD_DIR}
-: GFARM_S3_USERNAME=${GFARM_S3_USERNAME}
-: GFARM_S3_GROUPNAME=${GFARM_S3_USERNAME}
 : GFARM_S3_WEBUI_THREADS=${GFARM_S3_WEBUI_THREADS}
 : GFARM_S3_WEBUI_WORKERS=${GFARM_S3_WEBUI_WORKERS}
 : GFARM_S3_ROUTER_THREADS=${GFARM_S3_ROUTER_THREADS}
 : GFARM_S3_ROUTER_WORKERS=${GFARM_S3_ROUTER_WORKERS}
+: GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR}
 : GO_URL=${GO_URL}
 
 # TODO GFARM_S3_LOCALTMP
@@ -89,15 +86,14 @@ debug_sleep() {
     sleep infinity
 }
 
-### cache files in GFARM_S3_BUILD_DIR to build.
+### cache files in GO_BUILDDIR to build.
 install_gf_s3() {
     groupadd -K GID_MIN=100 ${GFARM_S3_GROUPNAME}
     useradd -K UID_MIN=100 -m ${GFARM_S3_USERNAME} -g ${GFARM_S3_GROUPNAME} -d ${GFARM_S3_HOMEDIR} -s /bin/bash
 
-    MINIO_WORKDIR=${GFARM_S3_BUILD_DIR}
     GFARM_S3_MINIO_DIRNAME=gfarm-s3-minio
-    GFARM_S3_MINIO_WORKDIR=${MINIO_WORKDIR}/${GFARM_S3_MINIO_DIRNAME}
-    mkdir -p ${MINIO_WORKDIR}
+    GFARM_S3_MINIO_WORKDIR=${GO_BUILDDIR}/${GFARM_S3_MINIO_DIRNAME}
+    mkdir -p ${GO_BUILDDIR}
     if [ ! -d "${GFARM_S3_MINIO_WORKDIR}" ]; then
         if [ -d "${GFARM_S3_MINIO_SRC_DIR_ORIG}" ]; then
             mkdir -p "${GFARM_S3_MINIO_WORKDIR}"
@@ -128,6 +124,7 @@ install_gf_s3() {
     GFARM_S3_WEBUI_WORKERS=${GFARM_S3_WEBUI_WORKERS} \
     GFARM_S3_ROUTER_THREADS=${GFARM_S3_ROUTER_THREADS} \
     GFARM_S3_ROUTER_WORKERS=${GFARM_S3_ROUTER_WORKERS} \
+    GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR} \
     GO_URL=${GO_URL} \
     GO_BUILDDIR=${GO_BUILDDIR} \
     MINIO_LOCALTEMP_DIR=/tmp \
@@ -139,9 +136,7 @@ install_gf_s3() {
     --with-gfarm=/usr/local \
     --with-globus=/usr \
     --with-myproxy=/usr \
-    --with-gunicorn=/usr/local \
-    --with-gfarm-shared-dir=${GFARM_S3_SHARED_DIR} \
-    --with-minio-builddir=${GFARM_S3_BUILD_DIR}
+    --with-gunicorn=/usr/local
     make || debug_sleep
     make install
     mkdir -p ${CACHE_DIR}
