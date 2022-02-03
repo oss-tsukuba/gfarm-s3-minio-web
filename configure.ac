@@ -133,6 +133,27 @@ case x$GFARM_S3_ROUTER_WORKERS in
 esac
 AC_SUBST(GFARM_S3_ROUTER_WORKERS)
 
+### GFARM_S3_SHARED_DIR
+AC_ARG_VAR(GFARM_S3_SHARED_DIR, [Shared Gfarm directory via Gfarm S3 [/share]])
+case x$GFARM_S3_SHARED_DIR in
+  x) GFARM_S3_SHARED_DIR=/share ;;
+esac
+AC_SUBST(GFARM_S3_SHARED_DIR)
+
+### GFARM_S3_LOCALTMP_DIR
+AC_ARG_VAR(GFARM_S3_LOCALTMP_DIR, [Gfarm S3 MinIO local tempfile directory [/var/tmp]])
+case x$GFARM_S3_LOCALTMP_DIR in
+  x) GFARM_S3_LOCALTMP_DIR=/var/tmp ;;
+esac
+AC_SUBST(GFARM_S3_LOCALTMP_DIR)
+
+### GFARM_S3_LOCALTMP_SIZE_MB
+AC_ARG_VAR(GFARM_S3_LOCALTMP_SIZE_MB, [Gfarm S3 MinIO local tempfile directory maximum size (MiB) [4096]])
+case x$GFARM_S3_LOCALTMP_SIZE_MB in
+  x) GFARM_S3_LOCALTMP_SIZE_MB=4096 ;;
+esac
+AC_SUBST(GFARM_S3_LOCALTMP_SIZE_MB)
+
 ### GO_URL
 AC_ARG_VAR(GO_URL, [go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]])
 case x$GO_URL in
@@ -146,27 +167,6 @@ case x$ in
   x) GO_BUILDDIR=/go_build ;;
 esac
 AC_SUBST(GO_BUILDDIR)
-
-### GFARM_S3_SHARED_DIR
-AC_ARG_VAR(GFARM_S3_SHARED_DIR, [Shared Gfarm directory via Gfarm S3 [/share]])
-case x$GFARM_S3_SHARED_DIR in
-  x) GFARM_S3_SHARED_DIR=/share ;;
-esac
-AC_SUBST(GFARM_S3_SHARED_DIR)
-
-### MINIO_LOCALTEMP_DIR
-AC_ARG_VAR(MINIO_LOCALTEMP_DIR, [Gfarm S3 MinIO local tempfile directory [/var/tmp]])
-case x$MINIO_LOCALTEMP_DIR in
-  x) MINIO_LOCALTEMP_DIR=/var/tmp ;;
-esac
-AC_SUBST(MINIO_LOCALTEMP_DIR)
-
-### MINIO_LOCALTEMP_SIZE_MB
-AC_ARG_VAR(MINIO_LOCALTEMP_SIZE_MB, [Gfarm S3 MinIO local tempfile size (MiB) [4096]])
-case x$MINIO_LOCALTEMP_SIZE_MB in
-  x) MINIO_LOCALTEMP_SIZE_MB=4096 ;;
-esac
-AC_SUBST(MINIO_LOCALTEMP_SIZE_MB)
 
 ### WEBUI_BASE_URL
 AC_ARG_VAR(WEBUI_BASE_URL, [WebUI base URL [gfarm_s3/]])

@@ -632,11 +632,11 @@ ac_includes_default="\
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 WEBUI_BASE_URL
-MINIO_LOCALTEMP_SIZE_MB
-MINIO_LOCALTEMP_DIR
-GFARM_S3_SHARED_DIR
 GO_BUILDDIR
 GO_URL
+GFARM_S3_LOCALTMP_SIZE_MB
+GFARM_S3_LOCALTMP_DIR
+GFARM_S3_SHARED_DIR
 GFARM_S3_ROUTER_WORKERS
 GFARM_S3_ROUTER_THREADS
 GFARM_S3_WEBUI_WORKERS
@@ -766,11 +766,11 @@ GFARM_S3_WEBUI_THREADS
 GFARM_S3_WEBUI_WORKERS
 GFARM_S3_ROUTER_THREADS
 GFARM_S3_ROUTER_WORKERS
+GFARM_S3_SHARED_DIR
+GFARM_S3_LOCALTMP_DIR
+GFARM_S3_LOCALTMP_SIZE_MB
 GO_URL
 GO_BUILDDIR
-GFARM_S3_SHARED_DIR
-MINIO_LOCALTEMP_DIR
-MINIO_LOCALTEMP_SIZE_MB
 WEBUI_BASE_URL'
 
 
@@ -1451,14 +1451,15 @@ Some influential environment variables:
               the number of threads of S3 router [16]
   GFARM_S3_ROUTER_WORKERS
               the number of workers of S3 router [2]
-  GO_URL      go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]
-  GO_BUILDDIR Golang build directory (minio, etc.) [/go_build]
   GFARM_S3_SHARED_DIR
               Shared Gfarm directory via Gfarm S3 [/share]
-  MINIO_LOCALTEMP_DIR
+  GFARM_S3_LOCALTMP_DIR
               Gfarm S3 MinIO local tempfile directory [/var/tmp]
-  MINIO_LOCALTEMP_SIZE_MB
-              Gfarm S3 MinIO local tempfile size (MiB) [4096]
+  GFARM_S3_LOCALTMP_SIZE_MB
+              Gfarm S3 MinIO local tempfile directory maximum size (MiB)
+              [4096]
+  GO_URL      go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]
+  GO_BUILDDIR Golang build directory (minio, etc.) [/go_build]
   WEBUI_BASE_URL
               WebUI base URL [gfarm_s3/]
 
@@ -11489,6 +11490,27 @@ case x$GFARM_S3_ROUTER_WORKERS in
 esac
 
 
+### GFARM_S3_SHARED_DIR
+
+case x$GFARM_S3_SHARED_DIR in
+  x) GFARM_S3_SHARED_DIR=/share ;;
+esac
+
+
+### GFARM_S3_LOCALTMP_DIR
+
+case x$GFARM_S3_LOCALTMP_DIR in
+  x) GFARM_S3_LOCALTMP_DIR=/var/tmp ;;
+esac
+
+
+### GFARM_S3_LOCALTMP_SIZE_MB
+
+case x$GFARM_S3_LOCALTMP_SIZE_MB in
+  x) GFARM_S3_LOCALTMP_SIZE_MB=4096 ;;
+esac
+
+
 ### GO_URL
 
 case x$GO_URL in
@@ -11500,27 +11522,6 @@ esac
 
 case x$ in
   x) GO_BUILDDIR=/go_build ;;
-esac
-
-
-### GFARM_S3_SHARED_DIR
-
-case x$GFARM_S3_SHARED_DIR in
-  x) GFARM_S3_SHARED_DIR=/share ;;
-esac
-
-
-### MINIO_LOCALTEMP_DIR
-
-case x$MINIO_LOCALTEMP_DIR in
-  x) MINIO_LOCALTEMP_DIR=/var/tmp ;;
-esac
-
-
-### MINIO_LOCALTEMP_SIZE_MB
-
-case x$MINIO_LOCALTEMP_SIZE_MB in
-  x) MINIO_LOCALTEMP_SIZE_MB=4096 ;;
 esac
 
 

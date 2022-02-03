@@ -51,6 +51,8 @@ services:
       # https://docs.gunicorn.org/en/stable/settings.html#workers
       - GFARM_S3_ROUTER_WORKERS=${GFARM_S3_ROUTER_WORKERS:-2}
 
+      - GFARM_S3_LOCALTMP_SIZE_MB=${GFARM_S3_LOCALTMP_SIZE_MB:-1024}
+
       # https://docs.djangoproject.com/en/4.0/ref/settings/#allowed-hosts
       # empty means using SERVER_NAME from SERVER_URL
       # use comma separator to specify multiple names
@@ -64,13 +66,10 @@ services:
       # https://go.dev/dl/
       - GO_URL=${GO_URL:-https://go.dev/dl/go1.16.13.linux-amd64.tar.gz}
 
-      #TODO GFARM_S3_
-      - CACHE_DIR=/var/cache/gfarm-s3
-      - CACHE_SIZE=1024
-
     volumes:
       - copy_home:/home:rw
       - build_cache:/build:rw
+      - localtmp:/localtmp:rw
 
       ### mandatory
       - ${GFARM_CONF_DIR:?GFARM_CONF_DIR}:/gfarm_conf:ro
@@ -99,6 +98,7 @@ services:
 volumes:
   copy_home:
   build_cache:
+  localtmp:
 
 networks:
   mynet1:
