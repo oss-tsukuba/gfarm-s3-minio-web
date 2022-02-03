@@ -41,8 +41,31 @@ while [ $# -gt 0 ]; do
 done
 
 if [ $# != 3 ]; then
-	echo "$USAGE" 1>&2
-	exit 1
+    echo "invalid usage"
+    echo "$USAGE" 1>&2
+    exit 1
+fi
+
+return_json() {
+    status="$1"
+    reason="$2"
+    cat <<-EOF
+{
+  "status": "$status",
+  "reason": "$reason"
+}
+EOF
+}
+
+GFARM_S3_USERNAME=@GFARM_S3_USERNAME@
+GFARM_S3_USER_ID=$(id -u ${GFARM_S3_USERNAME})
+
+# GFARM_S3_USERNAME only
+if [ "$UID" != "${GFARM_S3_USER_ID}" ]; then
+    msg="only ${GFARM_S3_USERNAME} is permitted"
+    log_info "ERROR: ${msg}"
+    return_json "failure" "${msg}"
+    exit 0  # return 0 to send JSON
 fi
 
 action="$1"
@@ -54,12 +77,7 @@ case "$action" in start|stop|restart|resume|status|keygen|info|gfuser|gfgroup|gf
 esac
 
 login_failed() {
-    cat <<-EOF
-{
-  "status": "failure",
-  "reason": "incorrect username or password"
-}
-EOF
+    return_json "failure" "incorrect username or password"
     sleep ${GFARM_S3_LOGIN_CHALLENGE_INTERVAL}
 }
 
@@ -75,6 +93,7 @@ bfa_check_addr() {
              -o ! -w "${GFARM_S3_LOGIN_CHALLENGE_LOG}" \
              -o ! -O "${GFARM_S3_LOGIN_CHALLENGE_LOG}" ]; then
             logger_error "invalid ${GFARM_S3_LOGIN_CHALLENGE_LOG}"
+            echo "server error"
             exit 1
         fi
         return 0
@@ -117,15 +136,15 @@ bfa_log_clear() {
 if ! bfa_check_addr "$remote_addr"; then
     log_info "login failed: Brute-force attack: $global_username $remote_addr"
     login_failed
-    exit 1
+    exit 0  # return 0 to send JSON
 fi
 
 usermap_entry=$(lookup_usermap_by_global_username "$global_username" "$GFARMS3_LOCAL_USER_MAP")
 if [ -z "$usermap_entry" ]; then
     log_info "login failed: user not found in $GFARMS3_LOCAL_USER_MAP: $global_username $remote_addr"
-    login_failed
     bfa_log_addr "$remote_addr"
-    exit 1
+    login_failed
+    exit 0  # return 0 to send JSON
 fi
 local_username=$(get_local_username "$usermap_entry")
 
@@ -136,9 +155,9 @@ elif authenticated_method=$(challenge_auth "$global_username" "$user_password" "
     bfa_log_clear "$remote_addr"
 else
     log_info "login failed: incorrect password: $global_username $local_username $remote_addr"
-    login_failed
     bfa_log_addr "$remote_addr"
-    exit 1
+    login_failed
+    exit 0  # return 0 to send JSON
 fi
 
 gfarm_shared_dir=$(gfarm_shared_dir_path "$gfarm_shared_dir" "$global_username")

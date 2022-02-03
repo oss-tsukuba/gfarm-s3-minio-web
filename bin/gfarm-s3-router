@@ -14,6 +14,8 @@ export no_proxy="${GFARMS3_ADDR}"
 loglevel=$(echo "$GFARM_S3_LOG_LEVEL" | tr [:upper:] [:lower:])
 
 exec "${GUNICORN_DIR}/bin/gunicorn" \
+     --user $GFARM_S3_USERNAME \
+     --group $GFARM_S3_GROUPNAME \
      --log-level "$loglevel" \
      --error-logfile - \
      --capture-output \

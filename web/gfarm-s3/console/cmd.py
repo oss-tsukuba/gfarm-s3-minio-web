@@ -58,7 +58,7 @@ def cmd(action, username, passwd, authenticated = None, remote_addr = None, lang
     retcode, stdout = _communicate(p, f"cmd:{action}")
     if retcode != 0:
         return {"status": "ERROR 2",
-                "reason": f"{action}, retcode = {retcode}, {stdout}"}
+                "reason": f"action = {action}, retcode = {retcode}, {stdout}  (Please contact administrator)"}
 
     try:
         result = json.loads(decode(stdout).strip())

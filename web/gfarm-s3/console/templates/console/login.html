@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block content1 %}
 {% if isLoginFailed %}
-<div class="alert alert-danger" role="alert">{% trans 'errorMessage' %} {{ reason }}</div>
+<div class="alert alert-danger" role="alert">{% trans 'errorMessage' %} : {{ reason }}</div>
 {% endif %}
 {% if showReauthMsg %}
 <div class="alert alert-info row" role="alert">{% trans 'plsreauth' %}</div>

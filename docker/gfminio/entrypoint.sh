@@ -319,4 +319,5 @@ done
 wait
 IFS="$SAVE_IFS"
 
+cd /
 exec "$@"
