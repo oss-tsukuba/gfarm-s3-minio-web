@@ -631,9 +631,9 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-WEBUI_BASE_URL
 GO_BUILDDIR
 GO_URL
+GFARM_S3_WEBUI_BASE_URL
 GFARM_S3_LOCALTMP_SIZE_MB
 GFARM_S3_LOCALTMP_DIR
 GFARM_S3_SHARED_DIR
@@ -769,9 +769,9 @@ GFARM_S3_ROUTER_WORKERS
 GFARM_S3_SHARED_DIR
 GFARM_S3_LOCALTMP_DIR
 GFARM_S3_LOCALTMP_SIZE_MB
+GFARM_S3_WEBUI_BASE_URL
 GO_URL
-GO_BUILDDIR
-WEBUI_BASE_URL'
+GO_BUILDDIR'
 
 
 # Initialize some variables set by options.
@@ -1458,10 +1458,10 @@ Some influential environment variables:
   GFARM_S3_LOCALTMP_SIZE_MB
               Gfarm S3 MinIO local tempfile directory maximum size (MiB)
               [4096]
+  GFARM_S3_WEBUI_BASE_URL
+              WebUI base URL [gfarm_s3/]
   GO_URL      go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]
   GO_BUILDDIR Golang build directory (minio, etc.) [/go_build]
-  WEBUI_BASE_URL
-              WebUI base URL [gfarm_s3/]
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -11511,6 +11511,13 @@ case x$GFARM_S3_LOCALTMP_SIZE_MB in
 esac
 
 
+### GFARM_S3_WEBUI_BASE_URL
+
+case x$GFARM_S3_WEBUI_BASE_URL in
+  x) GFARM_S3_WEBUI_BASE_URL=gfarm_s3/ ;;
+esac
+
+
 ### GO_URL
 
 case x$GO_URL in
@@ -11522,13 +11529,6 @@ esac
 
 case x$ in
   x) GO_BUILDDIR=/go_build ;;
-esac
-
-
-### WEBUI_BASE_URL
-
-case x$WEBUI_BASE_URL in
-  x) WEBUI_BASE_URL=gfarm_s3/ ;;
 esac
 
 

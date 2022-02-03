@@ -154,6 +154,13 @@ case x$GFARM_S3_LOCALTMP_SIZE_MB in
 esac
 AC_SUBST(GFARM_S3_LOCALTMP_SIZE_MB)
 
+### GFARM_S3_WEBUI_BASE_URL
+AC_ARG_VAR(GFARM_S3_WEBUI_BASE_URL, [WebUI base URL [gfarm_s3/]])
+case x$GFARM_S3_WEBUI_BASE_URL in
+  x) GFARM_S3_WEBUI_BASE_URL=gfarm_s3/ ;;
+esac
+AC_SUBST(GFARM_S3_WEBUI_BASE_URL)
+
 ### GO_URL
 AC_ARG_VAR(GO_URL, [go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]])
 case x$GO_URL in
@@ -167,13 +174,6 @@ case x$ in
   x) GO_BUILDDIR=/go_build ;;
 esac
 AC_SUBST(GO_BUILDDIR)
-
-### WEBUI_BASE_URL
-AC_ARG_VAR(WEBUI_BASE_URL, [WebUI base URL [gfarm_s3/]])
-case x$WEBUI_BASE_URL in
-  x) WEBUI_BASE_URL=gfarm_s3/ ;;
-esac
-AC_SUBST(WEBUI_BASE_URL)
 
 # Checks for libraries.
 AC_CHECK_LIB([gfarm], [gfarm_initialize],, [AC_MSG_ERROR([libgfarm not found])])

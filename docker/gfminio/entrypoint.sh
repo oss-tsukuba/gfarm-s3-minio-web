@@ -32,11 +32,12 @@ fi
 TZ=${TZ:-Asia/Tokyo}
 export TZ
 
-GFARM_S3_USERNAME=_gfarm_s3
-GFARM_S3_GROUPNAME=_gfarm_s3
-GFARM_S3_HOMEDIR=/home/${GFARM_S3_USERNAME}
-GFARM_S3_LOCALTMP_DIR=/localtmp
-GO_BUILDDIR=/build
+GFARM_S3_USERNAME="_gfarm_s3"
+GFARM_S3_GROUPNAME="_gfarm_s3"
+GFARM_S3_HOMEDIR="/home/${GFARM_S3_USERNAME}"
+GFARM_S3_LOCALTMP_DIR="/localtmp"
+GO_BUILDDIR="/build"
+GFARM_S3_WEBUI_BASE_URL="gf_s3/"
 
 GFARM_S3_MINIO_SRC_DIR_ORIG=/gfarm-s3-minio
 
@@ -109,7 +110,6 @@ install_gf_s3() {
         git checkout ${GFARM_S3_MINIO_SRC_GIT_BRANCH}
     fi
 
-
     cd ${WORKDIR}/gfarm-s3-minio-web
     GSI_PROXY_HOURS=${GSI_PROXY_HOURS} \
     MYPROXY_SERVER=${MYPROXY_SERVER} \
@@ -125,7 +125,7 @@ install_gf_s3() {
     GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR} \
     GFARM_S3_LOCALTMP_DIR=${GFARM_S3_LOCALTMP_DIR} \
     GFARM_S3_LOCALTMP_SIZE_MB=${GFARM_S3_LOCALTMP_SIZE_MB} \
-    WEBUI_BASE_URL="gf_s3/" \
+    GFARM_S3_WEBUI_BASE_URL=${GFARM_S3_WEBUI_BASE_URL} \
     GO_URL=${GO_URL} \
     GO_BUILDDIR=${GO_BUILDDIR} \
     ./configure \
@@ -152,6 +152,7 @@ install_gf_s3() {
         chown ${GFARM_S3_USERNAME}:root "${DJANGO_SECRET_KEY}"
     fi
 
+    # edit addtional configurations
     CONF_OVERWRITE=${SYSCONFDIR}/gfarm-s3-overwrite.conf
     cat <<EOF > "${CONF_OVERWRITE}"
 #GFARM_S3_LOG_LEVEL=debug
