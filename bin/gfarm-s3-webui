@@ -4,9 +4,6 @@ set -eu
 
 eval $(gfarm-s3-readconf)
 
-threads=2
-workers=1
-
 TIMEOUT=180
 
 #RELOAD="--reload"
@@ -18,8 +15,8 @@ exec "${GUNICORN_DIR}/bin/gunicorn" \
      --log-level "$loglevel" \
      --error-logfile - \
      --capture-output \
-     --threads $threads \
-     --workers $workers \
+     --threads $WEBUI_THREAD_NUM \
+     --workers $WEBUI_WORKER_NUM \
      --bind "$WEBUI_ADDR" \
      --chdir "$WEBUI_BASEDIR" \
      --timeout $TIMEOUT \

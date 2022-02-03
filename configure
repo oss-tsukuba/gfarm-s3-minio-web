@@ -639,6 +639,8 @@ with_minio_builddir
 with_go_archive
 GFARM_S3_ROUTER_WORKERS
 GFARM_S3_ROUTER_THREADS
+GFARM_S3_WEBUI_WORKERS
+GFARM_S3_WEBUI_THREADS
 GFARM_S3_ROUTER_ADDR
 GFARM_S3_WEBUI_ADDR
 GFARM_S3_GROUPNAME
@@ -763,6 +765,8 @@ GFARM_S3_USERNAME
 GFARM_S3_GROUPNAME
 GFARM_S3_WEBUI_ADDR
 GFARM_S3_ROUTER_ADDR
+GFARM_S3_WEBUI_THREADS
+GFARM_S3_WEBUI_WORKERS
 GFARM_S3_ROUTER_THREADS
 GFARM_S3_ROUTER_WORKERS
 MINIO_LOCALTEMP_DIR
@@ -1445,6 +1449,10 @@ Some influential environment variables:
               Gfarm S3 WebUI address [unix:/tmp/gfarm-s3-webui.sock]
   GFARM_S3_ROUTER_ADDR
               Gfarm S3 router address [unix:/tmp/gfarm-s3-router.sock]
+  GFARM_S3_WEBUI_THREADS
+              the number of threads of Web UI [8]
+  GFARM_S3_WEBUI_WORKERS
+              the number of workers of Web UI [2]
   GFARM_S3_ROUTER_THREADS
               the number of threads of S3 router [16]
   GFARM_S3_ROUTER_WORKERS
@@ -11452,6 +11460,20 @@ esac
 
 case x$GFARM_S3_ROUTER_ADDR in
   x) GFARM_S3_ROUTER_ADDR=unix:/tmp/gfarm-s3-router.sock ;;
+esac
+
+
+### GFARM_S3_WEBUI_THREADS
+
+case x$GFARM_S3_WEBUI_THREADS in
+  x) GFARM_S3_WEBUI_THREADS=8 ;;
+esac
+
+
+### GFARM_S3_WEBUI_WORKERS
+
+case x$GFARM_S3_WEBUI_WORKERS in
+  x) GFARM_S3_WEBUI_WORKERS=2 ;;
 esac
 
 

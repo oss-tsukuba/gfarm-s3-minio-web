@@ -40,6 +40,11 @@ services:
       - MYPROXY_SERVER=${MYPROXY_SERVER:-}
 
       # https://docs.gunicorn.org/en/stable/settings.html#threads
+      - GFARM_S3_WEBUI_THREADS=${GFARM_S3_WEBUI_THREADS:-8}
+      # https://docs.gunicorn.org/en/stable/settings.html#workers
+      - GFARM_S3_WEBUI_WORKERS=${GFARM_S3_WEBUI_WORKERS:-2}
+
+      # https://docs.gunicorn.org/en/stable/settings.html#threads
       - GFARM_S3_ROUTER_THREADS=${GFARM_S3_ROUTER_THREADS:-16}
       # https://docs.gunicorn.org/en/stable/settings.html#workers
       - GFARM_S3_ROUTER_WORKERS=${GFARM_S3_ROUTER_WORKERS:-2}
