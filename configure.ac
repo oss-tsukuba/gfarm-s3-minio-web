@@ -105,25 +105,19 @@ case x$GFARM_S3_ROUTER_ADDR in
 esac
 AC_SUBST(GFARM_S3_ROUTER_ADDR)
 
-### --with-router-nthreads=ROUTER_NTHREADS
-AC_MSG_CHECKING([number of router threads])
-AC_ARG_WITH([router-nthreads],
-  AC_HELP_STRING([--with-router-nthreads=ROUTER_NTHREADS], [number of threads [10]]))
-case x$router_nthreads in
-  x|xyes|xno) router_nthreads=10 ;;
+### GFARM_S3_ROUTER_THREADS
+AC_ARG_VAR(GFARM_S3_ROUTER_THREADS, [the number of threads of S3 router [16]])
+case x$GFARM_S3_ROUTER_THREADS in
+  x) GFARM_S3_ROUTER_THREADS=16 ;;
 esac
-AC_MSG_RESULT([$router_nthreads])
-AC_SUBST(router_nthreads)
+AC_SUBST(GFARM_S3_ROUTER_THREADS)
 
-### --with-router-nworkers=ROUTER_NWORKERS
-AC_MSG_CHECKING([number of router workers])
-AC_ARG_WITH([router-nworkers],
-  AC_HELP_STRING([--with-router-nworkers=ROUTER_NWORKERS], [number of workers [10]]))
-case x$router_nworkers in
-  x|xyes|xno) router_nworkers=1 ;;
+### GFARM_S3_ROUTER_WORKERS
+AC_ARG_VAR(GFARM_S3_ROUTER_WORKERS, [the number of workers of S3 router [2]])
+case x$GFARM_S3_ROUTER_WORKERS in
+  x) GFARM_S3_ROUTER_WORKERS=2 ;;
 esac
-AC_MSG_RESULT([$router_nworkers])
-AC_SUBST(router_nworkers)
+AC_SUBST(GFARM_S3_ROUTER_WORKERS)
 
 ### --with-go-archive=GO_ARCHIVE
 AC_MSG_CHECKING([go-archive that fetched from https://dl.google.com/go for build s3 server (MinIO)])

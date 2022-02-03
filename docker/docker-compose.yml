@@ -36,11 +36,22 @@ services:
       - GFARM_S3_MINIO_SRC_GIT_BRANCH=${GFARM_S3_MINIO_SRC_GIT_BRANCH:-gfarmmerge}
 
       - GSI_PROXY_HOURS=${GSI_PROXY_HOURS:-168}
+      # empty means "disabled"
       - MYPROXY_SERVER=${MYPROXY_SERVER:-}
 
+      # https://docs.gunicorn.org/en/stable/settings.html#threads
+      - GFARM_S3_ROUTER_THREADS=${GFARM_S3_ROUTER_THREADS:-16}
+      # https://docs.gunicorn.org/en/stable/settings.html#workers
+      - GFARM_S3_ROUTER_WORKERS=${GFARM_S3_ROUTER_WORKERS:-2}
+
+      # https://docs.djangoproject.com/en/4.0/ref/settings/#allowed-hosts
       # empty means using SERVER_NAME from SERVER_URL
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
+      # use comma separator to specify multiple names
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS-}
+
+      # https://docs.djangoproject.com/en/4.0/ref/settings/#csrf-trusted-origins
       # empty means using SERVER_URL
+      # use comma separator to specify multiple names
       - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS-}
 
       #TODO GFARM_S3_

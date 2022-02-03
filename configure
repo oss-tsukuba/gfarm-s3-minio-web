@@ -637,8 +637,8 @@ MINIO_LOCALTEMP_DIR
 with_gfarm_shared_dir
 with_minio_builddir
 with_go_archive
-router_nworkers
-router_nthreads
+GFARM_S3_ROUTER_WORKERS
+GFARM_S3_ROUTER_THREADS
 GFARM_S3_ROUTER_ADDR
 GFARM_S3_WEBUI_ADDR
 GFARM_S3_GROUPNAME
@@ -743,8 +743,6 @@ with_gfarm
 with_globus
 with_myproxy
 with_gunicorn
-with_router_nthreads
-with_router_nworkers
 with_go_archive
 with_minio_builddir
 with_gfarm_shared_dir
@@ -765,6 +763,8 @@ GFARM_S3_USERNAME
 GFARM_S3_GROUPNAME
 GFARM_S3_WEBUI_ADDR
 GFARM_S3_ROUTER_ADDR
+GFARM_S3_ROUTER_THREADS
+GFARM_S3_ROUTER_WORKERS
 MINIO_LOCALTEMP_DIR
 MINIO_LOCALTEMP_SIZE_MB
 WEBUI_BASE_URL'
@@ -1415,10 +1415,6 @@ Optional Packages:
                           Myproxy root directory [/usr]
   --with-gunicorn=GUNICORN_ROOT
                           gunicorn root directory [/usr]
-  --with-router-nthreads=ROUTER_NTHREADS
-                          number of threads [10]
-  --with-router-nworkers=ROUTER_NWORKERS
-                          number of workers [10]
   --with-go-archive=GO_ARCHIVE
                           go archive [go1.16.linux-amd64.tar.gz]
   --with-minio-builddir=MINIO_BUILDDIR
@@ -1449,6 +1445,10 @@ Some influential environment variables:
               Gfarm S3 WebUI address [unix:/tmp/gfarm-s3-webui.sock]
   GFARM_S3_ROUTER_ADDR
               Gfarm S3 router address [unix:/tmp/gfarm-s3-router.sock]
+  GFARM_S3_ROUTER_THREADS
+              the number of threads of S3 router [16]
+  GFARM_S3_ROUTER_WORKERS
+              the number of workers of S3 router [2]
   MINIO_LOCALTEMP_DIR
               Gfarm S3 MinIO local tempfile directory [/var/tmp]
   MINIO_LOCALTEMP_SIZE_MB
@@ -11455,36 +11455,18 @@ case x$GFARM_S3_ROUTER_ADDR in
 esac
 
 
-### --with-router-nthreads=ROUTER_NTHREADS
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking number of router threads" >&5
-$as_echo_n "checking number of router threads... " >&6; }
+### GFARM_S3_ROUTER_THREADS
 
-# Check whether --with-router-nthreads was given.
-if test "${with_router_nthreads+set}" = set; then :
-  withval=$with_router_nthreads;
-fi
-
-case x$router_nthreads in
-  x|xyes|xno) router_nthreads=10 ;;
+case x$GFARM_S3_ROUTER_THREADS in
+  x) GFARM_S3_ROUTER_THREADS=16 ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $router_nthreads" >&5
-$as_echo "$router_nthreads" >&6; }
 
 
-### --with-router-nworkers=ROUTER_NWORKERS
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking number of router workers" >&5
-$as_echo_n "checking number of router workers... " >&6; }
+### GFARM_S3_ROUTER_WORKERS
 
-# Check whether --with-router-nworkers was given.
-if test "${with_router_nworkers+set}" = set; then :
-  withval=$with_router_nworkers;
-fi
-
-case x$router_nworkers in
-  x|xyes|xno) router_nworkers=1 ;;
+case x$GFARM_S3_ROUTER_WORKERS in
+  x) GFARM_S3_ROUTER_WORKERS=2 ;;
 esac
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $router_nworkers" >&5
-$as_echo "$router_nworkers" >&6; }
 
 
 ### --with-go-archive=GO_ARCHIVE
