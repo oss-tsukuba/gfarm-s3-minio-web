@@ -163,6 +163,8 @@ ALLOWED_HOSTS=${ALLOWED_HOSTS}
 
 # required by Django 4 or later
 CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
+
+GFARM_S3_LOGIN_CHALLENGE_LOG=${GFARM_S3_LOCALTMP_DIR}/error_addr.log
 EOF
 
     if which systemctl > /dev/null 2>&1; then
