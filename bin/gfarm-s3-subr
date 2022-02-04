@@ -475,7 +475,6 @@ update_usermap() {
 				echo "STOP FAILED" 1>&2
 			fi
 
-			need_update_revproxy=1
 			del_from_portmap "$user"
 		done
 		if [ -n "$users" ]; then
@@ -718,8 +717,9 @@ spawn_per_user_server() {
 	spawn_per_user_server_common "$1" "$2" 0
 }
 
-stop_per_user_server() {
+stop_per_user_server_common() {
 	local user="$1"
+	local resume="$2"
 	local usermap_entry=$(lookup_usermap_by_local_username "$user" "$GFARMS3_LOCAL_USER_MAP")
 	if [ -z "$usermap_entry" ]; then
 		echo "user not found: $user" 1>&2
@@ -730,8 +730,13 @@ stop_per_user_server() {
 	## assert $user == $local_username
 	local access_key=$(get_access_key "$usermap_entry")
 	local status=0
-	if local port=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --stop --access_key "$access_key"); then
-		log_info "MinIO stopped (for ${user}|${global_username})"
+	local resume_opt=""
+	if [ $resume -eq 1 ]; then
+		resume_opt="--resume"
+	fi
+
+	if local port=$(mysudo "$user" $GFARM_S3_BIN/gfarm-s3-server --stop ${resume_opt} --access_key "$access_key"); then
+		log_info "MinIO stopped (for ${user}|${global_username}) (resume=${resume})"
 	else
 		echo "Stop MinIO failed" 1>&2
 		status=1
@@ -741,6 +746,14 @@ stop_per_user_server() {
 	### We do not update gfarm_s3_user_port_map here.
 	### username and port number keep.
 	return $status
+}
+
+stop_per_user_server() {
+    stop_per_user_server_common "$1" 0
+}
+
+stop_to_resume_per_user_server() {
+    stop_per_user_server_common "$1" 1
 }
 
 get_s3_server_status() {	# local_username
@@ -903,7 +916,7 @@ _mc_init() {
 }
 
 _mc_fin() {
-    local config_dir=$(_mc_init)
+    local config_dir="$1"
     [ -d "$config_dir" ] || return
     [ "$config_dir" != "/" ] || return
     rm -rf "$config_dir"
@@ -1014,10 +1027,18 @@ try_start_a_server() {
 		log_debug "try_start_a_server: [S] minio is already running"
 		return $SUCCESS
 	fi
-	local tmpfile=$(mktemp $GFARM_S3_TMP/minio-log.XXXXXX) || return $ABORT
-	local pidfile=$(mktemp $GFARM_S3_TMP/minio-pid.XXXXXX) || (rm -f $tmpfile; return $ABORT)
+	local tmpfile=$(mktemp $GFARM_S3_TMP/gf_s3-log.XXXXXX) || return $ABORT
+	local pidfile=$(mktemp $GFARM_S3_TMP/gf_s3-pid.XXXXXX) || (rm -f $tmpfile; return $ABORT)
 	( \
-	 export MINIO_GFARM_LOCALTMP_DIR=$(mktemp -d $GFARMS3_LOCALTMP_DIR/gfarm-s3-XXXXXXXX) || exit 1; \
+	 export MINIO_GFARM_LOCALTMP_DIR=$(mktemp -d $GFARMS3_LOCALTMP_DIR/gf_s3-${USER}-XXXXXXXX) || exit 1; \
+	 ignore_signal() { \
+		log_info "signal is caught"; \
+	 }; \
+	 cleanup() { \
+		rm -rf "$MINIO_GFARM_LOCALTMP_DIR"; \
+	 }; \
+	 trap ignore_signal 1 2 15; \
+	 trap cleanup EXIT; \
 	 export MINIO_GFARM_LOCALTMP_SIZE_MB="$GFARMS3_LOCALTMP_SIZE_MB_PER_USER"; \
 	 export MINIO_GFARM_PARTFILE_DIGEST="$GFARMS3_PARTFILE_DIGEST"; \
 	 if ! chmod 700 $MINIO_GFARM_LOCALTMP_DIR; then exit 1; fi; \
@@ -1030,7 +1051,6 @@ try_start_a_server() {
 		$GFARMS3_GFARM_SHARED_VIRTUAL_NAME & \
 	 echo "$port:$!" 1>&3; \
 	 wait; \
-	 rm -rf "$MINIO_GFARM_LOCALTMP_DIR"; \
 	 echo "Minio Exited") <&- >$tmpfile 2>&1 3>$pidfile &
 	RETRY_MAX=60  # sec.
 	for i in $(seq 1 1 $RETRY_MAX); do
@@ -1104,6 +1124,10 @@ try_start_a_server() {
 }
 
 stop_server() {
+	if [ $resume -eq 1 ] && ! is_started "$USER"; then
+		return 0
+	fi
+	local resume="$1"
 	local port_pid=$(lookup_portmap "$USER" "$uport")
 	local port="${port_pid%:*}"
 	local pid="${port_pid#*:}"
@@ -1111,7 +1135,10 @@ stop_server() {
 		return 1
 	fi
 	try_stop_a_server "$port" "$pid"
-	save_started_status 0 "$USER"
+        if [ $resume -ne 1 ]; then
+            save_started_status 0 "$USER"
+        fi
+        return 0
 }
 
 try_stop_a_server() {

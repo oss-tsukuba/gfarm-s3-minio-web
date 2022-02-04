@@ -148,7 +148,7 @@ export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
 
 case $action in
 START) start_server "$gfarm_shared_dir" "$resume";;
-STOP) stop_server;;
+STOP) stop_server "$resume";;
 STATUS) status_server;;
 SECRET_SHOW) show_secret_key;;
 SECRET_SHOW_FILENAME) show_secret_key_file;;

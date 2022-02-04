@@ -18,7 +18,7 @@ options ::= --gfarm_shared_dir gfarm_shared_dir |
             --bucket bucket
             --remote_addr remote_addr
             --quiet
-action ::= start|stop|restart|resume|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl
+action ::= start|stop|restart|resume|stop_to_resume|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl
 "
 
 authenticated=""
@@ -72,7 +72,7 @@ action="$1"
 global_username="$2"
 user_password="$3"
 
-case "$action" in start|stop|restart|resume|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl) ;;
+case "$action" in start|stop|restart|resume|stop_to_resume|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl) ;;
 *) echo $USAGE 1>&2; exit 1;;
 esac
 
@@ -183,6 +183,8 @@ restart)
 	spawn_per_user_server "$local_username" "$gfarm_shared_dir";;
 resume)
 	resume_per_user_server "$local_username" "$gfarm_shared_dir";;
+stop_to_resume)
+	stop_to_resume_per_user_server "$local_username";;
 status)
 	get_s3_server_status "$local_username";;
 keygen)

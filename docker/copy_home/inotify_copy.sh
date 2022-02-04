@@ -79,7 +79,7 @@ stop() {
     exit 0
 }
 
-trap stop EXIT 1 2 15
+trap stop 1 2 15
 
 watch_list_init
 copy_all

@@ -208,6 +208,15 @@ wait_for_copy_home() {
 
 wait_for_copy_home
 
+run_gfarm_s3_login() {
+    ACTION="$1"
+    GFARM_USERNAME="$2"
+
+    sudo -u ${GFARM_S3_USERNAME} gfarm-s3-login --quiet --authenticated "DUMMY_AUTH_METHOD" $ACTION "${GFARM_USERNAME}" "DUMMY_PASSWORD" > /dev/null
+}
+
+ENABLED_USERS=()
+
 SAVE_IFS="$IFS"
 IFS=$'\n'
 for line in $(cat "${GFARM_S3_USERMAP}"); do
@@ -217,6 +226,9 @@ for line in $(cat "${GFARM_S3_USERMAP}"); do
 
     [ -z "${GFARM_USERNAME}" ] && continue
     [ "${GFARM_USERNAME:0:1}" = "#" ] && continue
+
+    # add
+    ENABLED_USERS+=("${GFARM_USERNAME}")
 
     HOMEDIR="${HOME_BASE}/${LOCAL_USERNAME}"
     USER_UID=$(stat -c %u "${HOMEDIR}")
@@ -309,15 +321,26 @@ EOF
         fi
     done
 
-    gfarm-s3-useradd "${GFARM_USERNAME}" "${LOCAL_USERNAME}" "${ACCESSKEY_ID}" || true  ## fail when the user already exists
+    gfarm-s3-useradd "${GFARM_USERNAME}" "${LOCAL_USERNAME}" "${ACCESSKEY_ID}" > /dev/null || true  ## fail when the user already exists
 
     ### resume minio (start minio if it was previously started)
-    sudo -u "${GFARM_S3_USERNAME}" gfarm-s3-login --quiet --authenticated "DUMMY_AUTH_METHOD" resume "${GFARM_USERNAME}" "DUMMY_PASSWORD" > /dev/null &
+    run_gfarm_s3_login resume "${GFARM_USERNAME}" &
     ##### backgroud (may fail, ignore)
 done
 ### wait for resuming minio
 wait
 IFS="$SAVE_IFS"
 
+stop_all() {
+    for gfarm_username in ${ENABLED_USERS[@]}; do
+        run_gfarm_s3_login stop_to_resume "${gfarm_username}" &
+    done
+    wait
+}
+
+# ignore signal
+trap "" 1 2 15
+
 cd /
-exec "$@"
+"$@"
+stop_all

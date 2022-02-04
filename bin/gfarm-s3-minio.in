@@ -96,9 +96,9 @@ export MINIO_ROOT_PASSWORD
 
 cleanup() {
     rm -rf "$MINIO_GFARM_LOCALTMP_DIR"
-    exit 0
 }
 
+trap "" 1 2 15
 trap cleanup EXIT
 
 export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
