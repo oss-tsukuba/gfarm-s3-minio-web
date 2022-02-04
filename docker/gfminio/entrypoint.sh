@@ -142,14 +142,15 @@ install_gf_s3() {
     chmod 1777 ${GFARM_S3_LOCALTMP_DIR}
 
     # generate DJANGO_SECRET_KEY
-    DJANGO_SECRET_KEY=${SYSCONFDIR}/django_secret_key.txt
-    if [ ! -f ${DJANGO_SECRET_KEY} ]; then
+    #DJANGO_SECRET_KEY_FILE=${SYSCONFDIR}/django_secret_key.txt
+    DJANGO_SECRET_KEY_FILE=${GFARM_S3_LOCALTMP_DIR}/django_secret_key.txt
+    if [ ! -f ${DJANGO_SECRET_KEY_FILE} ]; then
         #pip install django-generate-secret-key
         #cd ${GFARM_S3_HOMEDIR}/gfarm-s3
-        #python3 manage.py generate_secret_key "${DJANGO_SECRET_KEY}"
-        python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())" > "${DJANGO_SECRET_KEY}"
-        chmod 400 "${DJANGO_SECRET_KEY}"
-        chown ${GFARM_S3_USERNAME}:root "${DJANGO_SECRET_KEY}"
+        #python3 manage.py generate_secret_key "${DJANGO_SECRET_KEY_FILE}"
+        python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())" > "${DJANGO_SECRET_KEY_FILE}"
+        chmod 400 "${DJANGO_SECRET_KEY_FILE}"
+        chown ${GFARM_S3_USERNAME}:root "${DJANGO_SECRET_KEY_FILE}"
     fi
 
     # edit addtional configurations
@@ -165,6 +166,7 @@ ALLOWED_HOSTS=${ALLOWED_HOSTS}
 CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
 
 GFARM_S3_LOGIN_CHALLENGE_LOG=${GFARM_S3_LOCALTMP_DIR}/error_addr.log
+DJANGO_SECRET_KEY_FILE=${DJANGO_SECRET_KEY_FILE}
 EOF
 
     if which systemctl > /dev/null 2>&1; then

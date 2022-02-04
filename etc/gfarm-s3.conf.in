@@ -12,6 +12,7 @@ GFARM_S3_LOG_OUTPUT=syslog
 
 # gfarm-s3-login
 GFARM_S3_PREFIX=@prefix@
+GFARM_S3_SYSCONFDIR=@sysconfdir@
 GFARM_S3_TMP=/tmp
 GFARM_S3_BIN=$GFARM_S3_PREFIX/bin
 GFARM_S3_ETC=$GFARM_S3_PREFIX/etc
@@ -79,6 +80,7 @@ HOMEDIR_BASE=/home
 ALLOWED_HOSTS="*"
 CSRF_TRUSTED_ORIGINS=""
 DJANGO_DEBUG=False
+DJANGO_SECRET_KEY_FILE=${GFARM_S3_SYSCONFDIR}/django_secret_key.txt
 
 # for gfarm-s3-webui
 GUNICORN_DIR=@with_gunicorn@
