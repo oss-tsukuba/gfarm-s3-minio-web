@@ -30,6 +30,7 @@ def app(environ, start_response):
 
     #for (k, v) in response_hdr:
         #logger.debug(f"@@@ << {k}: {v}")
+    #logger.debug("@@@ response from MinIO: {}".format(str(response_hdr)))
 
     if response is None:
         #logger.debug(f"@@@ {myformat()} [2] START_RESPONSE {status}")
@@ -113,6 +114,11 @@ def is_buffering(hdr):
     lower_hdr = {}
     for (k, v) in hdr:
         lower_hdr[k.lower()] = v
+
+    # transfer_encoding = lower_hdr.get("transfer-encoding", None)
+    # if transfer_encoding is not None and transfer_encoding.lower() == "chunked":
+    #     logger.debug("@@@ chunked")
+    #     return False
 
     x_accel_buffering = lower_hdr.get("x-accel-buffering", None)
     if x_accel_buffering is not None and x_accel_buffering.lower() == "no":
