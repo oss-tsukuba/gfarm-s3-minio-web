@@ -64,6 +64,9 @@ restart-proxy:
 restart-copy_home copy-home:
 	$(COMPOSE) restart copy_home
 
+reset-brute-force-attack-log:
+	$(COMPOSE) exec gfminio gfarm-s3-reset-brute-force-attack-log
+
 shell:
 	$(COMPOSE) exec gfminio bash
 

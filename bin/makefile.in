@@ -13,6 +13,7 @@ scripts= \
 	gfarm-s3-server \
 	gfarm-s3-minio \
 	gfarm-s3-readconf \
+	gfarm-s3-reset-brute-force-attack-log \
 	gfarm-s3-sharedsecret-password \
 	gfarm-s3-update-reverse-proxy \
 	gfarm-s3-useradd \
