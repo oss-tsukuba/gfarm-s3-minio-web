@@ -54,7 +54,7 @@ for kv in $C1; do
     eval $kv
 done
 
-C2=$(conf_filter "${CONF}")
+C2=$(conf_filter "${CONF}" || true)
 
 for kv in $C2; do
     k=${kv%=*}
