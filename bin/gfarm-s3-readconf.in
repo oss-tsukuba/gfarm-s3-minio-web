@@ -51,7 +51,7 @@ for kv in $C1; do
     KEYS[$k]=1  # exist
 
     # evaluate per line
-    eval $kv
+    eval "$kv"
 done
 
 C2=$(conf_filter "${CONF}" || true)
@@ -61,7 +61,7 @@ for kv in $C2; do
     v=${kv#*=}
     if [ "${KEYS[$k]:-}" = "1" ]; then
         # overwrite only
-        eval $kv
+        eval "$kv"
     fi
 done
 
@@ -74,8 +74,8 @@ to_json()
         if [ $first -eq 0 ]; then
             echo ","
         fi
-        v=$(eval echo \$$k)
-        v=$(echo $v | sed 's/"/\\"/')
+        eval v="\$$k"
+        v=$(echo "$v" | sed 's/"/\\"/g')
         echo -n "\"$k\": \"$v\""
         first=0
     done
@@ -87,8 +87,8 @@ to_sh()
 {
     # from keys of C1
     for k in "${!KEYS[@]}"; do
-        v=$(eval echo \$$k)
-        v=$(echo $v | sed 's/"/\\"/')
+        eval v="\$$k"
+        v=$(echo "$v" | sed 's/"/\\"/g')
         echo "$k=\"$v\""
     done
 }

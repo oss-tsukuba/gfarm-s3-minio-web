@@ -146,7 +146,7 @@ install_gf_s3() {
     # generate DJANGO_SECRET_KEY
     #DJANGO_SECRET_KEY_FILE=${SYSCONFDIR}/django_secret_key.txt
     DJANGO_SECRET_KEY_FILE=${GFARM_S3_LOCALTMP_DIR}/django_secret_key.txt
-    if [ ! -f ${DJANGO_SECRET_KEY_FILE} ]; then
+    if [ ! -s ${DJANGO_SECRET_KEY_FILE} ]; then
         #pip install django-generate-secret-key
         #cd ${GFARM_S3_HOMEDIR}/gfarm-s3
         #python3 manage.py generate_secret_key "${DJANGO_SECRET_KEY_FILE}"
