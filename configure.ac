@@ -176,7 +176,7 @@ esac
 AC_SUBST(GO_BUILDDIR)
 
 ### SYSCONFDIR
-SYSCONFDIR=$sysconfdir
+eval SYSCONFDIR=$sysconfdir
 AC_SUBST(SYSCONFDIR)
 
 # Checks for libraries.
