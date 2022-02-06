@@ -16,3 +16,43 @@
 ## Requirements
 
 - Username mapping of Gfarm and My Proxy must be equal.
+- RAM: 1～2GB per user
+
+## Quick start (Install using Docker Compose)
+
+- install Docker
+- install Docker Compose
+- create and edit .env file (see below)
+    - specify Gfarm configuration
+    - select Gfarm authentication method
+    - Gfarm and local user name mapping
+    - server name
+- create docker-compose.override.yml
+    - example: `ln -s docker-compose.override.yml.https docker-compose.override.yml`
+    - or use one of other docker-compose.override.yml.*
+    - or write docker-compose.override.yml for your environment
+- check `make config`
+- run `make reborn-withlog`
+
+TODO
+
+## Install on real machine
+
+Please refer to:
+
+- docker/gfminio/Dockerfile
+- docker/gfminio/entrypoint.sh
+
+- Gfarm source: docker/dev/common/s3/setup.sh
+
+## HTTPS and Certificates and Reverse proxy
+
+docker-compose.override.yml.https is an example to setup
+using a reverse proxy and using self signed certificates.
+
+## Configuration file (.env)
+
+example:
+
+```
+```
