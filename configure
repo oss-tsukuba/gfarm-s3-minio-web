@@ -632,6 +632,8 @@ ac_includes_default="\
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 SYSCONFDIR
+NGINX_ERROR_LOG
+NGINX_ACCESS_LOG
 GO_BUILDDIR
 GO_URL
 GFARM_S3_WEBUI_BASE_URL
@@ -772,7 +774,9 @@ GFARM_S3_LOCALTMP_DIR
 GFARM_S3_LOCALTMP_SIZE_MB
 GFARM_S3_WEBUI_BASE_URL
 GO_URL
-GO_BUILDDIR'
+GO_BUILDDIR
+NGINX_ACCESS_LOG
+NGINX_ERROR_LOG'
 
 
 # Initialize some variables set by options.
@@ -1463,6 +1467,10 @@ Some influential environment variables:
               WebUI base URL [gfarm_s3/]
   GO_URL      go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]
   GO_BUILDDIR Golang build directory (minio, etc.) [/go_build]
+  NGINX_ACCESS_LOG
+              NGINX access_log [${LOG_JOURNALD}]
+  NGINX_ERROR_LOG
+              NGINX error_log [${LOG_JOURNALD}]
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -11528,8 +11536,24 @@ esac
 
 ### GO_BUILDDIR
 
-case x$ in
+case x$GO_BUILDDIR in
   x) GO_BUILDDIR=/go_build ;;
+esac
+
+
+LOG_JOURNALD=syslog:server=unix:/dev/log
+
+### NGINX_ACCESS_LOG
+
+case x$NGINX_ACCESS_LOG in
+  x) NGINX_ACCESS_LOG=${LOG_JOURNALD} ;;
+esac
+
+
+### NGINX_ERROR_LOG
+
+case x$NGINX_ERROR_LOG in
+  x) NGINX_ERROR_LOG=${LOG_JOURNALD} ;;
 esac
 
 

@@ -170,10 +170,26 @@ AC_SUBST(GO_URL)
 
 ### GO_BUILDDIR
 AC_ARG_VAR(GO_BUILDDIR, [Golang build directory (minio, etc.) [/go_build]])
-case x$ in
+case x$GO_BUILDDIR in
   x) GO_BUILDDIR=/go_build ;;
 esac
 AC_SUBST(GO_BUILDDIR)
+
+LOG_JOURNALD=syslog:server=unix:/dev/log
+
+### NGINX_ACCESS_LOG
+AC_ARG_VAR(NGINX_ACCESS_LOG, [NGINX access_log [${LOG_JOURNALD}]])
+case x$NGINX_ACCESS_LOG in
+  x) NGINX_ACCESS_LOG=${LOG_JOURNALD} ;;
+esac
+AC_SUBST(NGINX_ACCESS_LOG)
+
+### NGINX_ERROR_LOG
+AC_ARG_VAR(NGINX_ERROR_LOG, [NGINX error_log [${LOG_JOURNALD}]])
+case x$NGINX_ERROR_LOG in
+  x) NGINX_ERROR_LOG=${LOG_JOURNALD} ;;
+esac
+AC_SUBST(NGINX_ERROR_LOG)
 
 ### SYSCONFDIR
 eval SYSCONFDIR=$sysconfdir

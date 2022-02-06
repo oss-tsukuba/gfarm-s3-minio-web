@@ -128,6 +128,8 @@ install_gf_s3() {
     GFARM_S3_WEBUI_BASE_URL=${GFARM_S3_WEBUI_BASE_URL} \
     GO_URL=${GO_URL} \
     GO_BUILDDIR=${GO_BUILDDIR} \
+    NGINX_ACCESS_LOG=/dev/stdout \
+    NGINX_ERROR_LOG=/dev/stderr \
     ./configure \
     --prefix=${PREFIX} \
     --sysconfdir=${SYSCONFDIR} \

@@ -20,8 +20,8 @@ log_format proxylog '[Gfarm S3]'
 #'uri:$uri\t'
 #'query_string:$query_string\t'
 
-access_log /dev/stdout proxylog;
-error_log /dev/stderr warn;
+access_log @NGINX_ACCESS_LOG@ proxylog;
+error_log @NGINX_ERROR_LOG@ warn;
 
 # use $scheme for proxy_x_forwarded_proto when http_x_forwarded_proto is empty
 map $http_x_forwarded_proto $proxy_x_forwarded_proto {
