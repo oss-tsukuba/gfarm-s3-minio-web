@@ -1,0 +1,9 @@
+#! /bin/bash
+
+set -eu -o pipefail
+#set -x
+
+D=$(dirname $0)
+eval $(${D}/gfarm-s3-readconf)
+
+rm -f "${GFARM_S3_LOGIN_CHALLENGE_LOG}"
