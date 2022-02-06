@@ -43,11 +43,11 @@ map $http_x_forwarded_proto $proxy_x_forwarded_proto {
 # }
 
 upstream webui {
-  server unix:/tmp/gfarm-s3-webui.sock fail_timeout=0;
+  server @GFARM_S3_WEBUI_ADDR@ fail_timeout=0;
 }
 
 upstream router {
-  server unix:/tmp/gfarm-s3-router.sock fail_timeout=0;
+  server @GFARM_S3_ROUTER_ADDR@ fail_timeout=0;
 }
 
 server {
@@ -81,7 +81,7 @@ server {
   proxy_send_timeout 60s;
 
   # Site specific
-  include /usr/local/etc/nginx-gfarm-s3-site.conf;
+  include @sysconfdir@/nginx-gfarm-s3-site.conf;
   # Example of nginx-gfarm-s3-site.conf:
   # listen 443 ssl;
   # listen [::]:443 ssl;
@@ -90,5 +90,5 @@ server {
   # server_name _;
 
   # from configure
-  include /usr/local/etc/nginx-gfarm-s3-generated.conf;
+  include @sysconfdir@/nginx-gfarm-s3-location.conf;
 }

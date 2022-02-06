@@ -47,7 +47,7 @@ install:
 	@echo systemctl enable --now gfarm-s3-router.service
 
 	$(INSTALL) -D -m 644 nginx-gfarm-s3.conf $(GFARMS3_CONF_DIR)/nginx-gfarm-s3.conf
-	$(INSTALL) -D -m 644 nginx-gfarm-s3-generated.conf $(GFARMS3_CONF_DIR)/nginx-gfarm-s3-generated.conf
+	$(INSTALL) -D -m 644 nginx-gfarm-s3-location.conf $(GFARMS3_CONF_DIR)/nginx-gfarm-s3-location.conf
 
 clean:
 

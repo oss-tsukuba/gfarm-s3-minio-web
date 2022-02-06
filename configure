@@ -11628,7 +11628,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-minio bin/gfarm-s3-readconf bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/gfarm-s3.conf etc/gfarm-s3-webui.service etc/gfarm-s3-router.service etc/makefile etc/nginx-gfarm-s3-generated.conf etc/sudoers minio/makefile web/makefile web/gfarm-s3/gfarms3/conf.py"
+ac_config_files="$ac_config_files makefile bin/gfarm-s3-configtest bin/gfarm-s3-diff-local-usermap bin/gfarm-s3-generate-usermap-hpci bin/gfarm-s3-login bin/gfarm-s3-server bin/gfarm-s3-minio bin/gfarm-s3-readconf bin/gfarm-s3-sharedsecret-password bin/gfarm-s3-update-reverse-proxy bin/gfarm-s3-useradd bin/gfarm-s3-viusermap bin/makefile etc/gfarm-s3.conf etc/gfarm-s3-webui.service etc/gfarm-s3-router.service etc/makefile etc/nginx-gfarm-s3.conf etc/nginx-gfarm-s3-location.conf etc/sudoers minio/makefile web/makefile web/gfarm-s3/gfarms3/conf.py"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -12639,7 +12639,8 @@ do
     "etc/gfarm-s3-webui.service") CONFIG_FILES="$CONFIG_FILES etc/gfarm-s3-webui.service" ;;
     "etc/gfarm-s3-router.service") CONFIG_FILES="$CONFIG_FILES etc/gfarm-s3-router.service" ;;
     "etc/makefile") CONFIG_FILES="$CONFIG_FILES etc/makefile" ;;
-    "etc/nginx-gfarm-s3-generated.conf") CONFIG_FILES="$CONFIG_FILES etc/nginx-gfarm-s3-generated.conf" ;;
+    "etc/nginx-gfarm-s3.conf") CONFIG_FILES="$CONFIG_FILES etc/nginx-gfarm-s3.conf" ;;
+    "etc/nginx-gfarm-s3-location.conf") CONFIG_FILES="$CONFIG_FILES etc/nginx-gfarm-s3-location.conf" ;;
     "etc/sudoers") CONFIG_FILES="$CONFIG_FILES etc/sudoers" ;;
     "minio/makefile") CONFIG_FILES="$CONFIG_FILES minio/makefile" ;;
     "web/makefile") CONFIG_FILES="$CONFIG_FILES web/makefile" ;;
