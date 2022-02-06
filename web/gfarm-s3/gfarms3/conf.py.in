@@ -4,7 +4,7 @@ import json
 from subprocess import Popen, PIPE
 
 prefix = '@prefix@'
-sysconfdir = '@sysconfdir@'
+sysconfdir = '@SYSCONFDIR@'
 
 # NOTE: @bindir@ is not available (... bindir='${exec_prefix}/bin')
 gfarm_s3_readconf = prefix + '/bin/gfarm-s3-readconf'

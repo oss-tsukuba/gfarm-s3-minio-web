@@ -3,8 +3,9 @@
 set -eu
 #set -x
 
-CONF_DEFAULT=@sysconfdir@/gfarm-s3.conf
-CONF=@sysconfdir@/gfarm-s3-overwrite.conf
+prefix=@prefix@
+CONF_DEFAULT=@SYSCONFDIR@/gfarm-s3.conf
+CONF=@SYSCONFDIR@/gfarm-s3-overwrite.conf
 
 CACHE="/tmp/gfarm-s3.conf.cache.${UID}"
 

@@ -81,7 +81,7 @@ server {
   proxy_send_timeout 60s;
 
   # Site specific
-  include @sysconfdir@/nginx-gfarm-s3-site.conf;
+  include @SYSCONFDIR@/nginx-gfarm-s3-site.conf;
   # Example of nginx-gfarm-s3-site.conf:
   # listen 443 ssl;
   # listen [::]:443 ssl;
@@ -90,5 +90,5 @@ server {
   # server_name _;
 
   # from configure
-  include @sysconfdir@/nginx-gfarm-s3-location.conf;
+  include @SYSCONFDIR@/nginx-gfarm-s3-location.conf;
 }

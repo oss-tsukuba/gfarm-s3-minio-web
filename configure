@@ -631,6 +631,7 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+SYSCONFDIR
 GO_BUILDDIR
 GO_URL
 GFARM_S3_WEBUI_BASE_URL
@@ -11530,6 +11531,10 @@ esac
 case x$ in
   x) GO_BUILDDIR=/go_build ;;
 esac
+
+
+### SYSCONFDIR
+SYSCONFDIR=$sysconfdir
 
 
 # Checks for libraries.

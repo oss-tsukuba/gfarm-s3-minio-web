@@ -175,6 +175,10 @@ case x$ in
 esac
 AC_SUBST(GO_BUILDDIR)
 
+### SYSCONFDIR
+SYSCONFDIR=$sysconfdir
+AC_SUBST(SYSCONFDIR)
+
 # Checks for libraries.
 AC_CHECK_LIB([gfarm], [gfarm_initialize],, [AC_MSG_ERROR([libgfarm not found])])
 AC_CHECK_LIB([gfarm], [gfarm_get_global_username_by_url],, [AC_MSG_ERROR([Gfarm-2.4.2 or later is required])])
