@@ -2,12 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([etc/gfarm-s3.conf.in], [0.0.0])
-#AM_MAINTAINER_MODE
+AC_INIT([etc/gfarm-s3.conf.in], [1.0.0])
 AC_CONFIG_SRCDIR([etc/gfarm-s3.conf.in])
-#AC_CONFIG_HEADER([config.h])
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_MACRO_DIR([m4])
 AC_SYS_LARGEFILE
 
@@ -18,7 +15,7 @@ AC_PROG_LIBTOOL
 ### --with-gfarm=GFARM_ROOT
 AC_MSG_CHECKING([for Gfarm file system])
 AC_ARG_WITH([gfarm],
-  AC_HELP_STRING([--with-gfarm=GFARM_ROOT], [Gfarm root directory [[/usr]]]))
+  AC_HELP_STRING([--with-gfarm=GFARM_ROOT], [Gfarm root directory [/usr]]))
 case x$with_gfarm in
   x|xyes|xno) with_gfarm=/usr ;;
 esac
@@ -32,7 +29,7 @@ AC_SUBST(with_gfarm)
 ### --with-globus=GLOBUS_ROOT
 AC_MSG_CHECKING([for Globus Toolkit])
 AC_ARG_WITH([globus],
-  AC_HELP_STRING([--with-globus=GLOBUS_ROOT], [Globus root directory [[/usr]]]))
+  AC_HELP_STRING([--with-globus=GLOBUS_ROOT], [Globus root directory [/usr]]))
 case x$with_globus in
   x|xyes|xno) with_globus=/usr ;;
 esac
@@ -42,132 +39,161 @@ AC_SUBST(with_globus)
 ### --with-myproxy=MYPROXY_ROOT
 AC_MSG_CHECKING([for MyProxy Credential Management Service])
 AC_ARG_WITH([myproxy],
-  AC_HELP_STRING([--with-myproxy=MYPROXY_ROOT], [Myproxy root directory [[/usr]]]))
+  AC_HELP_STRING([--with-myproxy=MYPROXY_ROOT], [Myproxy root directory [/usr]]))
 case x$with_myproxy in
   x|xyes|xno) with_myproxy=/usr ;;
 esac
 AC_MSG_RESULT([$with_myproxy])
 AC_SUBST(with_myproxy)
 
-### --with-myproxy-server=MYPROXY_SERVER
-AC_MSG_CHECKING([for myproxy server])
-AC_ARG_WITH([myproxy-server],
-  AC_HELP_STRING([--with-myproxy-server=MYPROXY_SERVER], [myproxy servername [[portal.hpci.nii.ac.jp]]]))
-case x$with_myproxy_server in
-  x|xyes|xno) with_myproxy_server=portal.hpci.nii.ac.jp ;;
-esac
-AC_MSG_RESULT([$with_myproxy_server])
-AC_SUBST(with_myproxy_server)
-
-### --with-proxy-lifetime=PROXY_LIFETIME
-AC_MSG_CHECKING([for proxy lifetime])
-AC_ARG_WITH([proxy-lifetime],
-  AC_HELP_STRING([--with-proxy-lifetime=PROXY_LIFETIME], [proxy lifetime [[168]]]))
-case x$with_proxy_lifetime in
-  x|xyes|xno) with_proxy_lifetime=168 ;;
-esac
-AC_MSG_RESULT([$with_proxy_lifetime])
-AC_SUBST(with_proxy_lifetime)
-
-### --with-apache=APACHE_ROOT
-AC_MSG_CHECKING([for Apache HTTP Server])
-AC_ARG_WITH([apache],
-  AC_HELP_STRING([--with-apache=APACHE_ROOT], [Apache root directory [[/usr]]]))
-case x$with_apache in
-  x|xyes|xno) with_apache=/usr ;;
-esac
-AC_MSG_RESULT([$with_apache])
-AC_SUBST(with_apache)
-
 ### --with-gunicorn=GUNICORN_ROOT
 AC_MSG_CHECKING([for Gunicorn - Python WSGI HTTP Server for UNIX])
 AC_ARG_WITH([gunicorn],
-  AC_HELP_STRING([--with-gunicorn=GUNICORN_ROOT], [gunicorn root directory [[/usr]]]))
+  AC_HELP_STRING([--with-gunicorn=GUNICORN_ROOT], [gunicorn root directory [/usr]]))
 case x$with_gunicorn in
   x|xyes|xno) with_gunicorn=/usr/local ;;
 esac
 AC_MSG_RESULT([$with_gunicorn])
 AC_SUBST(with_gunicorn)
 
-### --with-wsgi-homedir=WSGI_HOMEDIR
-AC_MSG_CHECKING([for WSGI homedir])
-AC_ARG_WITH([wsgi-homedir],
-  AC_HELP_STRING([--with-wsgi-homedir=WSGI_HOMEDIR], [wsgi homedir [[/home/wsgi]]]))
-case x$with_wsgi_homedir in
-  x|xyes|xno) with_wsgi_homedir=/home/wsgi ;;
+### MYPROXY_SERVER
+AC_ARG_VAR(MYPROXY_SERVER, [myproxy server name [<not specified (disabled)>]])
+case x$MYPROXY_SERVER in
+  x) MYPROXY_SERVER= ;;
 esac
-AC_MSG_RESULT([$with_wsgi_homedir])
-AC_SUBST(with_wsgi_homedir)
+AC_SUBST(MYPROXY_SERVER)
 
-### --with-wsgi-user=WSGI_USER
-AC_MSG_CHECKING([for WSGI user])
-AC_ARG_WITH([wsgi-user],
-  AC_HELP_STRING([--with-wsgi-user=WSGI_USER], [wsgi username [[wsgi]]]))
-case x$with_wsgi_user in
-  x|xyes|xno) with_wsgi_user=wsgi ;;
+### GSI_PROXY_HOURS
+AC_ARG_VAR(GSI_PROXY_HOURS, [GSI proxy certificate lifetime [168] hours])
+case x$GSI_PROXY_HOURS in
+  x) GSI_PROXY_HOURS=168 ;;
 esac
-AC_MSG_RESULT([$with_wsgi_user])
-AC_SUBST(with_wsgi_user)
+AC_SUBST(GSI_PROXY_HOURS)
 
-### --with-wsgi-group=WSGI_GROUP
-AC_MSG_CHECKING([for WSGI group])
-AC_ARG_WITH([wsgi-group],
-  AC_HELP_STRING([--with-wsgi-group=WSGI_GROUP], [wsgi groupname [[wsgi]]]))
-case x$with_wsgi_group in
-  x|xyes|xno) with_wsgi_group=wsgi ;;
+### GFARM_S3_HOMEDIR
+AC_ARG_VAR(GFARM_S3_HOMEDIR, [Gfarm S3 homedir [/home/_gfarm_s3]])
+case x$GFARM_S3_HOMEDIR in
+  x) GFARM_S3_HOMEDIR=/home/_gfarm_s3 ;;
 esac
-AC_MSG_RESULT([$with_wsgi_group])
-AC_SUBST(with_wsgi_group)
+AC_SUBST(GFARM_S3_HOMEDIR)
 
-### --with-wsgi-port=WSGI_PORT
-AC_MSG_CHECKING([for WSGI port])
-AC_ARG_WITH([wsgi-port],
-  AC_HELP_STRING([--with-wsgi-port=WSGI_PORT], [wsgi port [[8000]]]))
-case x$with_wsgi_port in
-  x|xyes|xno) with_wsgi_port=8000 ;;
+### GFARM_S3_USERNAME
+AC_ARG_VAR(GFARM_S3_USERNAME, [Gfarm S3 user name [_gfarm_s3]])
+case x$ in
+  x) GFARM_S3_USERNAME= ;;
 esac
-AC_MSG_RESULT([$with_wsgi_port])
-AC_SUBST(with_wsgi_port)
+AC_SUBST(GFARM_S3_USERNAME)
 
-### --with-minio-builddir=MINIO_BUILDDIR
-AC_MSG_CHECKING([minio-builddir for build s3 server (MinIO)])
-AC_ARG_WITH([minio-builddir],
-  AC_HELP_STRING([--with-minio-builddir=MINIO_BUILDDIR], [work directory [[$HOME/tmp]]]))
-case x$with_minio_builddir in
-  x|xyes|xno) with_minio_builddir=$HOME/tmp ;;
+### GFARM_S3_GROUPNAME
+AC_ARG_VAR(GFARM_S3_GROUPNAME, [Gfarm S3 group name [_gfarm_s3]])
+case x$GFARM_S3_GROUPNAME in
+  x) GFARM_S3_GROUPNAME= ;;
 esac
-AC_MSG_RESULT([$with_minio_builddir])
-AC_SUBST(with_minio_builddir)
+AC_SUBST(GFARM_S3_GROUPNAME)
 
-### --with-gfarm-shared-dir=SHARED_DIR
-AC_MSG_CHECKING([gfarm_shared_dir])
-AC_ARG_WITH([gfarm-shared-dir],
-  AC_HELP_STRING([--with-gfarm-shared-dir=SHARED_DIR], [work directory [[/share]]]))
-case x$with_gfarm_shared_dir in
-  x|xyes|xno) with_gfarm_shared_dir=/share ;;
+### GFARM_S3_WEBUI_ADDR
+AC_ARG_VAR(GFARM_S3_WEBUI_ADDR, [Gfarm S3 WebUI address [unix:/tmp/gfarm-s3-webui.sock]])
+case x$GFARM_S3_WEBUI_ADDR in
+  x) GFARM_S3_WEBUI_ADDR=unix:/tmp/gfarm-s3-webui.sock ;;
 esac
-AC_MSG_RESULT([$with_gfarm_shared_dir])
-AC_SUBST(with_gfarm_shared_dir)
+AC_SUBST(GFARM_S3_WEBUI_ADDR)
 
-### --with-cache-basedir=CACHE_BASEDIR
-AC_MSG_CHECKING([minio cache basedir])
-AC_ARG_WITH([cache-basedir],
-  AC_HELP_STRING([--with-cache-basedir=CACHE_BASEDIR], [cache directory [[/var/tmp]]]))
-case x$with_cache_basedir in
-  x|xyes|xno) with_cache_basedir=/var/tmp ;;
+### GFARM_S3_ROUTER_ADDR
+AC_ARG_VAR(GFARM_S3_ROUTER_ADDR, [Gfarm S3 router address [unix:/tmp/gfarm-s3-router.sock]])
+case x$GFARM_S3_ROUTER_ADDR in
+  x) GFARM_S3_ROUTER_ADDR=unix:/tmp/gfarm-s3-router.sock ;;
 esac
-AC_MSG_RESULT([$with_cache_basedir])
-AC_SUBST(with_cache_basedir)
+AC_SUBST(GFARM_S3_ROUTER_ADDR)
 
-### --with-cache-size=CACHE_SIZE (MB)
-AC_MSG_CHECKING([minio cache size])
-AC_ARG_WITH([cache-size],
-  AC_HELP_STRING([--with-cache-size=CACHE_SIZE], [cache size [[4096]]]))
-case x$with_cache_size in
-  x|xyes|xno) with_cache_size=4096 ;;
+### GFARM_S3_WEBUI_THREADS
+AC_ARG_VAR(GFARM_S3_WEBUI_THREADS, [the number of threads of Web UI [8]])
+case x$GFARM_S3_WEBUI_THREADS in
+  x) GFARM_S3_WEBUI_THREADS=8 ;;
 esac
-AC_MSG_RESULT([$with_cache_size])
-AC_SUBST(with_cache_size)
+AC_SUBST(GFARM_S3_WEBUI_THREADS)
+
+### GFARM_S3_WEBUI_WORKERS
+AC_ARG_VAR(GFARM_S3_WEBUI_WORKERS, [the number of workers of Web UI [2]])
+case x$GFARM_S3_WEBUI_WORKERS in
+  x) GFARM_S3_WEBUI_WORKERS=2 ;;
+esac
+AC_SUBST(GFARM_S3_WEBUI_WORKERS)
+
+### GFARM_S3_ROUTER_THREADS
+AC_ARG_VAR(GFARM_S3_ROUTER_THREADS, [the number of threads of S3 router [16]])
+case x$GFARM_S3_ROUTER_THREADS in
+  x) GFARM_S3_ROUTER_THREADS=16 ;;
+esac
+AC_SUBST(GFARM_S3_ROUTER_THREADS)
+
+### GFARM_S3_ROUTER_WORKERS
+AC_ARG_VAR(GFARM_S3_ROUTER_WORKERS, [the number of workers of S3 router [2]])
+case x$GFARM_S3_ROUTER_WORKERS in
+  x) GFARM_S3_ROUTER_WORKERS=2 ;;
+esac
+AC_SUBST(GFARM_S3_ROUTER_WORKERS)
+
+### GFARM_S3_SHARED_DIR
+AC_ARG_VAR(GFARM_S3_SHARED_DIR, [Shared Gfarm directory via Gfarm S3 [/share]])
+case x$GFARM_S3_SHARED_DIR in
+  x) GFARM_S3_SHARED_DIR=/share ;;
+esac
+AC_SUBST(GFARM_S3_SHARED_DIR)
+
+### GFARM_S3_LOCALTMP_DIR
+AC_ARG_VAR(GFARM_S3_LOCALTMP_DIR, [Gfarm S3 MinIO local tempfile directory [/var/tmp]])
+case x$GFARM_S3_LOCALTMP_DIR in
+  x) GFARM_S3_LOCALTMP_DIR=/var/tmp ;;
+esac
+AC_SUBST(GFARM_S3_LOCALTMP_DIR)
+
+### GFARM_S3_LOCALTMP_SIZE_MB
+AC_ARG_VAR(GFARM_S3_LOCALTMP_SIZE_MB, [Gfarm S3 MinIO local tempfile directory maximum size (MiB) [4096]])
+case x$GFARM_S3_LOCALTMP_SIZE_MB in
+  x) GFARM_S3_LOCALTMP_SIZE_MB=4096 ;;
+esac
+AC_SUBST(GFARM_S3_LOCALTMP_SIZE_MB)
+
+### GFARM_S3_WEBUI_BASE_URL
+AC_ARG_VAR(GFARM_S3_WEBUI_BASE_URL, [WebUI base URL [gfarm_s3/]])
+case x$GFARM_S3_WEBUI_BASE_URL in
+  x) GFARM_S3_WEBUI_BASE_URL=gfarm_s3/ ;;
+esac
+AC_SUBST(GFARM_S3_WEBUI_BASE_URL)
+
+### GO_URL
+AC_ARG_VAR(GO_URL, [go binary URL [https://go.dev/dl/go1.16.13.linux-amd64.tar.gz]])
+case x$GO_URL in
+  x) GO_URL=https://go.dev/dl/go1.16.13.linux-amd64.tar.gz ;;
+esac
+AC_SUBST(GO_URL)
+
+### GO_BUILDDIR
+AC_ARG_VAR(GO_BUILDDIR, [Golang build directory (minio, etc.) [/go_build]])
+case x$GO_BUILDDIR in
+  x) GO_BUILDDIR=/go_build ;;
+esac
+AC_SUBST(GO_BUILDDIR)
+
+LOG_JOURNALD=syslog:server=unix:/dev/log
+
+### NGINX_ACCESS_LOG
+AC_ARG_VAR(NGINX_ACCESS_LOG, [NGINX access_log [${LOG_JOURNALD}]])
+case x$NGINX_ACCESS_LOG in
+  x) NGINX_ACCESS_LOG=${LOG_JOURNALD} ;;
+esac
+AC_SUBST(NGINX_ACCESS_LOG)
+
+### NGINX_ERROR_LOG
+AC_ARG_VAR(NGINX_ERROR_LOG, [NGINX error_log [${LOG_JOURNALD}]])
+case x$NGINX_ERROR_LOG in
+  x) NGINX_ERROR_LOG=${LOG_JOURNALD} ;;
+esac
+AC_SUBST(NGINX_ERROR_LOG)
+
+### SYSCONFDIR
+eval SYSCONFDIR=$sysconfdir
+AC_SUBST(SYSCONFDIR)
 
 # Checks for libraries.
 AC_CHECK_LIB([gfarm], [gfarm_initialize],, [AC_MSG_ERROR([libgfarm not found])])
@@ -179,19 +205,22 @@ bin/gfarm-s3-diff-local-usermap
 bin/gfarm-s3-generate-usermap-hpci
 bin/gfarm-s3-login
 bin/gfarm-s3-server
+bin/gfarm-s3-minio
+bin/gfarm-s3-readconf
 bin/gfarm-s3-sharedsecret-password
 bin/gfarm-s3-update-reverse-proxy
 bin/gfarm-s3-useradd
 bin/gfarm-s3-viusermap
 bin/makefile
-etc/apache-gfarm-s3.conf
 etc/gfarm-s3.conf
-etc/gunicorn.service
+etc/gfarm-s3-webui.service
+etc/gfarm-s3-router.service
 etc/makefile
+etc/nginx-gfarm-s3.conf
+etc/nginx-gfarm-s3-location.conf
 etc/sudoers
 minio/makefile
 web/makefile
-web/rungunicorn
-web/runserver
+web/gfarm-s3/gfarms3/conf.py
 ])
 AC_OUTPUT

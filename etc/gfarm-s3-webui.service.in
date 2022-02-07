@@ -1,0 +1,19 @@
+[Unit]
+Description = Gfarm-S3 WebUI (gunicorn app)
+After = network.target
+
+[Service]
+Type = simple
+User = @GFARM_S3_USERNAME@
+Group = @GFARM_S3_GROUPNAME@
+RuntimeDirectory = gfarm-s3-webui
+WorkingDirectory = /
+ExecStart = @prefix@/bin/gfarm-s3-webui
+
+#ExecReload = /bin/kill -s HUP $MAINPID
+#KillMode = mixed
+#TimeoutStopSec = 5
+PrivateTmp = false
+
+[Install]
+WantedBy = multi-user.target

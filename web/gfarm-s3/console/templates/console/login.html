@@ -1,22 +1,28 @@
 {% extends "console/base.html" %}
 {% load i18n %}
 {% block content1 %}
-{% if isLoginFailed %}<div class="alert alert-danger" role="alert"
->{% trans 'errorMessage' %}</div
->{% endif %}{% if showReauthMsg %}<div class="alert alert-info row" role="alert"
->{% trans 'plsreauth' %}</div
->{% endif %}<form action="{% url 'login' %}" method="post"
->{% csrf_token %}<div class="form-group"
-><label for="exampleInputEmail1"
->{% trans 'globalUsername' %}</label
-><input type="text" class="form-control" name="username"{% if username %} value="{{ username }}"{% endif %} required{% if username is None %} autofocus{% endif %}
- /></div
-><div class="form-group"
-><label for="exampleInputPassword1"
->{% trans 'Password' %}</label
-><input type="password" class="form-control" name="passwd" required{% if username %} autofocus{% endif %} data-bs-toggle="tooltip" data-placement="top" title="{% trans 'passwordInstruction' %}"
- /></div
-><button type="submit" class="btn btn-outline-primary form-control" value="Launch"
->{% trans 'GoButton' %}</button
-></form
->{% endblock %}
+{% if isLoginFailed %}
+<div class="alert alert-danger" role="alert">{% trans 'errorMessage' %} : {{ reason }}</div>
+{% endif %}
+{% if showReauthMsg %}
+<div class="alert alert-info row" role="alert">{% trans 'plsreauth' %}</div>
+{% endif %}
+<form action="{% url 'login' %}" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="exampleInputEmail1">
+            {% trans 'globalUsername' %}
+        </label>
+        <input type="text" class="form-control" name="username" {% if username %} value="{{ username }}" {% endif %}
+            required{% if username is None %} autofocus{% endif %} autocomplete="username" />
+    </div>
+    <div class="form-group"><label for="exampleInputPassword1">{% trans 'Password' %}</label>
+        <input type="password" class="form-control" name="passwd" required{% if username %} autofocus{% endif %}
+            data-bs-toggle="tooltip" data-placement="top" title="{% trans 'passwordInstruction' %}"
+            autocomplete="current-password" />
+    </div>
+    <button type="submit" class="btn btn-outline-primary form-control submit-once" value="Launch">
+        {% trans 'GoButton' %}
+    </button>
+</form>
+{% endblock %}

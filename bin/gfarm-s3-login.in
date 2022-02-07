@@ -1,13 +1,15 @@
-#! /bin/sh
+#! /bin/bash
+
+set -eu -o pipefail
+#set -x
 
 export LANG=C
 export LC_CTYPE=C
 export LC_COLLATE=C
 
-prefix=@prefix@
-. @sysconfdir@/gfarm-s3.conf
-. $GFARM_S3_LIB/gfarm-s3-subr
-
+D=$(dirname $0)
+eval $(${D}/gfarm-s3-readconf)
+source $GFARM_S3_LIB/gfarm-s3-subr
 
 USAGE="\
 usage: $0 [options...] action global-username password
@@ -15,13 +17,15 @@ options ::= --gfarm_shared_dir gfarm_shared_dir |
             --authenticated authenticated_method_name |
             --bucket bucket
             --remote_addr remote_addr
-action ::= start|stop|restart|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl
+            --quiet
+action ::= start|stop|restart|resume|stop_to_resume|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl
 "
 
 authenticated=""
 gfarm_shared_dir=""
 bucket=""
 remote_addr=""
+quiet=0
 
 while [ $# -gt 0 ]; do
 	opt="$1"
@@ -30,47 +34,144 @@ while [ $# -gt 0 ]; do
 	--gfarm_shared_dir) gfarm_shared_dir="$2"; shift;;
 	--bucket) bucket="$2"; shift;;
 	--remote_addr) remote_addr="$2"; shift;;
+	--quiet) quiet=1;;
 	*) break;;
 	esac
 	shift;
 done
 
 if [ $# != 3 ]; then
-	echo "$USAGE" 1>&2
-	exit 1
+    echo "invalid usage"
+    echo "$USAGE" 1>&2
+    exit 1
+fi
+
+return_json() {
+    status="$1"
+    reason="$2"
+    cat <<-EOF
+{
+  "status": "$status",
+  "reason": "$reason"
+}
+EOF
+}
+
+GFARM_S3_USERNAME=@GFARM_S3_USERNAME@
+GFARM_S3_USER_ID=$(id -u ${GFARM_S3_USERNAME})
+
+# GFARM_S3_USERNAME only
+if [ "$UID" != "${GFARM_S3_USER_ID}" ]; then
+    msg="only ${GFARM_S3_USERNAME} is permitted"
+    log_info "ERROR: ${msg}"
+    return_json "failure" "${msg}"
+    exit 0  # return 0 to send JSON
 fi
 
 action="$1"
 global_username="$2"
 user_password="$3"
 
-case "$action" in
-start|stop|restart|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl) ;;
+case "$action" in start|stop|restart|resume|stop_to_resume|status|keygen|info|gfuser|gfgroup|gfls|gfgetfacl|gfsetfacl) ;;
 *) echo $USAGE 1>&2; exit 1;;
 esac
 
+login_failed() {
+    return_json "failure" "incorrect username or password"
+    sleep ${GFARM_S3_LOGIN_CHALLENGE_INTERVAL}
+}
+
+# Brute-force attack
+bfa_check_addr() {
+    ADDR="$1"
+
+    [ -z "${ADDR}" ] && return 0
+
+    if [ ! -f "${GFARM_S3_LOGIN_CHALLENGE_LOG}" ]; then
+        touch "${GFARM_S3_LOGIN_CHALLENGE_LOG}"
+        chmod 600 "${GFARM_S3_LOGIN_CHALLENGE_LOG}"
+        if [ ! -r "${GFARM_S3_LOGIN_CHALLENGE_LOG}" \
+             -o ! -w "${GFARM_S3_LOGIN_CHALLENGE_LOG}" \
+             -o ! -O "${GFARM_S3_LOGIN_CHALLENGE_LOG}" ]; then
+            logger_error "invalid ${GFARM_S3_LOGIN_CHALLENGE_LOG}"
+            echo "server error"
+            exit 1
+        fi
+        return 0
+    fi
+
+    count=$(grep "^${ADDR}\$" "${GFARM_S3_LOGIN_CHALLENGE_LOG}" | wc -l)
+    if [ ${count} -ge ${GFARM_S3_LOGIN_CHALLENGE_MAX} ]; then
+        return 1
+    fi
+    echo ${count}
+    return 0
+}
+
+bfa_log_addr() {
+    ADDR="$1"
+
+    [ -z "${ADDR}" ] && return 0
+
+    # atomic operation
+    echo "${ADDR}" >> "${GFARM_S3_LOGIN_CHALLENGE_LOG}"
+}
+
+bfa_log_clear() {
+    ADDR="$1"
+    COUNT="$2"
+
+    [ -z "${ADDR}" ] && return 0
+    [ "${COUNT}" = "0" ] && return 0
+
+    # If bfa_log_addr and bfa_log_clear are called simultaneously,
+    # ADDR may not be cleared or may not be added. (optimistically)
+
+    tmpfile1=$(mktemp)
+    tmpfile2=$(mktemp)
+    cp "${GFARM_S3_LOGIN_CHALLENGE_LOG}" "$tmpfile1"
+    grep -v "^${ADDR}\$" "$tmpfile1" > "$tmpfile2" 2> /dev/null || true
+    rm -f "$tmpfile1"
+    # atomic operation
+    mv "$tmpfile2" "${GFARM_S3_LOGIN_CHALLENGE_LOG}"
+}
+
+# check Brute-force attack
+if ! bfa_count=$(bfa_check_addr "$remote_addr"); then
+    log_info "login failed: Brute-force attack: $global_username $remote_addr"
+    login_failed
+    exit 0  # return 0 to send JSON
+fi
+
 usermap_entry=$(lookup_usermap_by_global_username "$global_username" "$GFARMS3_LOCAL_USER_MAP")
 if [ -z "$usermap_entry" ]; then
-	echo "user not found: $global_username"
-	exit 1
+    log_info "login failed: user not found in $GFARMS3_LOCAL_USER_MAP: $global_username $remote_addr"
+    bfa_log_addr "$remote_addr"
+    login_failed
+    exit 0  # return 0 to send JSON
 fi
 local_username=$(get_local_username "$usermap_entry")
 
-status=failure
 if [ -n "$authenticated" ]; then
-	authenticated_method="$authenticated"
-elif ! authenticated_method=$(challenge_auth "$global_username" "$user_password" "$local_username"); then
-	logger -i -p local7.info -t gfarm-s3-login "login failed: $global_username $remote_addr"
-cat <<-EOF
-	{
-		"status": "$status",
-		"reason": "no authentication method succeeded"
-	}
-EOF
-	exit 1
+    authenticated_method="$authenticated"
+elif authenticated_method=$(challenge_auth "$global_username" "$user_password" "$local_username"); then
+    log_info "login ($authenticated_method): $global_username $local_username $remote_addr"
+    bfa_log_clear "$remote_addr" "$bfa_count"
+else
+    log_info "login failed: incorrect password: $global_username $local_username $remote_addr"
+    bfa_log_addr "$remote_addr"
+    login_failed
+    exit 0  # return 0 to send JSON
 fi
 
 gfarm_shared_dir=$(gfarm_shared_dir_path "$gfarm_shared_dir" "$global_username")
+
+rungf() {
+	local local_username="$1"
+	local x509_user_proxy=$(get_x509_user_proxy $local_username)
+	shift
+	mysudo "$local_username" X509_USER_PROXY="$x509_user_proxy" "$@"
+}
 
 case "$action" in
 start)
@@ -80,6 +181,10 @@ stop)
 restart)
 	stop_per_user_server "$local_username" &&
 	spawn_per_user_server "$local_username" "$gfarm_shared_dir";;
+resume)
+	resume_per_user_server "$local_username" "$gfarm_shared_dir";;
+stop_to_resume)
+	stop_to_resume_per_user_server "$local_username";;
 status)
 	get_s3_server_status "$local_username";;
 keygen)
@@ -87,16 +192,16 @@ keygen)
 info)
 	true;;
 gfuser)
-	mysudo "$local_username" $GFUSER -l; exit $?;;
+	rungf "$local_username" $GFUSER -l; exit $?;;
 gfgroup)
-	mysudo "$local_username" $GFGROUP; exit $?;;
+	rungf "$local_username" $GFGROUP; exit $?;;
 gfls)
-	mysudo "$local_username" $GFLS "$gfarm_shared_dir/$bucket"; exit $?;;
+	rungf "$local_username" $GFLS "$gfarm_shared_dir/$bucket"; exit $?;;
 gfgetfacl)
-	mysudo "$local_username" $GFGETFACL "$gfarm_shared_dir/$bucket"; exit $?;;
+	rungf "$local_username" $GFGETFACL "$gfarm_shared_dir/$bucket"; exit $?;;
 gfsetfacl)
 	### ignore all errors ==> exit 0
-	mysudo "$local_username" $GFSETFACL -R -b -M - "$gfarm_shared_dir/$bucket"; exit 0;;
+	rungf "$local_username" $GFSETFACL -R -b -M - "$gfarm_shared_dir/$bucket"; exit 0;;
 esac
 
 exit_status=$?
@@ -109,6 +214,7 @@ else
 	reason="$action exit: code = $exit_status"
 fi
 
+if [ $quiet -ne 1 ]; then
 cat <<-EOF
 	{
 		"status": "$status",
@@ -122,3 +228,4 @@ cat <<-EOF
 		"secret_key": "$(get_per_user_secret_key "$local_username")"
 	}
 EOF
+fi

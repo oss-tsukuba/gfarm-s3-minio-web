@@ -1,0 +1,31 @@
+version: '3.5'
+
+# use variables from .env
+
+services:
+  gfminio:
+    environment:
+      - VIRTUAL_HOST=${SERVER_NAME}
+
+  revproxy:
+    build: ./revproxy
+    networks:
+      - mynet2
+    ports:
+      - ${HTTP_PORT:-80}:${HTTP_PORT:-80}
+      - ${HTTPS_PORT:-443}:${HTTPS_PORT:-443}
+    environment:
+      - DEFAULT_HOST=${SERVER_NAME}
+      - HTTP_PORT=${HTTP_PORT:-80}
+      - HTTPS_PORT=${HTTPS_PORT:-443}
+      ### to use http
+      #- HTTPS_METHOD=noredirect
+      - TZ=${TZ:-Asia/Tokyo}
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs:ro
+
+volumes:
+  html:
+  certs:

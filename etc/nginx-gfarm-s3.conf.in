@@ -1,0 +1,94 @@
+log_format proxylog '[Gfarm S3]'
+'[$time_iso8601] '
+'remote_addr:$remote_addr\t'
+'x_forwarded_for:$http_x_forwarded_for\t'
+'http_user_agent:$http_user_agent\t'
+'upstream_addr:$upstream_addr\t'
+'request_method:$request_method\t'
+'request_uri:$request_uri\t'
+'status:$status\t'
+'http_host:$http_host\t'
+;
+
+#'scheme:$scheme\t'
+#'http_referer:$http_referer\t'
+#'x_forwarded_host:$http_x_forwarded_host\t'
+#'x_real_ip:$http_x_real_ip\t'
+#'host:$host\t'
+#'remote_addr:$remote_addr\t'
+#'realip_remote_addr:$realip_remote_addr\t'
+#'uri:$uri\t'
+#'query_string:$query_string\t'
+
+access_log @NGINX_ACCESS_LOG@ proxylog;
+error_log @NGINX_ERROR_LOG@ warn;
+
+# use $scheme for proxy_x_forwarded_proto when http_x_forwarded_proto is empty
+map $http_x_forwarded_proto $proxy_x_forwarded_proto {
+  default $http_x_forwarded_proto;
+  ''      $scheme;
+}
+
+# map $http_x_forwarded_port $proxy_x_forwarded_port {
+#   default $http_x_forwarded_port;
+#   ''      $server_port;
+# }
+# map $http_upgrade $proxy_connection {
+#   default upgrade;
+#   '' close;
+# }
+# map $proxy_x_forwarded_proto $proxy_x_forwarded_ssl {
+#    default off;
+#    https on;
+# }
+
+upstream webui {
+  server @GFARM_S3_WEBUI_ADDR@ fail_timeout=0;
+}
+
+upstream router {
+  server @GFARM_S3_ROUTER_ADDR@ fail_timeout=0;
+}
+
+server {
+  # Settings from: https://docs.min.io/docs/setup-nginx-proxy-with-minio
+
+  # To allow special characters in headers
+  ignore_invalid_headers off;
+  # Allow any size file to be uploaded.
+  # Set to a value such as 1000m; to restrict file size to a specific value
+  client_max_body_size 0;
+  # To disable buffering
+  proxy_buffering off;
+
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
+  proxy_set_header Host $http_host;
+
+  proxy_connect_timeout 300s;
+  # Default is HTTP/1, keepalive is only enabled in HTTP/1.1
+  proxy_http_version 1.1;
+  proxy_set_header Connection "";
+  chunked_transfer_encoding off;
+
+  # Do not use bufferinig to upload
+  proxy_request_buffering off;
+
+  # http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_read_timeout
+  # default
+  proxy_read_timeout 60s;
+  proxy_send_timeout 60s;
+
+  # Site specific
+  include @SYSCONFDIR@/nginx-gfarm-s3-site.conf;
+  # Example of nginx-gfarm-s3-site.conf:
+  # listen 443 ssl;
+  # listen [::]:443 ssl;
+  # ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
+  # ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+  # server_name _;
+
+  # from configure
+  include @SYSCONFDIR@/nginx-gfarm-s3-location.conf;
+}

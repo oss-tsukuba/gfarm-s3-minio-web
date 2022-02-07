@@ -3,16 +3,12 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 import time
-import logging
+
+from gfarms3 import conf
 from . import cmd
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+logger = conf.get_logger(__name__)
+
 
 ### session["global_username"]:
 ###   "non-empty"  login succeeded
@@ -34,23 +30,37 @@ def login(request):
         isLoginFailed = is_login_failed(request.session)
         isReauth = not need_login(request.session)
         username = None
+        reason = None
         if request.session is not None:
             username = request.session.get("global_username", None)
+            reason = request.session.get("reason", None)
         render_dict = {"isLoginFailed": isLoginFailed,
                        "showLogoutButton": isReauth,
                        "showReauthMsg": isReauth,
-                       "username": username}
+                       "username": username,
+                       "reason": f"{reason}"}
         return render(request, "console/login.html", render_dict)
     elif request.method == "POST":
         username = request.POST["username"]
         passwd = request.POST["passwd"]
         http_x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR", None)
         if http_x_forwarded_for is not None:
-            remote_addr = http_x_forwarded_for 
+            remote_addr = http_x_forwarded_for.split(',')[0]
         else:
             remote_addr = request.META.get("REMOTE_ADDR", None)
+
+        if not remote_addr:
+            reason = "remote_addr is None"
+            logger.error(reason)
+            request.session["reason"] = reason
+            request.session["global_username"] = ""
+            return HttpResponseRedirect(reverse("login"))
+
         ### challenge authenticateion
         cmd_result = cmd.cmd("info", username, passwd, remote_addr = remote_addr)
+        ### logger.debug(f"@@@ cmd_result = {cmd_result}")
+        if cmd_result is not None:
+            request.session["reason"] = cmd_result.get("reason")
         if cmd_result is None or cmd_result["status"] != "success":
             request.session["global_username"] = ""
             return HttpResponseRedirect(reverse("login"))

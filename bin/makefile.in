@@ -1,8 +1,9 @@
-PREFIX=@prefix@
-
-BINDIR=$(PREFIX)/bin
-LIBDIR=$(PREFIX)/lib
-INSTALL=install
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+libdir = @libdir@
+libexecdir = @libexecdir@
+INSTALL = install
 
 scripts= \
 	gfarm-s3-configtest \
@@ -10,16 +11,23 @@ scripts= \
 	gfarm-s3-generate-usermap-hpci \
 	gfarm-s3-login \
 	gfarm-s3-server \
+	gfarm-s3-minio \
+	gfarm-s3-readconf \
+	gfarm-s3-reset-brute-force-attack-log \
 	gfarm-s3-sharedsecret-password \
 	gfarm-s3-update-reverse-proxy \
 	gfarm-s3-useradd \
-	gfarm-s3-viusermap
+	gfarm-s3-viusermap \
+	gfarm-s3-webui \
+	gfarm-s3-router
 
 generated_scripts= \
 	gfarm-s3-configtest \
 	gfarm-s3-diff-local-usermap \
 	gfarm-s3-login \
 	gfarm-s3-server \
+	gfarm-s3-minio \
+	gfarm-s3-readconf \
 	gfarm-s3-sharedsecret-password \
 	gfarm-s3-update-reverse-proxy \
 	gfarm-s3-useradd \
@@ -28,8 +36,8 @@ generated_scripts= \
 all:
 
 install:
-	for i in $(scripts); do $(INSTALL) -c -m 555 $$i $(BINDIR); done
-	$(INSTALL) -c -m 644 gfarm-s3-subr $(LIBDIR)
+	for i in $(scripts); do $(INSTALL) -D -c -m 755 $$i $(bindir)/$$i; done
+	$(INSTALL) -D -c -m 644 gfarm-s3-subr $(libdir)/gfarm-s3-subr
 
 clean:
 

@@ -1,20 +1,21 @@
 PREFIX=@prefix@
 WITH_GFARM=@with_gfarm@
-MINIO_BUILDDIR=@with_minio_builddir@
-GOPATH=$(MINIO_BUILDDIR)/minio/work/go
-GOBIN=$(GOPATH)/bin
-BUILDDIR=$(MINIO_BUILDDIR)/minio/work/build
 
-GO_ARCHIVE=go1.15.linux-amd64.tar.gz
+BUILDDIR=@GO_BUILDDIR@
+
+GOPATH=$(BUILDDIR)/go
+GOBIN=$(GOPATH)/bin
+GO_URL=@GO_URL@
+GO_ARCHIVE_NAME=$$(basename $(GO_URL))
 GO_ARCHIVE_DIR=$$(dirname $(GOPATH))
-GO_ARCHIVE_PATH=$(GO_ARCHIVE_DIR)/$(GO_ARCHIVE)
-GO_URL=https://dl.google.com/go/$(GO_ARCHIVE)
+GO_ARCHIVE_PATH=$(GO_ARCHIVE_DIR)/$(GO_ARCHIVE_NAME)
 
 MINIO_PATH=$(PREFIX)/bin/minio
 MC_PATH=$(PREFIX)/bin/mc
 
 mc_git=https://github.com/minio/mc.git
-minio_git=https://github.com/oss-tsukuba/gfarm-s3-minio.git
+minio_gfarm_git=https://github.com/oss-tsukuba/gfarm-s3-minio.git
+minio_gfarm_branch=gfarm
 
 CGO_LDFLAGS="-Wl,-rpath,$(WITH_GFARM)/lib"
 PKG_CONFIG_PATH="$(WITH_GFARM)/lib/pkgconfig"
@@ -24,24 +25,33 @@ CURL=curl
 TAR=tar
 RM=rm
 GIT=git
+INSTALL=install
+
+#RACE=-race
+RACE=
 
 all::
 	[ -d $(BUILDDIR) ] || $(MKDIR) -p $(BUILDDIR)
-	[ -d $(BUILDDIR)/mc ] || (cd $(BUILDDIR) && $(GIT) clone $(mc_git))
-	[ -d $(BUILDDIR)/gfarm-s3-minio ] || (cd $(BUILDDIR) && $(GIT) clone $(minio_git) && cd gfarm-s3-minio && $(GIT) checkout gfarm && $(GIT) pull)
+	# fetch or update "mc"
+	[ -d $(BUILDDIR)/mc ] && (cd $(BUILDDIR)/mc && git pull || true) || (cd $(BUILDDIR) && $(GIT) clone --depth 1 $(mc_git))
+	# fetch or update "gfarm-s3-minio"
+	# (may fail when using private repository)
+	[ -d $(BUILDDIR)/gfarm-s3-minio ] && (cd $(BUILDDIR)/gfarm-s3-minio && git pull || true) || (cd $(BUILDDIR) && $(GIT) clone --depth 1 $(minio_gfarm_git) && cd gfarm-s3-minio && $(GIT) checkout $(minio_gfarm_branch))
 
 	cd $(BUILDDIR)/mc && GOPATH=$(GOPATH) $(GOPATH)/bin/go install
 
-	cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(GOPATH)/bin/go install
+	cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(GOPATH)/bin/go install $(RACE) -ldflags '-w -s'
+
+	#cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) PATH=$(GOBIN):$${PATH} make
 
 install-go::
 	-$(MKDIR) -p $$(dirname $(GOPATH))
-	[ -f $(GO_ARCHIVE_PATH) ] || $(CURL) -o $(GO_ARCHIVE_PATH) $(GO_URL)
-	cd $$(dirname $(GOPATH)) && $(TAR) xfzp $(GO_ARCHIVE_PATH)
+	[ -f $(GO_ARCHIVE_PATH) ] || $(CURL) -L -o $(GO_ARCHIVE_PATH) $(GO_URL)
+	cd $$(dirname $(GOPATH)) && $(TAR) xfzp $(GO_ARCHIVE_PATH) || (rm $(GO_ARCHIVE_PATH); false)
 
 install::
-	install -c -m 555 $(GOBIN)/mc "$(MC_PATH)"
-	install -c -m 555 $(GOBIN)/minio "$(MINIO_PATH)"
+	$(INSTALL) -D -c -m 555 $(GOBIN)/mc "$(MC_PATH)"
+	$(INSTALL) -D -c -m 555 $(GOBIN)/minio "$(MINIO_PATH)"
 
 clean::
 	$(RM) -rf $(BUILDDIR)

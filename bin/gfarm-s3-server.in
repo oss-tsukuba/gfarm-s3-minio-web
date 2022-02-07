@@ -1,10 +1,11 @@
-#! /bin/sh
+#! /bin/bash
+
+set -eu -o pipefail
+#set -x
 
 export LANG=C
 export LC_CTYPE=C
 export LC_COLLATE=C
-
-MC_PROFILE="mcuser"
 
 show_secret_key() {
 	cat "$GFARMS3_SECRET_KEY"
@@ -15,8 +16,11 @@ show_secret_key_file() {
 }
 
 regenerate_secret() {
-	mkdir -p $(dirname "$GFARMS3_SECRET_KEY")
+	GFARMS3_DIR="$(dirname "$GFARMS3_SECRET_KEY")"
+	mkdir -p "$GFARMS3_DIR"
+	chmod 700 "$GFARMS3_DIR"
 	generate_secret_key > "$GFARMS3_SECRET_KEY"
+	chmod 600 "$GFARMS3_SECRET_KEY"
 }
 
 variables_overridable="MINIO_PATH \
@@ -30,15 +34,20 @@ variables_overridable="MINIO_PATH \
 ### $GFARMS3_LOCAL_USER_MAP may not be overrided
 
 for var in $variables_overridable; do
-	eval SAVED_$var=\$$var
+	eval SAVED_$var=\${$var:-}
 done
 
-prefix=@prefix@
-. @sysconfdir@/gfarm-s3.conf
-. $GFARM_S3_LIB/gfarm-s3-subr
+D=$(dirname $0)
+eval $(${D}/gfarm-s3-readconf)
+source $GFARM_S3_LIB/gfarm-s3-subr
+
+GFARMS3_SECRET_KEY="$(get_user_metadir $USER)/secret_key"
 
 for var in $variables_overridable; do
-	eval $var=\${SAVED_$var:-\$$var}
+	eval sv=\${SAVED_$var}
+	if [ -n "$sv" ]; then
+		eval $var=$sv
+	fi
 done
 
 USAGE="\
@@ -54,10 +63,12 @@ common options:
           [--port port]
 "
 
+global_username=
 access_key=
 secret_key=
 action=START
 uport=
+resume=0
 
 gfarm_shared_dir=
 
@@ -67,9 +78,11 @@ while [ $# -gt 0 ]; do
 	--access_key) access_key="$2"; shift;;
 	--secret_key) secret_key="$2"; shift;;
 	--global_username) global_username="$2"; shift;;
+	--resume) resume=1;;
 	--start) action="START";;
 	--stop) action="STOP";;
 	--status) action="STATUS";;
+	--status-quick) action="STATUS";;
 	--show-secret-key) action="SECRET_SHOW";;
 	--show-secret-key-file) action="SECRET_SHOW_FILENAME";;
 	--regenerate-secret-key) action="SECRET_REGENERATE";;
@@ -81,6 +94,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ $# != 0 ]; then
+	echo "gfarm-s3-server: argment number:" "$@" 1>&2
 	echo "$USAGE" 1>&2
 	exit 1
 fi
@@ -112,17 +126,20 @@ fi
 #export MINIO_CACHE_WATERMARK_LOW="70"
 #export MINIO_CACHE_WATERMARK_HIGH="90"
 
-#export MINIO_GFARMS3_CACHEDIR="$GFARMS3_CACHE_BASEDIR"
-#export MINIO_GFARMS3_CACHEDIR_SIZE_MB="$GFARMS3_CACHE_SIZE_MB_PER_USER"
-#export GFARMS3_PARTFILE_DIGEST="$GFARMS3_PARTFILE_DIGEST"
+### set in gfarm-s3-subr
+# MINIO_GFARM_LOCALTMP_DIR
+# MINIO_GFARM_LOCALTMP_SIZE_MB
+# MINIO_GFARM_PARTFILE_DIGEST
 
 export MINIO_ROOT_USER="$access_key"
 if [ ! -f "$GFARMS3_SECRET_KEY" ]; then regenerate_secret; fi
-TMP_MINIO_ROOT_PASSWORD=`cat "$GFARMS3_SECRET_KEY"`
-export MINIO_ROOT_PASSWORD=${secret_key:-$TMP_MINIO_ROOT_PASSWORD}
+export MINIO_ROOT_PASSWORD=${secret_key:-$(cat "$GFARMS3_SECRET_KEY")}
 
 export MINIO_ACCESS_KEY="$MINIO_ROOT_USER"
 export MINIO_SECRET_KEY="$MINIO_ROOT_PASSWORD"
+
+export MINIO_GFARM_SYSLOG_FACILITY="${GFARM_S3_LOG_FACILITY}"
+export MINIO_GFARM_SYSLOG_LEVEL="${GFARM_S3_LOG_LEVEL}"
 
 if [ -z "$MINIO_ROOT_USER" ]; then exit 1; fi
 if [ -z "$MINIO_ROOT_PASSWORD" ]; then exit 1; fi
@@ -130,8 +147,8 @@ if [ -z "$MINIO_ROOT_PASSWORD" ]; then exit 1; fi
 export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
 
 case $action in
-START) start_server "$gfarm_shared_dir";;
-STOP) stop_server;;
+START) start_server "$gfarm_shared_dir" "$resume";;
+STOP) stop_server "$resume";;
 STATUS) status_server;;
 SECRET_SHOW) show_secret_key;;
 SECRET_SHOW_FILENAME) show_secret_key_file;;

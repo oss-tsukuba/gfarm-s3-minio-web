@@ -1,6 +1,5 @@
 import json
 import locale
-import logging
 import os
 from subprocess import Popen, PIPE
 import time
@@ -10,16 +9,13 @@ from django.utils.translation import gettext as _
 
 from contextlib import contextmanager
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+from gfarms3 import conf
+
+logger = conf.get_logger(__name__)
 
 def gfarm_s3_login(action, username, passwd, stdin = None, authenticated = None, bucket = None, remote_addr = None):
-    GFARM_S3_BIN = "/usr/local/bin"
+    #logger.debug(f"gfarm_s3_login")
+    GFARM_S3_BIN = conf.get_str("GFARM_S3_BIN")
     args = [action, username, passwd]
     if authenticated is not None:
         args = ["--authenticated", authenticated] + args
@@ -30,38 +26,71 @@ def gfarm_s3_login(action, username, passwd, stdin = None, authenticated = None,
     gfarm_s3_login_bin = os.path.join(GFARM_S3_BIN, "gfarm-s3-login")
     return Popen([gfarm_s3_login_bin] + args, stdin = stdin, stdout = PIPE, stderr = PIPE, env = {})
 
+def decode(s):
+    if isinstance(s, bytes):
+        return s.decode()
+    return s
+
+def _communicate(p, name):
+    try:
+        stdout, stderr = p.communicate()
+        p.wait()
+        if stderr:
+            stderr = decode(stderr)
+            if p.returncode == 0:
+                for l in stderr.splitlines():
+                    logger.info(f"{l}")
+            else:
+                for l in stderr.splitlines():
+                    logger.error(f"{l}")
+        return p.returncode, decode(stdout)
+    except Exception as e:
+        logger.error(f"{name}: {e}")
+        return -1, f"{e}"
+
 def cmd(action, username, passwd, authenticated = None, remote_addr = None, lang = None):
     try:
         p = gfarm_s3_login(action, username, passwd, authenticated = authenticated, remote_addr = remote_addr)
-    except:
-        #logger.debug("ERROR 1")
+    except Exception as e:
+        logger.error(f"cmd: ERROR 1: {e}")
         return {"status": "ERROR 1", "reason": "Popen failed"}
+
+    retcode, stdout = _communicate(p, f"cmd:{action}")
+    if retcode != 0:
+        return {"status": "ERROR 2",
+                "reason": f"action = {action}, retcode = {retcode}, {stdout}  (Please contact administrator)"}
+
     try:
-        stdout, stderr = p.communicate()
-        ret = p.wait()
-    except:
-        #logger.debug("ERROR 2 --- RETCODE = {} STDERR = None".format(p.returncode))
-        return {"status": "ERROR 2", "reason": "retcode = {}".format(p.returncode)}
-    if ret != 0:
-        #logger.debug("ERROR 3 --- RETVAL = {} --- STDERR = {}".format(ret, stderr.decode()))
-        return {"status": "ERROR 3", "reason": stderr.decode()}
-    result = json.loads(stdout.decode().strip())
+        result = json.loads(decode(stdout).strip())
+    except Exception as e:
+        logger.error(f"cmd: ERROR 4 (parse JSON): {e} [{stdout}]")
+        return {"status": "ERROR 4", "reason": f"{e}"}
     if "expiration_date" in result.keys():
         result["expiration_date_calendar_datetime"] = myctime(result["expiration_date"], lang)
     return result
 
 def get_bucket_list(username):
-    p = gfarm_s3_login("gfls", username, "", authenticated = "unspecified")
-    stdout, stderr = p.communicate()
-    p.wait()
-    return split_lines(stdout.decode())
+    try:
+        p = gfarm_s3_login("gfls", username, "", authenticated = "unspecified")
+    except Exception as e:
+        logger.error(f"get_bucket_list: exception: {e}")
+        return None
+    retcode, stdout = _communicate(p, "get_bucket_list")
+    if retcode != 0:
+        return None
+    return split_lines(decode(stdout))
 
 def get_bucket_acl(username, bucket):
-    p = gfarm_s3_login("gfgetfacl", username, "", authenticated = "unspecified", bucket = bucket)
-    stdout, stderr = p.communicate()
-    p.wait()
-    #logger.debug("GET_BUCKET_ACL: [{}]".format(stdout.decode() + "\n"))
-    return split_lines(stdout.decode())
+    try:
+        p = gfarm_s3_login("gfgetfacl", username, "", authenticated = "unspecified", bucket = bucket)
+    except Exception as e:
+        logger.error(f"get_bucket_acl: exception: {e}")
+        return None
+    retcode, stdout = _communicate(p, "get_bucket_acl")
+    if retcode != 0:
+        return None
+    #logger.debug("GET_BUCKET_ACL: [{}]".format(decode(stdout) + "\n"))
+    return split_lines(decode(stdout))
 
 def need_default(s):
     return (s.startswith("group:") or s.startswith("user:")) and ("::" not in s)
@@ -121,24 +150,37 @@ def set_bucket_acl(username, bucket, acl_1, acl_2):
     #logger.debug("acl_2: {}".format(acl_2))
     acl = "\n".join(fix_acl_1(acl_1) + fix_acl_2(acl_2)) + "\n"
     #logger.debug("acl_fixed: {}".format(acl))
-    p = gfarm_s3_login("gfsetfacl", username, "", authenticated = "unspecified", bucket = bucket, stdin = PIPE)
-    stdout, stderr = p.communicate(input = acl.encode())
-### ignore error for now
-#    if p.wait() != 0:
-#        return stderr.decode()
-    return stdout.decode()
+    try:
+        p = gfarm_s3_login("gfsetfacl", username, "", authenticated = "unspecified", bucket = bucket, stdin = PIPE)
+    except Exception as e:
+        logger.error(f"set_bucket_acl: exception: {e}")
+        return None
+    retcode, stdout = _communicate(p, "set_bucket_acl")
+    if retcode != 0:
+        return None
+    return decode(stdout)
 
 def get_group_list(username):
-    p = gfarm_s3_login("gfgroup", username, "", authenticated = "unspecified")
-    stdout, stderr = p.communicate()
-    p.wait()
-    return split_lines(stdout.decode())
+    try:
+        p = gfarm_s3_login("gfgroup", username, "", authenticated = "unspecified")
+    except Exception as e:
+        logger.error(f"get_group_list: exception: {e}")
+        return None
+    retcode, stdout = _communicate(p, "get_group_list")
+    if retcode != 0:
+        return None
+    return split_lines(decode(stdout))
 
 def get_user_list(username):
-    p = gfarm_s3_login("gfuser", username, "", authenticated = "unspecified")
-    stdout, stderr = p.communicate()
-    p.wait()
-    return split_lines(stdout.decode())
+    try:
+        p = gfarm_s3_login("gfuser", username, "", authenticated = "unspecified")
+    except Exception as e:
+        logger.error(f"get_user_list: exception: {e}")
+        return None
+    retcode, stdout = _communicate(p, "get_user_list")
+    if retcode != 0:
+        return None
+    return split_lines(decode(stdout))
 
 def split_lines(s):
     return [e.strip() for e in s.split('\n') if e.strip() != ""]

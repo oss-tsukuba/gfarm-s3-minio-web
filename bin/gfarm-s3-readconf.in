@@ -1,0 +1,117 @@
+#! /bin/bash
+
+set -eu
+#set -x
+
+prefix=@prefix@
+CONF_DEFAULT=@SYSCONFDIR@/gfarm-s3.conf
+CONF=@SYSCONFDIR@/gfarm-s3-overwrite.conf
+
+CACHE="/tmp/gfarm-s3.conf.cache.${UID}"
+
+OPT_JSON="${1:-}"
+
+if [ "${OPT_JSON}" = "-json" ]; then
+    JSON=1
+    CACHE="${CACHE}.json"
+else
+    JSON=0
+fi
+
+UPDATE_CACHE=1
+
+if [ -f "$CACHE" ]; then
+    if [ ! -O "$CACHE" ]; then  # not own file
+        UPDATE_CACHE=0
+    elif [ "$CACHE" -nt "$CONF_DEFAULT" -a "$CACHE" -nt "$CONF" ]; then
+        cat "$CACHE"
+        exit 0
+    fi
+fi
+
+conf_filter()
+{
+    # ignore $(...) and `...`
+    egrep "^[^\\s#=]+=[^=]*$" "${1}" \
+    | egrep -v "\\$\\([^\\)]+\\)" \
+    | egrep -v "\`[^\`]+\`)"
+}
+
+SAVE_IFS=$IFS
+IFS="
+"
+
+C1=$(conf_filter "${CONF_DEFAULT}")
+
+declare -A KEYS
+
+for kv in $C1; do
+    k=${kv%=*}
+    v=${kv#*=}
+    KEYS[$k]=1  # exist
+
+    # evaluate per line
+    eval "$kv"
+done
+
+C2=$(conf_filter "${CONF}" || true)
+
+for kv in $C2; do
+    k=${kv%=*}
+    v=${kv#*=}
+    if [ "${KEYS[$k]:-}" = "1" ]; then
+        # overwrite only
+        eval "$kv"
+    fi
+done
+
+to_json()
+{
+    echo "{"
+    first=1
+    # from keys of C1
+    for k in "${!KEYS[@]}"; do
+        if [ $first -eq 0 ]; then
+            echo ","
+        fi
+        eval v="\$$k"
+        v=$(echo "$v" | sed 's/"/\\"/g')
+        echo -n "\"$k\": \"$v\""
+        first=0
+    done
+    echo ""
+    echo "}"
+}
+
+to_sh()
+{
+    # from keys of C1
+    for k in "${!KEYS[@]}"; do
+        eval v="\$$k"
+        v=$(echo "$v" | sed 's/"/\\"/g')
+        echo "$k=\"$v\""
+    done
+}
+
+print_conf()
+{
+    FUNC="$1"
+
+    if  [ $UPDATE_CACHE -eq 1 ]; then
+        # use PID
+        CACHE_TMP="${CACHE}.tmp.${FUNC}.$$"
+        rm -f "${CACHE_TMP}"
+        touch "${CACHE_TMP}"
+        chmod 600 "${CACHE_TMP}"
+        ${FUNC} | tee "${CACHE_TMP}"
+        mv "${CACHE_TMP}" "${CACHE}"
+    else
+        ${FUNC}
+    fi
+}
+
+if [ "${JSON}" -eq 1 ]; then
+    print_conf to_json
+else
+    print_conf to_sh
+fi

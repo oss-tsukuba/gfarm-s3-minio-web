@@ -1,113 +1,127 @@
 {% extends "console/base.html" %}
 {% load i18n %}
 {% block content1 %}
-<table class="table-responsive borderless border-0"
-><thead
-><tr
-><th style="width: 4000px"
-></th
-></tr
-></thead
-><tbody
-><tr
-><td
-><hr
-></td
-></tr
-><tr
-><td style="width:100%" class="bg-light"
->{% trans 'CurrentStatus' %}<div style='float: right; text-align: right'
-><form action="{% if not s3sstatus %}{% url 'starts3' %}{% else %}{% url 'stops3' %}{% endif %}" method="post" class="form-inline"
->{% csrf_token %}<button type="submit" class="btn btn-outline-primary h-75 form-control" value="Launch"
->{% if not s3sstatus %}{% trans 'StartGfarmS3' %}{% else %}{% trans 'StopGfarmS3' %}{% endif %}</button
-></form
-></div
-></td
-></tr
-><tr
-><td class="h5"
-><div class="{% if s3sstatus %}alert alert-success{% else %}alert alert-danger{% endif %} border-0"
->{% if s3sstatus %}{% trans 'running' %}{% else %}{% trans 'stopped' %}{% endif %}</div
-></td
-></tr
-><tr
-><td
-><hr
-></td
-></tr
-><tr
-><td class="h6-small"
->{% trans 'accessKey' %}</td
-></tr
-><tr
-><td class="h5"
-><input onClick="this.select();" value="{{ access_key }}" class="border-0 flex-grow-1" style="width: 100%" readonly="readonly"
- /></td
-></tr
-><tr
-><td
-><hr
-></td
-></tr
-><tr
-><td
->{% trans 'secretKey' %}<div style='float: right; text-align: right'
-><form action="{% url 'chgkey' %}" method="post" class="form-inline"
->{% csrf_token %}<a class="btn btn-outline-primary h-75" data-bs-toggle="collapse" href="#collapseSecretKey" role="button" aria-expanded="false" aria-controls="collapseSecretKey"
->{% trans 'viewSecretKey' %}</a
-><div class="button-wrapper"{% if s3sstatus %} data-toggle="tooltip" data-placement="top" title="{% trans 'stops3tochangesecretkey' %}"{% endif %}
-><button type="submit" class="btn btn-outline-primary h-75" value="Launch"{% if s3sstatus %} disabled{% endif %}
->{% trans 'chgKey' %}</button
-></div
-></form
-></div
-></td
-></tr
-><tr
-><td
-><input onClick="this.select();" class="collapse" id="collapseSecretKey" value="{{ secret_key }}" class="border-0 flex-grow-1" style="width: 100%" readonly="readonly"
- /></td
-></tr
-><tr
-><td
-><hr
-></td
-></tr
-><tr
-><td class="h6-small"
->{% trans 'authenticationMethod' %}</td
-></tr
-><tr
-><td class="h5"
->{% if authenticated_method == "myproxy-logon" %}{% trans 'myproxyLogon' %}{% endif %}
-{% if authenticated_method == "grid-proxy-init" %}{% trans 'gridProxyInit' %}{% endif %}
-{% if authenticated_method == "gfkey" %}{% trans 'gfkey' %}{% endif %}</td
-></tr
-><tr
-><td
-><hr
-></td
-></tr
-><tr
-><td
->{% trans 'expirationDate' %}
-{% if authenticated_method != "gfkey" %}<div style='float: right; text-align: right'
-><form action="{% url 'reauth' %}" method="post" class="form-inline"
->{% csrf_token %}<button type="submit" class="btn btn-outline-primary h-75" value="Launch"
->{% trans 'updateCertificate' %}</button
-></form
-></div
->{% endif %}</td
-></tr
-><tr
-><td class="h5"
->{{ expiration_date_calendar_datetime }}</td
-></tr
-><tr
-><td
-><hr
-></td
-></tr
-></tbody
-></table
->{% endblock %}
+<table class="table-responsive borderless border-0">
+    <thead>
+        <tr>
+            <th style="width: 4000px"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td style="width:100%" class="bg-light">{% trans 'CurrentStatus' %}
+                <div style='float: right; text-align: right'>
+                    <form action="{% if not s3sstatus %}{% url 'starts3' %}{% else %}{% url 'stops3' %}{% endif %}" method="post" class="form-inline submit-once">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-primary h-75 form-control" value="Launch">
+                            {% if not s3sstatus %}
+                            {% trans 'StartGfarmS3' %}
+                            {% else %}
+                            {% trans 'StopGfarmS3' %}
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="h5">
+                <div class="{% if s3sstatus %}alert alert-success{% else %}alert alert-danger{% endif %} border-0">
+                    {% if s3sstatus %}
+                    {% trans 'running' %}
+                    {% else %}
+                    {% trans 'stopped' %}
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td class="h6-small">{% trans 'accessKey' %}</td>
+        </tr>
+        <tr>
+            <td class="h5"><input onClick="this.select();" value="{{ access_key }}" class="border-0 flex-grow-1"
+                    style="width: 100%" readonly="readonly" /></td>
+        </tr>
+        <tr>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans 'secretKey' %}
+                <div style='float: right; text-align: right'>
+                    <form action="{% url 'chgkey' %}" method="post" class="form-inline submit-confirm">
+                        {% csrf_token %}
+                        <a class="btn btn-outline-primary h-75" data-bs-toggle="collapse" href="#collapseSecretKey"
+                            role="button" aria-expanded="false" aria-controls="collapseSecretKey">
+                            {% trans 'viewSecretKey' %}</a>
+                        <div class="button-wrapper" {% if s3sstatus %} data-toggle="tooltip" data-placement="top"
+                            title="{% trans 'stops3tochangesecretkey' %}" {% endif %}>
+                            <button type="submit"
+                                class="btn btn-outline-primary h-75" value="Launch" {% if s3sstatus %} disabled{% endif %}>
+                                {% trans 'chgKey' %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td><input onClick="this.select();" class="collapse" id="collapseSecretKey" value="{{ secret_key }}"
+                    class="border-0 flex-grow-1" style="width: 100%" readonly="readonly" /></td>
+        </tr>
+        <tr>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td class="h6-small">{% trans 'authenticationMethod' %}</td>
+        </tr>
+        <tr>
+            <td class="h5">
+                {% if authenticated_method == "myproxy-logon" %}{% trans 'myproxyLogon' %}{% endif %}
+                {% if authenticated_method == "grid-proxy-init" %}{% trans 'gridProxyInit' %}{% endif %}
+                {% if authenticated_method == "gfkey" %}{% trans 'gfkey' %}{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans 'expirationDate' %}
+                {% if authenticated_method != "gfkey" %}
+                <div style='float: right; text-align: right'>
+                    <form action="{% url 'reauth' %}" method="post" class="form-inline submit-once">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-primary h-75" value="Launch">
+                            {% trans 'updateCertificate' %}
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="h5">{{ expiration_date_calendar_datetime }}</td>
+        </tr>
+        <tr>
+            <td>
+                <hr>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

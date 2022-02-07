@@ -69,4 +69,24 @@ $(function() {
 		}
 	}
 
+	$('.submit-once').each(function(i, e) {
+		var b = $(e).find('button[type="submit"]');
+		$(e).submit(function() {
+			b.prop('disabled', true);
+			return true;
+		});
+	});
+
+	$('.submit-confirm').each(function(i, e) {
+		var b = $(e).find('button[type="submit"]');
+		$(e).submit(function() {
+			if (window.confirm('Do you want to update?')) {
+				b.prop('disabled', true);
+				return true;
+			} else {
+				return false;
+			}
+		});
+	});
+
 });

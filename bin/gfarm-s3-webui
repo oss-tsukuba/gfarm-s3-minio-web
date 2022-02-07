@@ -1,0 +1,26 @@
+#! /bin/bash
+
+set -eu
+
+eval $(gfarm-s3-readconf)
+
+TIMEOUT=180
+
+#RELOAD="--reload"
+RELOAD=""
+
+loglevel=$(echo "$GFARM_S3_LOG_LEVEL" | tr [:upper:] [:lower:])
+
+exec "${GUNICORN_DIR}/bin/gunicorn" \
+     --user $GFARM_S3_USERNAME \
+     --group $GFARM_S3_GROUPNAME \
+     --log-level "$loglevel" \
+     --error-logfile - \
+     --capture-output \
+     --threads $WEBUI_THREAD_NUM \
+     --workers $WEBUI_WORKER_NUM \
+     --bind "$WEBUI_ADDR" \
+     --chdir "$WEBUI_BASEDIR" \
+     --timeout $TIMEOUT \
+     $RELOAD \
+     gfarms3.wsgi:application

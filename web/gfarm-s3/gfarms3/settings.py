@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 from django.utils.translation import gettext_lazy as _
+from . import conf
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,14 +21,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '8umf@=(co+*^=a71nfsi+@@0ppzd!#7t07&vq%%)mgim@s+(m*'
+django_secret_key_file = conf.get_str('DJANGO_SECRET_KEY_FILE')
+with open(django_secret_key_file) as f:
+    SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = conf.get_bool('DJANGO_DEBUG')
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = conf.get_list('ALLOWED_HOSTS')
 
+# for Django 4
+CSRF_TRUSTED_ORIGINS = conf.get_list('CSRF_TRUSTED_ORIGINS')
 
 # Application definition
 
@@ -119,14 +123,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-#STATIC_URL = '/d/console/static/'
-STATIC_URL = '/static/'
+webui_base_url = conf.get_str('WEBUI_BASE_URL')
+STATIC_URL = '/' + webui_base_url + 'static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
-
-## Mon Aug 24 09:37:36 JST 2020 nis
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.file'
 

@@ -1,10 +1,7 @@
-prefix=@prefix@
-
-with_globus=@with_globus@
-with_myproxy=@with_myproxy@
-with_gfarm=@with_gfarm@
-with_apache=@with_apache@
-with_wsgi_user=@with_wsgi_user@
+# prefix=@prefix@
+# with_gfarm=@with_gfarm@
+# with_globus=@with_globus@
+# with_myproxy=@with_myproxy@
 
 RM=rm
 

@@ -1,0 +1,28 @@
+#! /bin/bash
+
+set -eu
+
+eval $(gfarm-s3-readconf)
+
+TIMEOUT=180
+
+#RELOAD="--reload"
+RELOAD=""
+
+export no_proxy="${GFARMS3_ADDR}"
+
+loglevel=$(echo "$GFARM_S3_LOG_LEVEL" | tr [:upper:] [:lower:])
+
+exec "${GUNICORN_DIR}/bin/gunicorn" \
+     --user $GFARM_S3_USERNAME \
+     --group $GFARM_S3_GROUPNAME \
+     --log-level "$loglevel" \
+     --error-logfile - \
+     --capture-output \
+     --threads "$ROUTER_THREAD_NUM" \
+     --workers "$ROUTER_WORKER_NUM" \
+     --bind "$ROUTER_ADDR" \
+     --chdir "$ROUTER_BASEDIR" \
+     --timeout $TIMEOUT \
+     $RELOAD \
+     router.router:app

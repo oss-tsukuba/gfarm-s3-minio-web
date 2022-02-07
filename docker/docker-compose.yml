@@ -1,0 +1,114 @@
+version: '3.5'
+
+# use variables from .env
+
+services:
+  gfminio:
+    hostname: gfminio
+    privileged: false
+    networks:
+      - mynet1
+      - mynet2
+    build:
+      context: ../
+      dockerfile: ./docker/gfminio/Dockerfile
+      args:
+        #- GFARM_SRC_URL=${GFARM_SRC_URL:-https://github.com/oss-tsukuba/gfarm/archive/refs/tags/2.7.19.tar.gz}
+        - GFARM_SRC_GIT_URL=${GFARM_SRC_GIT_UR:-https://github.com/oss-tsukuba/gfarm.git}
+        - GFARM_SRC_GIT_BRANCH=${GFARM_SRC_GIT_BRANCH:-2.7}
+        ### optional
+        - http_proxy=${http_proxy:-}
+        - https_proxy=${https_proxy:-}
+    environment:
+      ### mandatory
+      - SERVER_URL=${SERVER_URL:?SERVER_URL}
+      # Gfarm directory to share files
+      - GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR:?GFARM_S3_SHARED_DIR}
+
+      ### Gfarm parameters (if necessary)
+      - MYPROXY_SERVER=${MYPROXY_SERVER:-}
+      - GSI_PROXY_HOURS=${GSI_PROXY_HOURS:-168}
+
+      ### optional
+      - DEBUG=${DEBUG:-0}
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+
+      - TZ=${TZ:-Asia/Tokyo}
+      - http_proxy=${http_proxy:-}
+      - https_proxy=${https_proxy:-}
+
+      - GFARM_S3_MINIO_SRC_GIT_URL=${GFARM_S3_MINIO_SRC_GIT_URL:-https://github.com/oss-tsukuba/gfarm-s3-minio.git}
+      - GFARM_S3_MINIO_SRC_GIT_BRANCH=${GFARM_S3_MINIO_SRC_GIT_BRANCH:-gfarm}
+      # https://docs.gunicorn.org/en/stable/settings.html#threads
+      - GFARM_S3_WEBUI_THREADS=${GFARM_S3_WEBUI_THREADS:-8}
+      # https://docs.gunicorn.org/en/stable/settings.html#workers
+      - GFARM_S3_WEBUI_WORKERS=${GFARM_S3_WEBUI_WORKERS:-2}
+
+      # https://docs.gunicorn.org/en/stable/settings.html#threads
+      - GFARM_S3_ROUTER_THREADS=${GFARM_S3_ROUTER_THREADS:-16}
+      # https://docs.gunicorn.org/en/stable/settings.html#workers
+      - GFARM_S3_ROUTER_WORKERS=${GFARM_S3_ROUTER_WORKERS:-2}
+
+      - GFARM_S3_LOCALTMP_SIZE_MB=${GFARM_S3_LOCALTMP_SIZE_MB:-1024}
+
+      # https://docs.djangoproject.com/en/4.0/ref/settings/#allowed-hosts
+      # empty means using SERVER_NAME from SERVER_URL
+      # use comma separator to specify multiple names
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS-}
+
+      # https://docs.djangoproject.com/en/4.0/ref/settings/#csrf-trusted-origins
+      # empty means using SERVER_URL
+      # use comma separator to specify multiple names
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS-}
+
+      # https://go.dev/dl/
+      - GO_URL=${GO_URL:-https://go.dev/dl/go1.16.13.linux-amd64.tar.gz}
+
+    volumes:
+      - copy_home:/home:rw
+      - build_cache:/build:rw
+      - localtmp:/localtmp:rw
+
+      ### mandatory
+      - ${GFARM_CONF_DIR:?GFARM_CONF_DIR}:/gfarm_conf:ro
+
+      ### Gfarm parameters (if necessary)
+      - ${GSI_CERTIFICATES_DIR:-/dev/null}:/etc/grid-security/certificates:ro
+
+      ### optional
+      # /dev/null means downloading from GFARM_S3_MINIO_SRC_GIT_URL
+      - ${GFARM_S3_MINIO_SRC_DIR:-/dev/null}:/gfarm-s3-minio
+      - ${SHARE_HOSTDIR:-/dev/null}:/share_host
+
+  copy_home:
+    hostname: copy_home
+    networks:
+      - mynet1
+    build:
+      context: ./copy_home/
+      args:
+        - http_proxy=${http_proxy:-}
+        - https_proxy=${https_proxy:-}
+    volumes:
+      - ${HOMEDIR_BASE:-/home}:/host_home:ro
+      - copy_home:/copy_home:rw
+      - ${SHARE_HOSTDIR:-/dev/null}:/share_host
+
+volumes:
+  copy_home:
+  build_cache:
+  localtmp:
+
+networks:
+  mynet1:
+    # (internal tier)
+    # external (outside of Docker Compose) network name
+    # overridable
+    name: ${NETWORK1_NAME:-gfarm-s3_internal}
+    external: ${NETWORK1_EXTERNAL:-false}
+  mynet2:
+    # (reverse proxy tier)
+    # overridable
+    # external (outside of Docker Compose) network name
+    name: ${NETWORK2_NAME:-gfarm-s3_revproxy}
+    external: ${NETWORK2_EXTERNAL:-false}

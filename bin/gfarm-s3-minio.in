@@ -1,0 +1,107 @@
+#! /bin/bash
+
+set -eu
+#set -x
+
+DEFAULT_ADDR=0.0.0.0:51000
+DEFAULT_DIR=/data/$(gfwhoami)
+DEFAULT_CACHE_DIR=/tmp
+DEFAULT_CACHE_SIZE=1024
+DEFAULT_FACILITY=local0
+DEFAULT_LOGLEVEL=info
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+minio="@bindir@/minio"
+
+usage()
+{
+    cat <<EOF
+NAME
+  $0 - run minio by general users
+
+USAGE
+  MINIO_ROOT_USER=... MINIO_ROOT_PASSWORD=... $0 [options]
+
+OPTIONS
+  -a address      : bind address (default: ${DEFAULT_ADDR})
+  -d gfarm_dir    : gfarm directory for S3 service (default: ${DEFAULT_DIR})
+  -c localtmp_dir : local working directory for CompleteMultipartUpload
+                    (default: ${DEFAULT_CACHE_DIR})
+  -s size(MB)     : size of working directory for CompleteMultipartUpload
+                    (default: ${DEFAULT_CACHE_SIZE})
+  -D              : DEBUG mode (set access key for debug)
+  -q              : disable startup information
+
+ENVIRONMENT
+  MINIO_ROOT_USER       : Access Key ID for the service (mandatory)
+  MINIO_ROOT_PASSWORD   : Secret Access Key for the service (mandatory)
+  MINIO_OPTIONS         : options for minio gateway gfarm
+  MINIO_GFARM_SYSLOG_FACILITY : syslog facility (default: ${DEFAULT_FACILITY})
+  MINIO_GFARM_SYSLOG_LEVEL    : syslog level (default: ${DEFAULT_LOGLEVEL})
+
+SEE ALSO
+  $minio gateway gfarm -h
+EOF
+}
+
+address=${DEFAULT_ADDR}
+gfarm_dir=${DEFAULT_DIR}
+cache_dir=${DEFAULT_CACHE_DIR}
+cache_size=${DEFAULT_CACHE_SIZE}
+quiet=false
+debug=false
+
+while getopts a:d:s:qD OPT; do
+	case $OPT in
+	a) address=$OPTARG;;
+	d) gfarm_dir=$OPTARG;;
+	c) cache_dir=$OPTARG;;
+	s) cache_size=$OPTARG;;
+	q) quiet=true;;
+	D) debug=true;;
+	\?) usage; exit 0;;
+	esac
+done
+shift $(expr $OPTIND - 1)
+
+if [ $# != 0 ]; then
+	echo usage 1>&2; exit 1
+fi
+
+if $debug; then
+    set -x
+    MINIO_ROOT_USER=${MINIO_ROOT_USER:-K4XcKzocrUhrnCAKrx2Z}
+    MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-xNMOFbCLhu+FKz1VmIDgHwPUQad0h1arCpdJAiN1oih1gNUx}
+fi
+
+if $quiet; then
+    QUIET="--quiet"
+else
+    QUIET=""
+fi
+
+CACHE_DIR_TEMPLATE=${cache_dir}/gfarm-s3_$(whoami)-XXXXXX
+
+export MINIO_OPTIONS=${MINIO_OPTIONS:-}
+
+export MINIO_GFARM_LOCALTMP_DIR=$(mktemp -d $CACHE_DIR_TEMPLATE)
+export MINIO_GFARM_LOCALTMP_SIZE_MB=$cache_size
+
+export MINIO_GFARM_SYSLOG_FACILITY=${MINIO_GFARM_SYSLOG_FACILITY:-${DEFAULT_FACILITY}}
+export MINIO_GFARM_SYSLOG_LEVEL=${MINIO_GFARM_SYSLOG_LEVEL:-${DEFAULT_LOGLEVEL}}
+
+export MINIO_ROOT_USER
+export MINIO_ROOT_PASSWORD
+
+cleanup() {
+    rm -rf "$MINIO_GFARM_LOCALTMP_DIR"
+}
+
+trap "" 1 2 15
+trap cleanup EXIT
+
+export GLOBUS_GSSAPI_NAME_COMPATIBILITY="HYBRID"
+
+### NOTE : Do not use "exec" to call cleanup
+"$minio" gateway gfarm $MINIO_OPTIONS $QUIET --address "$address" "$gfarm_dir"

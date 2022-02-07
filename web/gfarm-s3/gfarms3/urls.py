@@ -16,7 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from gfarms3 import conf
+
+webui_base_url = conf.get_str('WEBUI_BASE_URL')
+console_path = webui_base_url + 'console/'
+
 urlpatterns = [
-    path('gfarm/console/', include('console.urls')),
+    path(console_path, include('console.urls')),
 #    path('admin/', admin.site.urls),
 ]
