@@ -11,7 +11,7 @@ scripts= \
 	gfarm-s3-generate-usermap-hpci \
 	gfarm-s3-login \
 	gfarm-s3-server \
-	gfarm-s3-minio \
+	gfarm-s3-server-user \
 	gfarm-s3-readconf \
 	gfarm-s3-reset-brute-force-attack-log \
 	gfarm-s3-sharedsecret-password \
@@ -26,7 +26,7 @@ generated_scripts= \
 	gfarm-s3-diff-local-usermap \
 	gfarm-s3-login \
 	gfarm-s3-server \
-	gfarm-s3-minio \
+	gfarm-s3-server-user \
 	gfarm-s3-readconf \
 	gfarm-s3-sharedsecret-password \
 	gfarm-s3-update-reverse-proxy \
