@@ -46,6 +46,9 @@ selfsigned-cert-ps:
 selfsigned-cert-config:
 	$(SSC_COMPOSE) config
 
+config:
+	$(COMPOSE) config
+
 down:
 	$(COMPOSE) down --remove-orphans
 	$(MAKE) prune

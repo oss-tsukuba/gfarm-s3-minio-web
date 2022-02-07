@@ -25,6 +25,10 @@ services:
       # Gfarm directory to share files
       - GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR:?GFARM_S3_SHARED_DIR}
 
+      ### Gfarm parameters (if necessary)
+      - MYPROXY_SERVER=${MYPROXY_SERVER:-}
+      - GSI_PROXY_HOURS=${GSI_PROXY_HOURS:-168}
+
       ### optional
       - DEBUG=${DEBUG:-0}
       - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
@@ -34,13 +38,7 @@ services:
       - https_proxy=${https_proxy:-}
 
       - GFARM_S3_MINIO_SRC_GIT_URL=${GFARM_S3_MINIO_SRC_GIT_URL:-https://github.com/oss-tsukuba/gfarm-s3-minio.git}
-      #TODO change to master branch
-      - GFARM_S3_MINIO_SRC_GIT_BRANCH=${GFARM_S3_MINIO_SRC_GIT_BRANCH:-gfarmmerge}
-
-      - GSI_PROXY_HOURS=${GSI_PROXY_HOURS:-168}
-      # empty means "disabled"
-      - MYPROXY_SERVER=${MYPROXY_SERVER:-}
-
+      - GFARM_S3_MINIO_SRC_GIT_BRANCH=${GFARM_S3_MINIO_SRC_GIT_BRANCH:-gfarm}
       # https://docs.gunicorn.org/en/stable/settings.html#threads
       - GFARM_S3_WEBUI_THREADS=${GFARM_S3_WEBUI_THREADS:-8}
       # https://docs.gunicorn.org/en/stable/settings.html#workers
@@ -74,11 +72,12 @@ services:
       ### mandatory
       - ${GFARM_CONF_DIR:?GFARM_CONF_DIR}:/gfarm_conf:ro
 
-      ### optional
+      ### Gfarm parameters (if necessary)
       - ${GSI_CERTIFICATES_DIR:-/dev/null}:/etc/grid-security/certificates:ro
+
+      ### optional
       # /dev/null means downloading from GFARM_S3_MINIO_SRC_GIT_URL
       - ${GFARM_S3_MINIO_SRC_DIR:-/dev/null}:/gfarm-s3-minio
-
       - ${SHARE_HOSTDIR:-/dev/null}:/share_host
 
   copy_home:
