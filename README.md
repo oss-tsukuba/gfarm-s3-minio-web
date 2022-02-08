@@ -2,8 +2,11 @@
 
 ## Overview
 
-- Gfarm S3 is a S3 compatible object storage server for Gfarm.
-- Based on gfarm-s3-minio (MinIO with gateway-gfarm).
+- gfarm-s3-minio-web is Web UI to manage gfarm-s3-minio.
+- gfarm-s3-minio is a S3 compatible object storage server for Gfarm
+  based on MinIO (gateway-gfarm is added).
+    - https://github.com/oss-tsukuba/gfarm-s3-minio
+    - branch name: gfarm
 - Web UI:
     - Login with password of .gfarm_shared_key or grid-proxy-init or myproxy-logon .
     - Start MinIO by each user.
@@ -18,6 +21,12 @@
 
 - Username mapping of Gfarm and My Proxy must be equal.
 - RAM: 1GB or more per user (per minio process)
+- [Docker](https://docs.docker.com/engine/install/)
+- [Docker Compose](https://docs.docker.com/compose/)
+    - v1 : https://docs.docker.com/compose/install/
+    - v2 (Recommended): https://docs.docker.com/compose/cli-command/#install-on-linux
+- GNU make
+- Gfarm configuration file (gfarm2.conf)
 
 ## Quick start (Install using Docker Compose)
 
