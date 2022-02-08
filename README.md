@@ -73,7 +73,9 @@ automatically in Docker container.
     - login
         - username: `<Gfarm username>`
         - password: `<password>`
-            - .gfarm_shared_key : gfarm-s3-sharedsecret-password
+            - .gfarm_shared_key : output of gfarm-s3-sharedsecret-password command
+                - or run `gfkey -l | openssl sha256 -r | awk '{ print $1 }'`
+                - or run `cat .gfarm_shared_key | openssl sha256 -r | awk '{ print $1 }'`
             - grid-proxy-init : pass phrase
             - myproxy-logon : password
     - push `Start` button to start Gfarm S3 server per user
