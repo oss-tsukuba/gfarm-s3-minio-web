@@ -221,6 +221,6 @@ def myctime(sec, lang):
     if lang == "ja":
         l = "ja_JP.UTF-8"
     else:
-        l = "en_US.UTF-8"
+        l = "C"
     with setlocale(l):
        return time.strftime(format, lt)
