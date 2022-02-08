@@ -211,8 +211,9 @@ make copy-home
 ## Update containers
 
 - update gfarm-s3-minio-web source
-- or, update URLs or source code directories in ./docker/.env
+- or, update ./docker/.env
 - or, update docker-compose.yml
+- or, run `make build-nocache` to update packages forcibly
 - and run `make reborn-withlog`
 
 ## Backup
