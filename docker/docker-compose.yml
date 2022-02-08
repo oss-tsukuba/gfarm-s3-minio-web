@@ -30,10 +30,8 @@ services:
       - GSI_PROXY_HOURS=${GSI_PROXY_HOURS:-168}
 
       ### optional
-      # disable http port if empty
-      - HTTP_PORT=${HTTP_PORT-80}
-      # disable https port if empty
-      - HTTPS_PORT=${HTTPS_PORT-443}
+      - HTTP_PORT=${HTTP_PORT:-80}
+      - HTTPS_PORT=${HTTPS_PORT:-443}
 
       - DEBUG=${DEBUG:-0}
       - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
@@ -58,12 +56,14 @@ services:
 
       # https://docs.djangoproject.com/en/4.0/ref/settings/#allowed-hosts
       # empty means SERVER_NAME
+      # (specified automatically in docker/gfminio/entrypoint.sh)
       # use comma separator to specify multiple names
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-}
 
       # https://docs.djangoproject.com/en/4.0/ref/settings/#csrf-trusted-origins
       # empty means:
       #   https://SEVER_NAME:HTTPS_PORT,http://SEVER_NAME:HTTP_PORT
+      # (specified automatically in docker/gfminio/entrypoint.sh)
       # use comma separator to specify multiple names
       - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS-}
 

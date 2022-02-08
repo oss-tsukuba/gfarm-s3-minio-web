@@ -1,5 +1,4 @@
 COMPOSE_PROJECT_NAME = gfarm-s3
-SUDO = sudo
 
 SUDO = $(shell docker version > /dev/null 2>&1 || echo sudo)
 DOCKER = $(SUDO) docker
