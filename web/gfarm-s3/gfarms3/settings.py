@@ -112,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 #LANGUAGE_CODE = 'en-us'
 LANGUAGE_CODE = 'ja-jp'
 
-TIME_ZONE = 'Japan'
+TIME_ZONE = conf.get_str('DJANGO_TIME_ZONE')
 
 USE_I18N = True
 

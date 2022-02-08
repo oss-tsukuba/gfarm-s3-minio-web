@@ -30,8 +30,8 @@ fi
 : ${GO_URL}
 : ${GFARM_S3_MINIO_SRC_GIT_URL}
 : ${GFARM_S3_MINIO_SRC_GIT_BRANCH}
+: ${TZ}
 
-TZ=${TZ:-Asia/Tokyo}
 export TZ
 
 GFARM_S3_USERNAME="_gfarm_s3"
@@ -206,6 +206,7 @@ install_gf_s3() {
 GFARM_S3_LOG_OUTPUT=stderr
 
 DJANGO_DEBUG=${DJANGO_DEBUG}
+DJANGO_TIME_ZONE=${TZ}
 ALLOWED_HOSTS=${ALLOWED_HOSTS}
 
 # required by Django 4 or later
