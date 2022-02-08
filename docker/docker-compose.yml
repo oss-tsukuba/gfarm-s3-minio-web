@@ -21,7 +21,7 @@ services:
         - https_proxy=${https_proxy:-}
     environment:
       ### mandatory
-      - SERVER_URL=${SERVER_URL:?SERVER_URL}
+      - SERVER_NAME=${SERVER_NAME:?SERVER_NAME}
       # Gfarm directory to share files
       - GFARM_S3_SHARED_DIR=${GFARM_S3_SHARED_DIR:?GFARM_S3_SHARED_DIR}
 
@@ -30,6 +30,11 @@ services:
       - GSI_PROXY_HOURS=${GSI_PROXY_HOURS:-168}
 
       ### optional
+      # disable http port if empty
+      - HTTP_PORT=${HTTP_PORT-80}
+      # disable https port if empty
+      - HTTPS_PORT=${HTTPS_PORT-443}
+
       - DEBUG=${DEBUG:-0}
       - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
 
@@ -52,12 +57,13 @@ services:
       - GFARM_S3_LOCALTMP_SIZE_MB=${GFARM_S3_LOCALTMP_SIZE_MB:-1024}
 
       # https://docs.djangoproject.com/en/4.0/ref/settings/#allowed-hosts
-      # empty means using SERVER_NAME from SERVER_URL
+      # empty means SERVER_NAME
       # use comma separator to specify multiple names
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-}
 
       # https://docs.djangoproject.com/en/4.0/ref/settings/#csrf-trusted-origins
-      # empty means using SERVER_URL
+      # empty means:
+      #   https://SEVER_NAME:HTTPS_PORT,http://SEVER_NAME:HTTP_PORT
       # use comma separator to specify multiple names
       - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS-}
 

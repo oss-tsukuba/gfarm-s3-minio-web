@@ -14,7 +14,9 @@ fi
 
 ### from enviroment
 : ${DJANGO_DEBUG}
-: ${SERVER_URL}
+: ${SERVER_NAME}
+: ${HTTP_PORT}
+: ${HTTPS_PORT}
 : ${ALLOWED_HOSTS}
 : ${CSRF_TRUSTED_ORIGINS}
 : ${GSI_PROXY_HOURS}
@@ -41,23 +43,65 @@ GFARM_S3_WEBUI_BASE_URL="gf_s3/"
 
 GFARM_S3_MINIO_SRC_DIR_ORIG=/gfarm-s3-minio
 
-URL_REGEXP="^([^/:]+?)://([^/:]+?):?([[:digit:]]+)?(/.*)?"
-[[ ${SERVER_URL} =~ ${URL_REGEXP} ]]
-URL_SCHEME=${BASH_REMATCH[1]}
-SERVER_NAME=${BASH_REMATCH[2]}
-SERVER_PORT=${BASH_REMATCH[3]}
-URL_PATH=${BASH_REMATCH[4]}
-
+# URL_REGEXP="^([^/:]+?)://([^/:]+?):?([[:digit:]]+)?(/.*)?"
+# [[ ${SERVER_URL} =~ ${URL_REGEXP} ]]
+# URL_SCHEME=${BASH_REMATCH[1]}
+# SERVER_NAME=${BASH_REMATCH[2]}
+# SERVER_PORT=${BASH_REMATCH[3]}
+# URL_PATH=${BASH_REMATCH[4]}
 # update SERVER_URL
-SERVER_URL="${URL_SCHEME}://${SERVER_NAME}"
-if [ -n "${SERVER_PORT}" ]; then
-    SERVER_URL="${SERVER_URL}:${SERVER_PORT}"
+# SERVER_URL="${URL_SCHEME}://${SERVER_NAME}"
+# if [ -n "${SERVER_PORT}" ]; then
+#     SERVER_URL="${SERVER_URL}:${SERVER_PORT}"
+# fi
+
+TMP_CSRF_TRUSTED_ORIGINS=""
+
+add_tmp_trusted() {
+    VAL="$1"
+    if [ -n "${TMP_CSRF_TRUSTED_ORIGINS}" ]; then
+        TMP_CSRF_TRUSTED_ORIGINS="${TMP_CSRF_TRUSTED_ORIGINS},${VAL}"
+    else
+        TMP_CSRF_TRUSTED_ORIGINS="${VAL}"
+    fi
+}
+
+HTTPS_URL=""
+if [ -n "${HTTPS_PORT}" ]; then
+    if [ "${HTTPS_PORT}" = 443 ]; then
+        HTTPS_URL="https://${SERVER_NAME}"
+    else
+        HTTPS_URL="https://${SERVER_NAME}:${HTTPS_PORT}"
+    fi
+    add_tmp_trusted "${HTTPS_URL}"
 fi
 
-# update when empty
+HTTP_URL=""
+if [ -n "${HTTP_PORT}" ]; then
+    if [ "${HTTP_PORT}" = 80 ]; then
+        HTTP_URL="http://${SERVER_NAME}"
+    else
+        HTTP_URL="http://${SERVER_NAME}:${HTTP_PORT}"
+    fi
+    add_tmp_trusted "${HTTP_URL}"
+fi
+
+if [ -n "${HTTPS_URL}" ]; then  # prioritize HTTPS
+    SERVER_URL="${HTTPS_URL}"
+    SERVER_PORT="${HTTPS_PORT}"
+    SERVER_SCHEME=https
+else
+    SERVER_URL="${HTTP_URL}"
+    SERVER_PORT="${HTTP_PORT}"
+    SERVER_SCHEME=http
+fi
+
+[ -n "${SERVER_URL}" ]
+
+# (overridable) update when empty
 ALLOWED_HOSTS=${ALLOWED_HOSTS:-${SERVER_NAME}}
-# update when empty
-CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-${SERVER_URL}}
+# (overridable) update when empty
+CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-${TMP_CSRF_TRUSTED_ORIGINS}}
 
 HOME_BASE=/home
 
@@ -278,41 +322,30 @@ EOF
 
 set -eu
 
-GFARM_USERNAME=${GFARM_USERNAME}
-
-SERVER_NAME=proxy
+### revproxy container is required
+SERVER_NAME=revproxy
 SERVER_PORT=${SERVER_PORT}
 SERVER_URL=https://\${SERVER_NAME}:\${SERVER_PORT}
 
 PROF="gfarm_s3"
-SECRET=\$(gfarm-s3-server --show-secret-key)
+ACCESS_KEY=\$(gfarm-s3-server --show-access-key)
+SECRET_KEY=\$(gfarm-s3-server --show-secret-key)
 
 NO_VERIFY_SSL="--no-verify-ssl"
 #NO_VERIFY_SSL=""
 
 AWS="aws --profile \${PROF}"
 
-\${AWS} configure set aws_access_key_id \${GFARM_USERNAME} &
-p1=\$!
-\${AWS} configure set aws_secret_access_key \${SECRET} &
-p2=\$!
-#\${AWS} configure set s3.multipart_threshold 300MB &
-#p3=\$!
-#\${AWS} configure set s3.multipart_chunksize 300MB &
-#p4=\$!
-#\${AWS} configure set s3.max_concurrent_requests 2 &
-#p5=\$!
+export no_proxy=\${SERVER_NAME}
+export AWS_EC2_METADATA_DISABLED=true
 
-wait \$p1
-wait \$p2
-#wait \$p3
-#wait \$p4
-#wait \$p5
+\${AWS} configure set aws_access_key_id \${ACCESS_KEY}
+\${AWS} configure set aws_secret_access_key \${SECRET_KEY}
+#\${AWS} configure set s3.multipart_threshold 300MB
+#\${AWS} configure set s3.multipart_chunksize 300MB
+#\${AWS} configure set s3.max_concurrent_requests 2
 
-no_proxy=\${SERVER_NAME} \
-AWS_EC2_METADATA_DISABLED=true \
-\${AWS} \${NO_VERIFY_SSL} \
---endpoint-url \${SERVER_URL} s3 \$@
+\${AWS} \${NO_VERIFY_SSL} --endpoint-url \${SERVER_URL} s3 \$@
 EOF
     chown "${LOCAL_USERNAME}" "${AWS_S3}"
     chmod u+x "${AWS_S3}"

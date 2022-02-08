@@ -7,6 +7,12 @@ export LANG=C
 export LC_CTYPE=C
 export LC_COLLATE=C
 
+
+show_access_key() {
+    usermap_entry=$(lookup_usermap_by_local_username "$USER" "$GFARMS3_LOCAL_USER_MAP")
+    get_access_key "$usermap_entry"
+}
+
 show_secret_key() {
 	cat "$GFARMS3_SECRET_KEY"
 }
@@ -83,6 +89,7 @@ while [ $# -gt 0 ]; do
 	--stop) action="STOP";;
 	--status) action="STATUS";;
 	--status-quick) action="STATUS";;
+	--show-access-key) action="ACCESS_SHOW";;
 	--show-secret-key) action="SECRET_SHOW";;
 	--show-secret-key-file) action="SECRET_SHOW_FILENAME";;
 	--regenerate-secret-key) action="SECRET_REGENERATE";;
@@ -150,6 +157,7 @@ case $action in
 START) start_server "$gfarm_shared_dir" "$resume";;
 STOP) stop_server "$resume";;
 STATUS) status_server;;
+ACCESS_SHOW) show_access_key;;
 SECRET_SHOW) show_secret_key;;
 SECRET_SHOW_FILENAME) show_secret_key_file;;
 SECRET_REGENERATE) regenerate_secret;;

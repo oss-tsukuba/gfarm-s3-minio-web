@@ -11,6 +11,7 @@
     - Share files with other Gfarm users under dedicated directory.
     - Control ACL.
 - Docker container:
+    - Simple setup
     - Automatically copy Gfarm configuration and credential files from home directories on host OS to the container.
 
 ## Requirements
@@ -92,10 +93,13 @@ Please refer to:
 - gfarm
     - docker/dev/common/s3/setup.sh
 
-## HTTPS and Certificates and Reverse proxy
+## HTTPS (SSL/TLS) and Certificates and Reverse proxy
 
 docker-compose.override.yml.https is an example to setup
 using a reverse proxy and using self signed certificates.
+
+You can use other reverse proxy and describe
+docker-compose.override.yml for the environment.
 
 ## Configuration file (docker/.env)
 
@@ -103,11 +107,8 @@ example:
 
 ```
 SERVER_NAME=client1.local
-HTTP_PORT=61080
+#HTTP_PORT=61080
 HTTPS_PORT=61443
-SERVER_URL=https://client1.local:61443
-ALLOWED_HOSTS=client1.local
-CSRF_TRUSTED_ORIGINS=https://client1.local:61443
 MYPROXY_SERVER=portal.hpci.nii.ac.jp:7512
 GSI_PROXY_HOURS=168
 #GFARM_S3_SHARED_DIR=/home/hpXXXXXXX/hpciXXXXXX/minio-share
@@ -125,8 +126,7 @@ KEY=VALUE
 mandatory parameters:
 
 ### mandatory
-- SERVER_NAME: Server name
-- SERVER_URL: Server URL (https://${SERVER_NAME})
+- SERVER_NAME: server name (without port number, not URL)
 - GFARM_S3_SHARED_DIR: Gfarm directory to share files
 - GFARM_CONF_DIR : path to parent directory on host OS for the following files
     - gfarm2.conf: Gfarm configuration file
@@ -141,6 +141,8 @@ Gfarm parameters (if necessary)
 
 optional parameters (default values are listed in docker-compose.yml):
 
+- HTTP_PORT: http port
+- HTTPS_PORT: https port
 - DEBUG: debug mode (1: enable)
 - DJANGO_DEBUG: debug mode of Django (True or False)
 - TZ: TZ environment variable
@@ -195,9 +197,10 @@ make shell
 
 ## Update Gfarm credential
 
-Normally, when Gfarm credential files (.globus, etc.)for users are
-updated, the files will be copied automatically from home directories
-to containers.
+Normally, when Gfarm credential and configuration files
+(.gfarm_shared_key, .globus, .gfarm2rc) for users are updated, the
+files will be copied automatically from home directories to
+containers.
 
 If the files are not copied automatically, run the following:
 
@@ -220,8 +223,13 @@ Files of Gfarm will be stored carefully on Gfarm.
 
 ## Logging
 
-- `make logs-<container name>` for containers
+- run `make logs-<container name>` for containers to show
     - NOTE: These logs are removed when running `make reborn` or `make down`
+
+You can describe docker-compose.override.yml to change logging driver.
+
+- https://docs.docker.com/compose/compose-file/compose-file-v3/#logging
+- https://docs.docker.com/config/containers/logging/configure/
 
 ## for developers
 
