@@ -13,7 +13,12 @@ GO_ARCHIVE_PATH=$(GO_ARCHIVE_DIR)/$(GO_ARCHIVE_NAME)
 MINIO_PATH=$(PREFIX)/bin/minio
 MC_PATH=$(PREFIX)/bin/mc
 
+RE_DOWNLOAD_INTERVAL_MINUTE=1440
+
 mc_git=https://github.com/minio/mc.git
+mc_bin_url=https://dl.min.io/client/mc/release/linux-amd64/mc
+mc_bin_local=$(BUILDDIR)/mc.bin
+
 minio_gfarm_git=https://github.com/oss-tsukuba/gfarm-s3-minio.git
 minio_gfarm_branch=gfarm
 
@@ -32,14 +37,15 @@ RACE=
 
 all::
 	[ -d $(BUILDDIR) ] || $(MKDIR) -p $(BUILDDIR)
-	# fetch or update "mc"
-	[ -d $(BUILDDIR)/mc ] && (cd $(BUILDDIR)/mc && git pull || true) || (cd $(BUILDDIR) && $(GIT) clone --depth 1 $(mc_git))
-	# fetch or update "gfarm-s3-minio"
-	# (may fail when using private repository)
+	### fetch or update "mc"
+	#[ -d $(BUILDDIR)/mc ] && (cd $(BUILDDIR)/mc && git pull || true) || (cd $(BUILDDIR) && $(GIT) clone --depth 1 $(mc_git))
+	#cd $(BUILDDIR)/mc && GOPATH=$(GOPATH) $(GOPATH)/bin/go install
+	### use binary mc
+	find $(mc_bin_local) -mmin -$(RE_DOWNLOAD_INTERVAL_MINUTE) | grep ^$(mc_bin_local)\$$ || { $(CURL) -L -o $(mc_bin_local).tmp $(mc_bin_url) && mv $(mc_bin_local).tmp $(mc_bin_local); }
+
+	### fetch or update "gfarm-s3-minio"
+	### (may fail when using private repository)
 	[ -d $(BUILDDIR)/gfarm-s3-minio ] && (cd $(BUILDDIR)/gfarm-s3-minio && git pull || true) || (cd $(BUILDDIR) && $(GIT) clone --depth 1 $(minio_gfarm_git) && cd gfarm-s3-minio && $(GIT) checkout $(minio_gfarm_branch))
-
-	cd $(BUILDDIR)/mc && GOPATH=$(GOPATH) $(GOPATH)/bin/go install
-
 	cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(GOPATH)/bin/go install $(RACE) -ldflags '-w -s'
 
 	#cd $(BUILDDIR)/gfarm-s3-minio && GOPATH=$(GOPATH) CGO_LDFLAGS=$(CGO_LDFLAGS) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) PATH=$(GOBIN):$${PATH} make
@@ -50,7 +56,8 @@ install-go::
 	cd $$(dirname $(GOPATH)) && $(TAR) xfzp $(GO_ARCHIVE_PATH) || (rm $(GO_ARCHIVE_PATH); false)
 
 install::
-	$(INSTALL) -D -c -m 555 $(GOBIN)/mc "$(MC_PATH)"
+	#$(INSTALL) -D -c -m 555 $(GOBIN)/mc "$(MC_PATH)"
+	$(INSTALL) -D -c -m 555 $(mc_bin_local) "$(MC_PATH)"
 	$(INSTALL) -D -c -m 555 $(GOBIN)/minio "$(MINIO_PATH)"
 
 clean::
