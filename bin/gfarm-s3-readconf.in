@@ -5,7 +5,7 @@ set -eu
 
 prefix=@prefix@
 CONF_DEFAULT=@SYSCONFDIR@/gfarm-s3.conf
-CONF=@SYSCONFDIR@/gfarm-s3-overwrite.conf
+CONF=@SYSCONFDIR@/gfarm-s3-override.conf
 
 CACHE="/tmp/gfarm-s3.conf.cache.${UID}"
 
@@ -60,7 +60,7 @@ for kv in $C2; do
     k=${kv%=*}
     v=${kv#*=}
     if [ "${KEYS[$k]:-}" = "1" ]; then
-        # overwrite only
+        # override only
         eval "$kv"
     fi
 done

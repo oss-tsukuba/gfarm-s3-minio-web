@@ -200,8 +200,8 @@ install_gf_s3() {
     fi
 
     # edit addtional configurations
-    CONF_OVERWRITE=${SYSCONFDIR}/gfarm-s3-overwrite.conf
-    cat <<EOF > "${CONF_OVERWRITE}"
+    CONF_OVERRIDE=${SYSCONFDIR}/gfarm-s3-override.conf
+    cat <<EOF > "${CONF_OVERRIDE}"
 #GFARM_S3_LOG_LEVEL=debug
 GFARM_S3_LOG_OUTPUT=stderr
 
