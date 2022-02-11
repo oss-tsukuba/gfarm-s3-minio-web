@@ -40,6 +40,20 @@ automatically in Docker container.
     - specify Gfarm configuration
     - select Gfarm authentication method
     - server name
+    - ask Gfarm administrator to prepare the shared directory, and specify the Gfarm directory in .env
+      ```
+      # Example of preparation for shared directory:
+      SHARED_DIR=/share
+      gfsudo gfmkdir -p "${SHARED_DIR}"
+      gfsudo gfchmod 0755 "${SHARED_DIR}"
+
+      for u in $(gfuser); do
+          NAME="$SHARED_DIR/$u"
+          gfsudo gfmkdir -p "$NAME"
+          gfsudo gfchmod 0755 "$NAME"
+          gfsudo gfchown $u:gfarmadm "$NAME"
+      done
+      ```
 - create and edit gfarm-s3-usermap.conf to specify the available users
     - one user per line, separate by colons
     - Format:
@@ -172,6 +186,24 @@ optional parameters (default values are listed in docker-compose.yml):
 - GO_URL: Golang binary package URL
 - HOMEDIR_BASE: parent directory for local (host OS) home directories
 - SHARE_HOSTDIR: shared directory between host OS and containers
+
+## Shared directory (GFARM_S3_SHARED_DIR)
+
+GFARM_S3_SHARED_DIR looks like the following via S3 client.
+
+- sss (virtual bucket to other users)
+    - username1
+        - bucket
+           - object
+           - ...
+        - ....
+    - username2
+    - ...
+- your_bucket1
+    - object
+    - ...
+- your_bucket2
+- ...
 
 ## Stop and Start
 
