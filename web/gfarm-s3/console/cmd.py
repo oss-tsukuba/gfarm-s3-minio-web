@@ -212,8 +212,8 @@ def setlocale(name):
         saved = locale.setlocale(locale.LC_ALL)
         try:
             yield locale.setlocale(locale.LC_ALL, name)
-        finally:
-            locale.setlocale(locale.LC_ALL, saved)
+        except Exception:
+            yield locale.setlocale(locale.LC_ALL, saved)
 
 def myctime(sec, lang):
     lt = time.localtime(sec)
