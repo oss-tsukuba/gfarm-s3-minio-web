@@ -15,7 +15,7 @@ CONTAINERS = gfminio copy_home revproxy
 .PONY =
 
 define gentarget
-	$(foreach name,$(CONTAINERS),$(1)-$(name))
+	$(foreach name,$(CONTAINERS),$(1)@$(name))
 endef
 
 TARGET_LOGS = $(call gentarget,logs)
@@ -77,10 +77,10 @@ restart-withlog:
 	$(MAKE) restart
 	$(COMPOSE) logs --follow gfminio
 
-restart-proxy:
+restart@revproxy:
 	$(COMPOSE) restart revproxy
 
-restart-copy_home copy-home:
+restart@copy_home copy-home:
 	$(COMPOSE) restart copy_home
 
 reset-brute-force-attack-log:
@@ -89,10 +89,10 @@ reset-brute-force-attack-log:
 shell:
 	$(COMPOSE) exec gfminio bash
 
-shell-copy_home:
+shell@copy_home:
 	$(COMPOSE) exec copy_home bash
 
-shell-revproxy:
+shell@revproxy:
 	$(COMPOSE) exec revproxy bash
 
 logs:
@@ -104,13 +104,13 @@ logs-follow:
 logs-time:
 	$(COMPOSE) logs --timestamps gfminio
 
-$(TARGET_LOGS): logs-%:
+$(TARGET_LOGS): logs@%:
 	$(COMPOSE) logs $*
 
-$(TARGET_LOGS_FOLLOW): logs-follow-%:
+$(TARGET_LOGS_FOLLOW): logs-follow@%:
 	$(COMPOSE) logs --follow $*
 
-$(TARGET_LOGS_TIME): logs-time-%:
+$(TARGET_LOGS_TIME): logs-time@%:
 	$(COMPOSE) logs --timestamps $*
 
 _COMPOSE:

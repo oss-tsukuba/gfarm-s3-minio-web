@@ -80,7 +80,7 @@ automatically in Docker container.
         - https://github.com/nginx-proxy/acme-companion
         - https://github.com/nginx-proxy/acme-companion/blob/main/docs/Docker-Compose.md
     - or etc.
-- run `make restart-revproxy` after certificate files for HTTPS are updated.
+- run `make restart@revproxy` after certificate files for HTTPS are updated.
 - open the URL in a browser
    - example: `https://<hostname>/`
 - Web UI
@@ -267,7 +267,7 @@ Files of Gfarm will be stored carefully on Gfarm.
 
 ## Logging
 
-- run `make logs-<container name>` for containers to show
+- run `make logs@<container name>` for containers to show
     - NOTE: These logs are removed when running `make reborn` or `make down`
 
 You can describe docker-compose.override.yml to change logging driver.
