@@ -3,7 +3,7 @@
 ## Overview
 
 - gfarm-s3-minio-web is Web UI to manage gfarm-s3-minio.
-- gfarm-s3-minio is a S3 compatible object storage server for Gfarm
+- gfarm-s3-minio is an S3 compatible object storage server for Gfarm
   based on MinIO (gateway-gfarm is added).
     - https://github.com/oss-tsukuba/gfarm-s3-minio
     - branch name: gfarm
