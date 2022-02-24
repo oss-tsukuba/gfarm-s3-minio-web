@@ -4,6 +4,7 @@ services:
   gfminio:
     hostname: gfminio
     privileged: false
+    restart: ${DOCKER_OPT_RESTART:-unless-stopped}
     networks:
       - mynet1
       - mynet2
@@ -87,6 +88,8 @@ services:
 
   copy_home:
     hostname: copy_home
+    privileged: false
+    restart: ${DOCKER_OPT_RESTART:-unless-stopped}
     networks:
       - mynet1
     build:
