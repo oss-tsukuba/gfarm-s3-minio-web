@@ -227,9 +227,8 @@ make restart-withlog
 
 ## After updating configurations (docker/.env)
 
-
 ```
-make rebone-withlog
+make reborn-withlog
 ```
 
 ## Use shell
