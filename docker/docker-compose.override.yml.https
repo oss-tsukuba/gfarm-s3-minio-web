@@ -1,7 +1,5 @@
 version: '3.5'
 
-# use variables from .env
-
 services:
   gfminio:
     environment:
