@@ -40,31 +40,33 @@ automatically in Docker container.
     - specify Gfarm configuration
     - select Gfarm authentication method
     - server name
-    - ask Gfarm administrator to prepare the shared directory, and specify the Gfarm directory in `config.env`
-      ```
-      # Example of preparation for shared directory:
-      SHARED_DIR=/share
-      gfsudo gfmkdir -p "${SHARED_DIR}"
-      gfsudo gfchmod 0755 "${SHARED_DIR}"
+- ask Gfarm administrator to prepare the shared directory, and specify the Gfarm directory as GFARM_S3_SHARED_DIR in `config.env`
+  ```
+  # Example of preparation for shared directory:
+  SHARED_DIR=/share
+  gfsudo gfmkdir -p "${SHARED_DIR}"
+  gfsudo gfchmod 0755 "${SHARED_DIR}"
 
-      for u in $(gfuser); do
-          NAME="$SHARED_DIR/$u"
-          gfsudo gfmkdir -p "$NAME"
-          gfsudo gfchmod 0755 "$NAME"
-          gfsudo gfchown $u:gfarmadm "$NAME"
-      done
-      ```
-- create and edit gfarm-s3-usermap.conf to specify the available users
+  for u in $(gfuser); do
+      NAME="$SHARED_DIR/$u"
+      gfsudo gfmkdir -p "$NAME"
+      gfsudo gfchmod 0755 "$NAME"
+      gfsudo gfchown $u:gfarmadm "$NAME"
+  done
+  ```
+- create and edit `gfarm-s3-usermap.conf` in GFARM_CONF_DIR directory to specify the available users
     - one user per line, separate by colons
     - Format:
-        - <Gfarm Username>:<Local Username>:<S3 Accesskey ID>
+        - `<Gfarm Username>:<Local Username>:<S3 Accesskey ID>`
     - Example:
-        - hpciXXXX01:user1:hpciXXXX01
-        - hpciXXXX02:user2:hpciXXXX02
-- create docker-compose.override.yml
-    - example: `ln -s docker-compose.override.yml.https docker-compose.override.yml`
-    - or use one of other docker-compose.override.yml.*
-    - or write docker-compose.override.yml for your environment
+      ```
+      hpciXXXX01:user1:hpciXXXX01
+      hpciXXXX02:user2:hpciXXXX02
+      ```
+- create `docker-compose.override.yml`
+    - example: `ln -s docker-compose.override.yml.https docker-compose.override.yml` to use HTTPS
+    - or use one of other `docker-compose.override.yml.*`
+    - or write `docker-compose.override.yml` for your environment
 - run `make config` to check configurations.
 - run `make reborn-withlog`
 - `ctrl-c` to stop output of `make reborn-withlog`
@@ -82,7 +84,7 @@ automatically in Docker container.
     - or etc.
 - run `make restart@revproxy` after certificate files for HTTPS are updated.
 - open the URL in a browser
-   - example: `https://<hostname>/`
+   - Example: `https://<hostname>/`
 - Web UI
     - login
         - username: `<Gfarm username>`
@@ -128,7 +130,7 @@ docker-compose.override.yml for the environment.
 
 ## Configuration file (docker/config.env)
 
-example:
+Example:
 
 ```
 SERVER_NAME=client1.local
