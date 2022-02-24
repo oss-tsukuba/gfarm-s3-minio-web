@@ -36,11 +36,11 @@ automatically in Docker container.
 - install Docker
 - install Docker Compose
 - run `cd ./docker` in this source directory
-- create and edit .env file (see details below)
+- create and edit `config.env` (see details below)
     - specify Gfarm configuration
     - select Gfarm authentication method
     - server name
-    - ask Gfarm administrator to prepare the shared directory, and specify the Gfarm directory in .env
+    - ask Gfarm administrator to prepare the shared directory, and specify the Gfarm directory in `config.env`
       ```
       # Example of preparation for shared directory:
       SHARED_DIR=/share
@@ -126,7 +126,7 @@ using a reverse proxy and using self signed certificates.
 You can use other reverse proxy and describe
 docker-compose.override.yml for the environment.
 
-## Configuration file (docker/.env)
+## Configuration file (docker/config.env)
 
 example:
 
@@ -225,7 +225,7 @@ start:
 make restart-withlog
 ```
 
-## After updating configurations (docker/.env)
+## After updating configurations
 
 ```
 make reborn-withlog
@@ -253,8 +253,8 @@ make copy-home
 ## Update containers
 
 - update gfarm-s3-minio-web source
-- or, update ./docker/.env
-- or, update docker-compose.yml
+- or, update `./docker/config.env`
+- or, update `docker-compose.yml`
 - or, run `make build-nocache` to update packages forcibly
 - and run `make reborn-withlog`
 
@@ -276,7 +276,7 @@ You can describe docker-compose.override.yml to change logging driver.
 
 ## for developers
 
-create Gfarm docker/dev environment,
-and see .env-docker_dev,
-and merge the file into .env,
-and create symlink from gfarm/docker/dev/mnt/COPY_DIR to /work/gfarm-dev
+- create Gfarm docker/dev environment
+- and see `config.env-docker_dev`
+- and merge the file into `config.env`
+- and run `ln -s <path to gfarm/docker/dev/mnt/COPY_DIR> /work/gfarm-dev`

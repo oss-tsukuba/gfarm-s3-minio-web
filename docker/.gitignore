@@ -1,5 +1,5 @@
 /docker-compose.override.yml
-/.env
+/config.env
 /gfarm-s3-usermap.conf
 /gfarm2.conf
 /certificates

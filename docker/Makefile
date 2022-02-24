@@ -1,11 +1,13 @@
 COMPOSE_PROJECT_NAME = gfarm-s3
 
+ENV_FILE = --env-file config.env
+
 SUDO = $(shell docker version > /dev/null 2>&1 || echo sudo)
 DOCKER = $(SUDO) docker
 COMPOSE_V1 = docker-compose
 COMPOSE_V2 = docker compose
 COMPOSE_SW = $(shell ${COMPOSE_V2} version > /dev/null 2>&1 && echo ${COMPOSE_V2} || echo ${COMPOSE_V1})
-COMPOSE = $(SUDO) COMPOSE_PROJECT_NAME=$(COMPOSE_PROJECT_NAME) $(COMPOSE_SW)
+COMPOSE = $(SUDO) COMPOSE_PROJECT_NAME=$(COMPOSE_PROJECT_NAME) $(COMPOSE_SW) $(ENV_FILE)
 
 # use selfsigned certificate
 SSC_COMPOSE = $(COMPOSE) -f docker-compose.selfsigned.yml
