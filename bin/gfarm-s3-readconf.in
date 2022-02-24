@@ -34,7 +34,7 @@ conf_filter()
     # ignore $(...) and `...`
     egrep "^[^\\s#=]+=[^=]*$" "${1}" \
     | egrep -v "\\$\\([^\\)]+\\)" \
-    | egrep -v "\`[^\`]+\`)"
+    | egrep -v "\`[^\`]+\`\\)"
 }
 
 SAVE_IFS=$IFS
