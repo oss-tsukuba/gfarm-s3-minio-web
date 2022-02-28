@@ -1,7 +1,7 @@
 import json
 import locale
 import os
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, DEVNULL
 import time
 import threading
 import urllib.parse
@@ -31,9 +31,9 @@ def decode(s):
         return s.decode()
     return s
 
-def _communicate(p, name):
+def _communicate(p, name, input=DEVNULL):
     try:
-        stdout, stderr = p.communicate()
+        stdout, stderr = p.communicate(input=input)
         p.wait()
         if stderr:
             stderr = decode(stderr)
@@ -155,7 +155,7 @@ def set_bucket_acl(username, bucket, acl_1, acl_2):
     except Exception as e:
         logger.error(f"set_bucket_acl: exception: {e}")
         return None
-    retcode, stdout = _communicate(p, "set_bucket_acl")
+    retcode, stdout = _communicate(p, "set_bucket_acl", input=acl.encode())
     if retcode != 0:
         return None
     return decode(stdout)
