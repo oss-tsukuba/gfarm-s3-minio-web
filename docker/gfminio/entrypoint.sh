@@ -125,33 +125,30 @@ cp -fa "${GFARM2_CONF_ORIG}" "${GFARM2_CONF}"
 cp -fa "${GFARM_S3_USERMAP_ORIG}" "${GFARM_S3_USERMAP}"
 
 debug_sleep() {
-    # TODO if [ $DEBUG -eq 1 ]; then
-    sleep infinity
+    if [ ${DEBUG} -eq 1 ]; then
+        sleep infinity
+    fi
 }
 
 ### cache files in GO_BUILDDIR to build.
 install_gf_s3() {
-    groupadd -K GID_MIN=100 ${GFARM_S3_GROUPNAME}
-    useradd -K UID_MIN=100 -m ${GFARM_S3_USERNAME} -g ${GFARM_S3_GROUPNAME} -d ${GFARM_S3_HOMEDIR} -s /bin/bash
+    groupadd -K GID_MIN=100 ${GFARM_S3_GROUPNAME} || true
+    if id -u ${GFARM_S3_USERNAME} > /dev/null 2>&1; then
+        :
+    else
+        useradd -K UID_MIN=100 -m ${GFARM_S3_USERNAME} -g ${GFARM_S3_GROUPNAME} -d ${GFARM_S3_HOMEDIR} -s /bin/bash
+    fi
 
     GFARM_S3_MINIO_DIRNAME=gfarm-s3-minio
     GFARM_S3_MINIO_WORKDIR=${GO_BUILDDIR}/${GFARM_S3_MINIO_DIRNAME}
     mkdir -p ${GO_BUILDDIR}
-    if [ ! -d "${GFARM_S3_MINIO_WORKDIR}" ]; then
-        if [ -d "${GFARM_S3_MINIO_SRC_DIR_ORIG}" ]; then
-            mkdir -p "${GFARM_S3_MINIO_WORKDIR}"
-        else
-            git clone "${GFARM_S3_MINIO_SRC_GIT_URL}" "${GFARM_S3_MINIO_WORKDIR}"
-        fi
-    fi
 
     if [ -d "${GFARM_S3_MINIO_SRC_DIR_ORIG}" ]; then
         # from local directory (for developpers)
         rsync --delete -rlptD "${GFARM_S3_MINIO_SRC_DIR_ORIG}"/ "${GFARM_S3_MINIO_WORKDIR}"/
     else
-        cd "${GFARM_S3_MINIO_WORKDIR}"
-        git pull
-        git checkout ${GFARM_S3_MINIO_SRC_GIT_BRANCH}
+        rm -rf "${GFARM_S3_MINIO_WORKDIR}"
+        git clone --depth 1 -b "${GFARM_S3_MINIO_SRC_GIT_BRANCH}" "${GFARM_S3_MINIO_SRC_GIT_URL}" "${GFARM_S3_MINIO_WORKDIR}"
     fi
 
     cd ${WORKDIR}/gfarm-s3-minio-web
