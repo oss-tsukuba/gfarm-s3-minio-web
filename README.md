@@ -68,7 +68,6 @@ automatically in Docker container.
     - or use one of other `docker-compose.override.yml.*`
     - or write `docker-compose.override.yml` for your environment
 - run `make config` to check configurations.
-- run `make reborn`
 - copy certificate files for HTTPS to `gfarm-s3-revproxy-1:/etc/nginx/certs` volume when using docker-compose.override.yml.https
     - NOTE: HTTPS port is disabled when certificate files do not exist.
     - prepare the following files
@@ -81,7 +80,7 @@ automatically in Docker container.
         - https://github.com/nginx-proxy/acme-companion
         - https://github.com/nginx-proxy/acme-companion/blob/main/docs/Docker-Compose.md
     - or etc.
-- run `make restart@revproxy` after certificate files for HTTPS are updated.
+- run `make reborn`
 - open the URL in a browser
    - Example: `https://<hostname>/`
 - Web UI
