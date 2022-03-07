@@ -68,8 +68,7 @@ automatically in Docker container.
     - or use one of other `docker-compose.override.yml.*`
     - or write `docker-compose.override.yml` for your environment
 - run `make config` to check configurations.
-- run `make reborn-withlog`
-- `ctrl-c` to stop output of `make reborn-withlog`
+- run `make reborn`
 - copy certificate files for HTTPS to `gfarm-s3-revproxy-1:/etc/nginx/certs` volume when using docker-compose.override.yml.https
     - NOTE: HTTPS port is disabled when certificate files do not exist.
     - prepare the following files
@@ -224,13 +223,13 @@ make stop
 start:
 
 ```
-make restart-withlog
+make restart
 ```
 
 ## After updating configurations
 
 ```
-make reborn-withlog
+make reborn
 ```
 
 ## Use shell
@@ -258,7 +257,7 @@ make copy-home
 - or, update `./docker/config.env`
 - or, update `docker-compose.yml`
 - or, run `make build-nocache` to update packages forcibly
-- and run `make reborn-withlog`
+- and run `make reborn`
 
 ## Backup
 

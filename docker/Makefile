@@ -61,6 +61,7 @@ reborn update:
 	$(COMPOSE) build
 	$(MAKE) down
 	$(COMPOSE) up -d
+	./wait.sh
 
 reborn-withlog:
 	$(MAKE) reborn
