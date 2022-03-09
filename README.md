@@ -237,6 +237,7 @@ or
 
 ```
 make reborn-withlog
+### `ctrl-c` to stop log messages
 ```
 
 ## Use shell
