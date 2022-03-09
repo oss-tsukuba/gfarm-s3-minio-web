@@ -68,19 +68,19 @@ automatically in Docker container.
     - or use one of other `docker-compose.override.yml.*`
     - or write `docker-compose.override.yml` for your environment
 - run `make config` to check configurations.
-- copy certificate files for HTTPS to `gfarm-s3-revproxy-1:/etc/nginx/certs` volume when using docker-compose.override.yml.https
+- run `make selfsigned-cert-generate` to activate HTTPS when using HTTPS.
+- run `make reborn` to create and start containers.
+- copy the following files for HTTPS to `gfarm-s3-revproxy-1:/etc/nginx/certs` volume when using HTTPS and not using selfsigned certificate.
     - NOTE: HTTPS port is disabled when certificate files do not exist.
     - prepare the following files
         - ${SERVER_NAME}.key (SSL_KEY)
         - ${SERVER_NAME}.csr (SSL_CSR)
         - ${SERVER_NAME}.crt (SSL_CERT)
         - and use `sudo docker cp <filename> gfarm-s3-revproxy-1:/etc/nginx/certs/<filename>` to copy a file
-    - or `make selfsigned-cert-generate` to generate and copy self-signed certificate
+        - and run `make restart@revproxy`
     - or (unsurveyed:) use acme-companion for nginx-proxy to use Let's Encrypt certificate and create new docker-compose.override.yml
         - https://github.com/nginx-proxy/acme-companion
         - https://github.com/nginx-proxy/acme-companion/blob/main/docs/Docker-Compose.md
-    - or etc.
-- run `make reborn`
 - open the URL in a browser
    - Example: `https://<hostname>/`
 - Web UI

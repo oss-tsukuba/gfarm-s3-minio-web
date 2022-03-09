@@ -57,15 +57,18 @@ down:
 down-REMOVE_VOLUMES:
 	$(COMPOSE) down --volumes --remove-orphans
 
-reborn update:
+reborn-nowait:
 	$(COMPOSE) build
 	$(MAKE) down
 	$(COMPOSE) up -d
+
+reborn:
+	$(MAKE) reborn-nowait
 	./wait.sh
 
 reborn-withlog:
-	$(MAKE) reborn
-	$(COMPOSE) logs --follow gfminio
+	$(MAKE) reborn-nowait
+	$(MAKE) logs-follow
 
 build-nocache:
 	$(COMPOSE) build --no-cache
