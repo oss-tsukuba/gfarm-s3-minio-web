@@ -67,7 +67,7 @@ automatically in Docker container.
     - example: `ln -s docker-compose.override.yml.https docker-compose.override.yml` to use HTTPS
     - or use one of other `docker-compose.override.yml.*`
     - or write `docker-compose.override.yml` for your environment
-- run `make config` to check configurations.
+- run `make check-config` to check configurations.
 - run `make selfsigned-cert-generate` to activate HTTPS when using HTTPS.
 - run `make reborn` to create and start containers.
     - If containers exist, these will be recreated.

@@ -44,10 +44,10 @@ selfsigned-cert-generate:
 selfsigned-cert-ps:
 	$(SSC_COMPOSE) ps
 
-selfsigned-cert-config:
+selfsigned-cert-check-config:
 	$(SSC_COMPOSE) config
 
-config:
+check-config:
 	$(COMPOSE) config
 
 down:
