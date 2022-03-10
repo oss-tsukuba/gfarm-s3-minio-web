@@ -289,3 +289,9 @@ You can describe docker-compose.override.yml to change logging driver.
 - and see `config.env-docker_dev`
 - and merge the file into `config.env`
 - and run `ln -s <path to gfarm/docker/dev/mnt/COPY_DIR> /work/gfarm-dev`
+- test:
+    - WebUI: login by user1
+    - WebUI: push `Start` button
+    - run `make shell`
+    - run `sudo -i -u user1`
+    - run `/test-s3.sh; echo $?`

@@ -326,22 +326,27 @@ SERVER_PORT=${SERVER_PORT}
 SERVER_URL=https://\${SERVER_NAME}:\${SERVER_PORT}
 
 PROF="gfarm_s3"
-ACCESS_KEY=\$(gfarm-s3-server --show-access-key)
-SECRET_KEY=\$(gfarm-s3-server --show-secret-key)
-
 NO_VERIFY_SSL="--no-verify-ssl"
 #NO_VERIFY_SSL=""
-
 AWS="aws --profile \${PROF}"
 
 export no_proxy=\${SERVER_NAME}
 export AWS_EC2_METADATA_DISABLED=true
 
-\${AWS} configure set aws_access_key_id \${ACCESS_KEY}
-\${AWS} configure set aws_secret_access_key \${SECRET_KEY}
-#\${AWS} configure set s3.multipart_threshold 300MB
-#\${AWS} configure set s3.multipart_chunksize 300MB
-#\${AWS} configure set s3.max_concurrent_requests 2
+is_configured() {
+  egrep -q ^\\\\[\${PROF}\\\\] \${HOME}/.aws/credentials
+}
+
+if ! is_configured; then
+  ACCESS_KEY=\$(gfarm-s3-server --show-access-key)
+  SECRET_KEY=\$(gfarm-s3-server --show-secret-key)
+
+  \${AWS} configure set aws_access_key_id \${ACCESS_KEY}
+  \${AWS} configure set aws_secret_access_key \${SECRET_KEY}
+  #\${AWS} configure set s3.multipart_threshold 300MB
+  #\${AWS} configure set s3.multipart_chunksize 300MB
+  #\${AWS} configure set s3.max_concurrent_requests 2
+fi
 
 \${AWS} \${NO_VERIFY_SSL} --endpoint-url \${SERVER_URL} s3 \$@
 EOF
