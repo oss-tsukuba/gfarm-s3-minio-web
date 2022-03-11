@@ -89,6 +89,7 @@ COPY ${BASEDIR}/supervisord.conf /supervisord.conf
 COPY ${BASEDIR}/logtail.sh /logtail.sh
 COPY ${BASEDIR}/run.sh /run.sh
 COPY ${BASEDIR}/test-s3.sh /test-s3.sh
+COPY ${BASEDIR}/run_aws.py /run_aws.py
 
 COPY ./ ${WORKDIR}/gfarm-s3-minio-web
 

@@ -17,11 +17,14 @@ TESTFILE_LOCAL_LARGE=$(mktemp tmpfile-large.XXXXXXXXXX)
 date +%s > ${TESTFILE_LOCAL_SMALL}
 dd if=/dev/urandom of=${TESTFILE_LOCAL_LARGE} bs=1M count=50
 
+RESULT=FAIL
+
 cleanup() {
     rm -f ${TESTFILE_LOCAL_TMP} ${TESTFILE_LOCAL_SMALL} ${TESTFILE_LOCAL_LARGE}
     ${AWS_S3} rm ${TESTFILE_S3_1} || true
     ${AWS_S3} rm ${TESTFILE_S3_2} || true
     ${AWS_S3} rb ${BUCKET_NAME} || true
+    echo $RESULT
 }
 trap cleanup EXIT
 
@@ -50,3 +53,5 @@ ${AWS_S3} ls ${TESTFILE_S3_2}
 ${AWS_S3} rm ${TESTFILE_S3_1}
 ${AWS_S3} rm ${TESTFILE_S3_2}
 ${AWS_S3} rb ${BUCKET_NAME}
+
+RESULT=PASS

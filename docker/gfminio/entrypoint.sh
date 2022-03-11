@@ -328,7 +328,7 @@ SERVER_URL=https://\${SERVER_NAME}:\${SERVER_PORT}
 PROF="gfarm_s3"
 NO_VERIFY_SSL="--no-verify-ssl"
 #NO_VERIFY_SSL=""
-AWS="aws --profile \${PROF}"
+AWS="python3 /run_aws.py --profile \${PROF}"
 
 export no_proxy=\${SERVER_NAME}
 export AWS_EC2_METADATA_DISABLED=true
