@@ -13,7 +13,7 @@ services:
       dockerfile: ./docker/gfminio/Dockerfile
       args:
         # use GFARM_SRC_GIT_URL if GFARM_SRC_URL is empty
-        - GFARM_SRC_URL=${GFARM_SRC_URL-https://github.com/oss-tsukuba/gfarm/archive/refs/tags/2.7.19.tar.gz}
+        - GFARM_SRC_URL=${GFARM_SRC_URL-https://github.com/oss-tsukuba/gfarm/archive/refs/tags/2.7.20.tar.gz}
         - GFARM_SRC_GIT_URL=${GFARM_SRC_GIT_URL:-https://github.com/oss-tsukuba/gfarm.git}
         - GFARM_SRC_GIT_BRANCH=${GFARM_SRC_GIT_BRANCH:-2.8}
         ### optional
