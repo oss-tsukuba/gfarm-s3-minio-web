@@ -97,6 +97,8 @@ services:
       args:
         - http_proxy=${http_proxy:-}
         - https_proxy=${https_proxy:-}
+    environment:
+      - DEBUG=${DEBUG:-0}
     volumes:
       - ${HOMEDIR_BASE:-/home}:/host_home:ro
       - copy_home:/copy_home:rw

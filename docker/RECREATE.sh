@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMPOSE=$(make _COMPOSE)
+COMPOSE=$(make -s ECHO_COMPOSE)
 
 [ $# = 1 ] || exit 1
 

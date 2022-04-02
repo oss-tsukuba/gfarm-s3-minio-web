@@ -1,8 +1,10 @@
 #! /bin/bash
 
 set -eu -o pipefail
-#set -x
-DEBUG=0
+
+if [ ${DEBUG} -eq 1 ]; then
+    set -x
+fi
 
 # usage:
 # inotify_copy.sh <timeout>
@@ -25,6 +27,10 @@ copy_targets=(
     /*/.gfarm_shared_key
     /*/.gfarm2rc
     /*/.globus/
+)
+
+exclude_targets=(
+    /_gfarm_s3/
 )
 
 debug() {
@@ -59,18 +65,35 @@ opt_events=(
 
 sync_list=$(mktemp)
 
+RSYNC_OPT_QUIET=""
+
+if [ ${DEBUG} -eq 0 ]; then  # not debug mode
+    RSYNC_OPT_QUIET="-q"
+fi
+
 copy_all() {
-    #truncate --size 0 "$sync_list"
-    echo "*/" > "$sync_list"
-    for L in "${copy_targets[@]}"; do
-        if [ ${L: -1} = "/" ]; then  # last character
-            L="${L}**"
-        fi
-        echo "${L}" >> "$sync_list"
+    truncate --size 0 "$sync_list"
+
+    # exclude
+    for L in "${exclude_targets[@]}"; do
+        echo "- ${L}" >> "$sync_list"
     done
-    #cat $sync_list  # debug
-    rsync -q --one-file-system -amv --delete \
-          --include-from="$sync_list" --exclude='*' "$src/" "$dst/"
+    # include
+    echo "+ /*/" >> "$sync_list"
+    for L in "${copy_targets[@]}"; do
+        echo "+ ${L}" >> "$sync_list"
+        if [ ${L: -1} = "/" ]; then  # last character
+            echo "+ ${L}**" >> "$sync_list"
+        fi
+    done
+    # exclude
+    echo "- *" >> "$sync_list"
+    if [ ${DEBUG} -eq 1 ]; then
+        cat $sync_list
+    fi
+
+    rsync --one-file-system -av --delete ${RSYNC_OPT_QUIET} \
+          --filter=". $sync_list" "$src/" "$dst/"
 }
 
 stop() {
