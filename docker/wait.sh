@@ -28,6 +28,7 @@ container_exists()
     ${COMPOSE} exec ${CONT_NAME} true
 }
 
+echo -n "Waiting for Gfarm-S3 startup..."
 while :; do
     if ! container_exists; then
         make stop ${CONT_NAME}
@@ -39,8 +40,9 @@ while :; do
             break
         fi
     fi
-    echo "Waiting for Gfarm-S3 startup..."
+    echo -n .
     sleep 1
 done
+echo
 
 echo "Gfarm-S3 is ready."
