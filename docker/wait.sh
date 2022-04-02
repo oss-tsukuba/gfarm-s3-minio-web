@@ -17,10 +17,23 @@ URL="${PROTOCOL}://${SERVER_NAME}:${PORT}/gf_s3/console/login/"
 
 RESOLVE="--resolve ${SERVER_NAME}:${PORT}:127.0.0.1"
 
+COMPOSE=$(make -s ECHO_COMPOSE)
+CONT_NAME=gfminio
+
 SILENT="-s"
 #SILENT=""
 
+container_exists()
+{
+    ${COMPOSE} exec ${CONT_NAME} true
+}
+
 while :; do
+    if ! container_exists; then
+        make stop ${CONT_NAME}
+        make logs | tail -20
+        exit 1
+    fi
     if CODE=$(curl ${SILENT} -k -w '%{http_code}' ${RESOLVE} ${URL} -o /dev/null); then
         if [ "$CODE" = 200 ]; then
             break

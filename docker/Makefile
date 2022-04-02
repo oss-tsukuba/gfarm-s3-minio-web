@@ -119,5 +119,5 @@ $(TARGET_LOGS_FOLLOW): logs-follow@%:
 $(TARGET_LOGS_TIME): logs-time@%:
 	$(COMPOSE) logs --timestamps $*
 
-_COMPOSE:
+ECHO_COMPOSE:
 	@echo $(COMPOSE)
