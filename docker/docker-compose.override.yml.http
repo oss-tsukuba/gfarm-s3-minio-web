@@ -4,29 +4,25 @@ services:
   gfminio:
     environment:
       - VIRTUAL_HOST=${SERVER_NAME}
+      - HTTPS_PORT=
 
   revproxy:
     build: ./revproxy
     privileged: false
     restart: ${DOCKER_OPT_RESTART:-unless-stopped}
-    networks:
-      - mynet2
     ports:
-      # comment out to disable HTTP
       - ${HTTP_PORT}:${HTTP_PORT}
-      - ${HTTPS_PORT}:${HTTPS_PORT}
     environment:
       - DEFAULT_HOST=${SERVER_NAME}
       - HTTP_PORT=${HTTP_PORT:?HTTP_PORT}
-      - HTTPS_PORT=${HTTPS_PORT:?HTTPS_PORT}
-      # default: redirect from HTTP port to HTTPS port
-      #- HTTPS_METHOD=noredirect
+      - HTTPS_PORT=
+      - HTTPS_METHOD=noredirect
       - TZ=${TZ:-Asia/Tokyo}
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - html:/usr/share/nginx/html
-      - certs:/etc/nginx/certs:ro
+    networks:
+      - mynet2
 
 volumes:
   html:
-  certs:

@@ -5,7 +5,7 @@ set -eu
 
 eval $(cat config.env | egrep  '^(HTTP_PORT|HTTPS_PORT|SERVER_NAME)=')
 
-if [ ${HTTPS_PORT:+HTTPS_PORT_IS_SET} = HTTPS_PORT_IS_SET ]; then
+if [ -n "${HTTPS_PORT:-}" ]; then
     PORT=$HTTPS_PORT
     PROTOCOL=https
 else

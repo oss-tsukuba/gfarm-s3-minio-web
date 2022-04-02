@@ -134,7 +134,7 @@ Example:
 
 ```
 SERVER_NAME=client1.local
-#HTTP_PORT=61080
+HTTP_PORT=61080
 HTTPS_PORT=61443
 MYPROXY_SERVER=portal.hpci.nii.ac.jp:7512
 GSI_PROXY_HOURS=168
@@ -158,6 +158,8 @@ mandatory parameters:
 - GFARM_CONF_DIR : path to parent directory on host OS for the following files
     - gfarm2.conf: Gfarm configuration file
     - gfarm-s3-usermap.conf
+- HTTP_PORT: http port
+- HTTPS_PORT: https port (required only when using https)
 
 Gfarm parameters (if necessary)
 (default values are listed in docker-compose.yml):
@@ -168,8 +170,6 @@ Gfarm parameters (if necessary)
 
 optional parameters (default values are listed in docker-compose.yml):
 
-- HTTP_PORT: http port
-- HTTPS_PORT: https port
 - DEBUG: debug mode (1: enable)
 - DJANGO_DEBUG: debug mode of Django (True or False)
 - TZ: TZ environment variable

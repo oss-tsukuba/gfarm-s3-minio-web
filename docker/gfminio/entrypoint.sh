@@ -323,7 +323,8 @@ set -eu
 ### revproxy container is required
 SERVER_NAME=revproxy
 SERVER_PORT=${SERVER_PORT}
-SERVER_URL=https://\${SERVER_NAME}:\${SERVER_PORT}
+SERVER_SCHEME=${SERVER_SCHEME}
+SERVER_URL=\${SERVER_SCHEME}://\${SERVER_NAME}:\${SERVER_PORT}
 
 PROF="gfarm_s3"
 NO_VERIFY_SSL="--no-verify-ssl"
