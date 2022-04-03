@@ -107,6 +107,7 @@ def chgkey(request):
     return render(request, "console/chgkeyresult.html", render_dict)
 
 def result(request):
+    #logger.info(str(request.META))  # for debug
     lang = request.LANGUAGE_CODE
     if need_login(request.session):
         return HttpResponseRedirect(reverse("login"))
@@ -118,6 +119,7 @@ def result(request):
     render_dict["s3sstatus"] = s3sstatus
     render_dict["showLogoutButton"] = True
     render_dict["username"] = username
+    render_dict["s3_urls"] = conf.get_list("CSRF_TRUSTED_ORIGINS")
     return render(request, "console/result.html", render_dict)
 
 def list(request):

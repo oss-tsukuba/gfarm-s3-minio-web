@@ -40,6 +40,23 @@
                 </div>
             </td>
         </tr>
+
+        <tr>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td class="h6-small">Endpoint URL (path-style)</td>
+        </tr>
+        {% for url in s3_urls %}
+        <tr>
+            <td class="h5"><input onClick="this.select();" value="{{ url }}"
+             class="border-0 flex-grow-1"
+             style="width: 100%" readonly="readonly" /></td>
+        </tr>
+        {% endfor %}
+
         <tr>
             <td>
                 <hr>

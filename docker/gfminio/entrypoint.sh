@@ -77,7 +77,8 @@ if [ -n "${HTTPS_PORT}" ]; then
 fi
 
 HTTP_URL=""
-if [ -n "${HTTP_PORT}" ]; then
+if [ -z "${HTTPS_PORT}" -a -n "${HTTP_PORT}" ]; then
+#if [ -n "${HTTP_PORT}" ]; then
     if [ "${HTTP_PORT}" = 80 ]; then
         HTTP_URL="http://${SERVER_NAME}"
     else
