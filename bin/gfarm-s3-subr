@@ -600,8 +600,8 @@ challenge_auth() {
 	if [ -n "$MYPROXY_SERVER" ]; then
 	case $GFARMS3_LOGIN_METHOD in
 	*myproxy-logon*)
-		echo "$user_provided_key" |
-		res=$(mysudo "$local_user" $MYPROXY_LOGON -S \
+		res=$(echo "$user_provided_key" |
+			mysudo "$local_user" $MYPROXY_LOGON -S \
 			${MYPROXY_SERVER:+-s "$MYPROXY_SERVER"} \
 			-l "$global_username" \
 			-o "$x509_user_proxy" \
