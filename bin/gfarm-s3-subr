@@ -1,7 +1,9 @@
 # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
 
+set -o pipefail
+
 #################################################
-### loggin
+### logging
 #################################################
 
 _log_level_to_num() {
@@ -606,7 +608,8 @@ challenge_auth() {
 			-l "$global_username" \
 			-o "$x509_user_proxy" \
 			${GSI_PROXY_HOURS:+-t "$GSI_PROXY_HOURS"} 2>&1)
-		if [ $? = 0 ]; then
+		ret=$?
+		if [ $ret = 0 ]; then
 			#echo SUCCESS $MYPROXY_LOGON 1>&2
 			log_debug "myproxy-logon: $local_user SUCCESS $res"
 			echo myproxy-logon  # result
@@ -623,14 +626,15 @@ challenge_auth() {
 	*grid-proxy-init*)
 		if check_nopasswd "$local_user"; then
 			#echo SKIP $GRID_PROXY_INIT 1>&2
-			log_debug "grid-proxy-init: $local_user SKIP"
+			log_debug "grid-proxy-init: $local_user SKIP (no passwd)"
 		else
 			res=$(echo "$user_provided_key" |
 				mysudo "$local_user" $GRID_PROXY_INIT \
 				-out "$x509_user_proxy" \
 				${GSI_PROXY_HOURS:+-hours "$GSI_PROXY_HOURS"} \
 				-pwstdin 2>&1)
-			if [ $? = 0 ]; then
+			ret=$?
+			if [ $ret = 0 ]; then
 				#echo SUCCESS $GRID_PROXY_INIT 1>&2
 				log_debug "grid-proxy-init: $local_user SUCCESS $res"
 				echo grid-proxy-init  # result
@@ -647,9 +651,10 @@ challenge_auth() {
 	*gfarm-shared-key*)
 		local tmpfile=$(mktemp) || return 1
 		user_key=$(mysudo "$local_user" $GFARM_S3_BIN/gfarm-s3-sharedsecret-password 2>$tmpfile)
+		ret=$?
 		res=$(cat $tmpfile)
 		rm $tmpfile
-		if [ "$user_provided_key" = "$user_key" ]; then
+		if [ $ret = 0 -a "$user_provided_key" = "$user_key" ]; then
 			#echo SUCCESS gfkey digest 1>&2
 			log_debug "gfarm-shared-key: $local_user SUCCESS $res"
 			echo gfkey  # result
