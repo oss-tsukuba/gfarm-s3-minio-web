@@ -200,10 +200,6 @@ install_gf_s3() {
     # edit addtional configurations
     CONF_OVERRIDE=${SYSCONFDIR}/gfarm-s3-override.conf
     cat <<EOF > "${CONF_OVERRIDE}"
-#GFARM_S3_LOG_LEVEL=debug
-GFARM_S3_LOG_OUTPUT=stderr
-
-DJANGO_DEBUG=${DJANGO_DEBUG}
 DJANGO_TIME_ZONE=${TZ}
 ALLOWED_HOSTS=${ALLOWED_HOSTS}
 
@@ -212,7 +208,21 @@ CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
 
 GFARM_S3_LOGIN_CHALLENGE_LOG=${GFARM_S3_LOCALTMP_DIR}/error_addr.log
 DJANGO_SECRET_KEY_FILE=${DJANGO_SECRET_KEY_FILE}
+
+GFARM_S3_LOG_OUTPUT=stderr
 EOF
+
+    if [ ${DEBUG} -eq 1 ]; then
+        cat <<EOF >> "${CONF_OVERRIDE}"
+GFARM_S3_LOG_LEVEL=debug
+DJANGO_DEBUG=True
+EOF
+    else
+        cat <<EOF >> "${CONF_OVERRIDE}"
+#GFARM_S3_LOG_LEVEL=info
+DJANGO_DEBUG=${DJANGO_DEBUG}
+EOF
+    fi
 
     if which systemctl > /dev/null 2>&1; then
         systemctl enable gfarm-s3-webui.service
