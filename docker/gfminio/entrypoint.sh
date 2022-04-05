@@ -128,6 +128,8 @@ cp -fa "${GFARM_S3_USERMAP_ORIG}" "${GFARM_S3_USERMAP}"
 debug_sleep() {
     if [ ${DEBUG} -eq 1 ]; then
         sleep infinity
+    else
+        return 1
     fi
 }
 
