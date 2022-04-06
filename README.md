@@ -269,13 +269,20 @@ make copy-home
 
 ## Backup
 
-Please keep configuration files and passwords of Gfarm S3 in a safe space.
+Please keep configuration files of Gfarm S3 in a safe space.
+
+- config.env
+- docker-compose.override.yml (if changed)
+
 gfarm-s3-minio-web does not use data like a database.
 Files of Gfarm will be stored carefully on Gfarm.
 
 ## Logging
 
-- run `make logs@<container name>` for containers to show
+- run `make logs` to show log of gfminio (main container)
+- run `make logs@<container name>` to show log of the other containr
+- run `make logs-follow` or `make logs-follow@<container name>` to follow log
+    - NOTE: These are not included in the backup.
     - NOTE: These logs are removed when running `make reborn` or `make down`
 
 You can describe docker-compose.override.yml to change logging driver.
