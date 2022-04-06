@@ -1,104 +1,84 @@
-# gfarm-s3-minio-web
+# Gfarm-S3-MinIO-Web
 
 ## Overview
 
-- gfarm-s3-minio-web is Web UI to manage gfarm-s3-minio.
-- gfarm-s3-minio is an S3 compatible object storage server for Gfarm
-  based on MinIO (gateway-gfarm is added).
-    - https://github.com/oss-tsukuba/gfarm-s3-minio
-    - branch name: gfarm
-- Web UI:
-    - Login with password of .gfarm_shared_key or grid-proxy-init or myproxy-logon .
-    - Start MinIO by each user.
-    - Display Access Key ID and Secret Access Key for S3 client.
-    - Share files with other Gfarm users under dedicated directory.
-    - Control ACL.
-- Docker container:
-    - Simple setup
-    - Automatically copy Gfarm configuration and credential files from home directories on host OS to the container.
+- Gfarm-S3-MinIO-Web is a web server to manage a [Gfarm S3 MinIO server](https://github.com/oss-tsukuba/gfarm-s3-minio), which is an S3 compatible object storage server for Gfarm (MinIO with the Gfarm gateway), and  manages access control list to flexibly share files with others.
+- All software are executed by Docker containers.  It is easy to set up.
 
-## Requirements
+## Hardware requirements
 
-- Username mapping of Gfarm and My Proxy must be equal.
-- RAM: 1GB or more per user (per minio process)
+- 1GB memory or more per user (per MinIO process)
+
+## Software requirements
+
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker Compose](https://docs.docker.com/compose/)
     - v1 : https://docs.docker.com/compose/install/
     - v2 (Recommended): https://docs.docker.com/compose/cli-command/#install-on-linux
 - GNU make
-- Gfarm configuration file (gfarm2.conf)
 
 ## Quick start (Install using Docker Compose)
 
-Users on host OS and their configuration files for Gfarm are copied
-automatically in Docker container.
+```
+% git clone https://github.com/oss-tsukuba/gfarm-s3-minio-web.git
+% cd gfarm-s3-minio-web/docker
+```
+Create `config.env` (see details below)
+```
+SERVER_NAME=localhost
+HTTPS_PORT=61443
+MYPROXY_SERVER=myproxy-server.domain.name:7512
+GFARM_S3_SHARED_DIR=/share
+GFARM_CONF_DIR=/etc
+```
+This example assumes user's directory for Gfarm S3 MinIO server is `/share/username` in Gfarm file system.  To share files among other users, all users' directories should be under the `/share` directory.  The Gfarm configuration file `gfarm2.conf` is placed in `/etc`.
 
-- install Docker
-- install Docker Compose
-- run `cd ./docker` in this source directory
-- create and edit `config.env` (see details below)
-    - specify Gfarm configuration
-    - select Gfarm authentication method
-    - server name
-- ask Gfarm administrator to prepare the shared directory, and specify the Gfarm directory as GFARM_S3_SHARED_DIR in `config.env`
-  ```
-  # Example of preparation for shared directory:
-  SHARED_DIR=/share
-  gfsudo gfmkdir -p "${SHARED_DIR}"
-  gfsudo gfchmod 0755 "${SHARED_DIR}"
+Create `gfarm-s3-usermap.conf` in GFARM_CONF_DIR directory for all users as the following format;
+```
+Gfarm username:local username:S3 access key ID
+```
+Copy `docker-compose.override.yml.https` to `docker-compose.override.yml`.  You can modify `docker-compose.override.yml` if required.
+```
+% cp -p docker-compose.override.yml.https docker-compose.override.yml
+```
+Check configuration
+```
+% make check-config
+```
+Create a self-signed certificate for Gfarm S3 MinIO web server
+```
+% make selfsigned-cert-generate
+```
+Create and start containers
+```
+% make reborn
+```
+If old containers already exist, they will be updated as necessary.
 
-  for u in $(gfuser); do
-      NAME="$SHARED_DIR/$u"
-      gfsudo gfmkdir -p "$NAME"
-      gfsudo gfchmod 0755 "$NAME"
-      gfsudo gfchown $u:gfarmadm "$NAME"
-  done
-  ```
-- create and edit `gfarm-s3-usermap.conf` in GFARM_CONF_DIR directory to specify the available users
-    - one user per line, separate by colons
-    - Format:
-        - `<Gfarm Username>:<Local Username>:<S3 Accesskey ID>`
-    - Example:
-      ```
-      hpciXXXX01:user1:hpciXXXX01
-      hpciXXXX02:user2:hpciXXXX02
-      ```
-- create `docker-compose.override.yml`
-    - example: `ln -s docker-compose.override.yml.https docker-compose.override.yml` to use HTTPS
-    - or use one of other `docker-compose.override.yml.*`
-    - or write `docker-compose.override.yml` for your environment
-- run `make check-config` to check configurations.
-- run `make selfsigned-cert-generate` to activate HTTPS when using HTTPS.
-- run `make reborn` to create and start containers.
-    - If containers exist, these will be recreated.
-    - Persistent data (coniguration files, build-cache and etc.) is not removed.
-- copy the following files for HTTPS to `gfarm-s3-revproxy-1:/etc/nginx/certs` volume when using HTTPS and not using selfsigned certificate.
-    - NOTE: HTTPS port is disabled when certificate files do not exist.
-    - prepare the following files
-        - ${SERVER_NAME}.key (SSL_KEY)
-        - ${SERVER_NAME}.csr (SSL_CSR)
-        - ${SERVER_NAME}.crt (SSL_CERT)
-        - and use `sudo docker cp <filename> gfarm-s3-revproxy-1:/etc/nginx/certs/<filename>` to copy a file
-        - and run `make restart@revproxy`
-    - or (unsurveyed:) write new docker-compose.override.yml and use acme-companion for nginx-proxy to use Let's Encrypt certificate
-        - https://github.com/nginx-proxy/acme-companion
-        - https://github.com/nginx-proxy/acme-companion/blob/main/docs/Docker-Compose.md
-- open the URL in a browser
-   - Example: `https://<hostname>/`
-- Web UI
-    - login
-        - username: `<Gfarm username>`
-        - password: `<password>`
-            - .gfarm_shared_key : output of gfarm-s3-sharedsecret-password command
-                - or run `gfkey -l | openssl sha256 -r | awk '{ print $1 }'`
-                - or run `cat .gfarm_shared_key | openssl sha256 -r | awk '{ print $1 }'`
-            - grid-proxy-init : pass phrase
-            - myproxy-logon : password
-    - push `Start` button to start Gfarm S3 server per user
-    - open `Sharing` page to share other users per bucket
+If there is a server certificate for Gfarm S3 MinIO web server, copy to `gfarm-s3-revproxy-1:/etc/nginx/certs` volume, and restart the reverse proxy container.
+```
+% sudo docker cp ${SERVER_NAME}.key gfarm-s3-revproxy-1:/etc/nginx/certs/${SERVER_NAME}.key
+% sudo docker cp ${SERVER_NAME}.csr gfarm-s3-revproxy-1:/etc/nginx/certs/${SERVER_NAME}.csr
+% sudo docker cp ${SERVER_NAME}.crt gfarm-s3-revproxy-1:/etc/nginx/certs/${SERVER_NAME}.crt
+% make restart@revproxy
+```
+Or, you can create `docker-compose.override.yml` to use, for example, the Let's Encrypt certificate using acme-companion for nginx-proxy.  See https://github.com/nginx-proxy/acme-companion and https://github.com/nginx-proxy/acme-companion/blob/main/docs/Docker-Compose.md
+
+## How to use Gfarm-S3-MinIO-Web
+
+1. Access `https://${SERVER_NAME}:${HTTPS_PORT}`
+
+1. Login with a Gfarm username.  Password is a hash of the Gfarm shared key generated by `openssl sha256 -r ~/.gfarm_shared_key | cut -d " " -f 1`, a passphrase of a client certificate, or a password for a myproxy server.
+
+1. Start a Gfarm S3 MinIO server for the login user by `Start` button.
+
+1. Manage access control list for each bucket by `Sharing` page.
+
+## How to access Gfarm S3 MinIO server
+
+You can use any S3 compatible client;
 - AWS CLI (S3 client)
-     - Download and Install
-         - https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+     - https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
      - aws configure --profile <new profile name>
          - Access Key ID
          - Secret Access Key
@@ -110,7 +90,7 @@ automatically in Docker container.
      - path-style option is required
 
 
-## Install on real machine (not recommended, no details)
+## Install on real machine (not recommended, no details provided)
 
 Please refer to:
 
@@ -120,56 +100,40 @@ Please refer to:
 - gfarm
     - docker/dev/common/s3/setup.sh
 
-## HTTPS (SSL/TLS) and Certificates and Reverse proxy
+## Customization
 
-docker-compose.override.yml.https is an example to setup
-using a reverse proxy and using self signed certificates.
+`docker-compose.override.yml.https` is an example to setup
+using a reverse proxy and self-signed certificates.
 
-You can use other reverse proxy and describe
-docker-compose.override.yml for the environment.
+You can use different reverse proxy by modifying
+`docker-compose.override.yml` for your environment.
 
 ## Configuration file (docker/config.env)
 
-Example:
-
-```
-SERVER_NAME=client1.local
-HTTP_PORT=61080
-HTTPS_PORT=61443
-MYPROXY_SERVER=portal.hpci.nii.ac.jp:7512
-GSI_PROXY_HOURS=168
-#GFARM_S3_SHARED_DIR=/home/hpXXXXXXX/hpciXXXXXX/minio-share
-GFARM_S3_SHARED_DIR=/share
-GFARM_CONF_DIR=/work/gfarm-conf/
-GSI_CERTIFICATES_DIR=/etc/grid-security/certificates
-```
-
-configuration format:
+### Configuration format
 
 ```
 KEY=VALUE
 ```
 
-mandatory parameters:
+### Mandatory parameters
+- SERVER_NAME: server name of Gfarm S3 MinIO web server (without port number, not URL)
+- GFARM_S3_SHARED_DIR: Gfarm top directory for Gfarm S3 MinIO server
+- GFARM_CONF_DIR : a directory for configuration files, `gfarm2.conf` and `gfarm-s3-usermap.conf`, on the host OS
 
-### mandatory
-- SERVER_NAME: server name (without port number, not URL)
-- GFARM_S3_SHARED_DIR: Gfarm directory to share files
-- GFARM_CONF_DIR : path to parent directory on host OS for the following files
-    - gfarm2.conf: Gfarm configuration file
-    - gfarm-s3-usermap.conf
+## Required parameters when using http
 - HTTP_PORT: http port
-- HTTPS_PORT: https port (required only when using https)
 
-Gfarm parameters (if necessary)
-(default values are listed in docker-compose.yml):
+## Required parameters when using https
+- HTTPS_PORT: https port
 
-- GSI_CERTIFICATES_DIR: `/etc/grid-security/certificates/` on host OS
+### Required parameters when using myproxy server
 - MYPROXY_SERVER: myproxy server (hostname:port)
-- GSI_PROXY_HOUR: hours for grid-proxy-init or myproxy-logon
 
-optional parameters (default values are listed in docker-compose.yml):
-
+### Optional parameters
+Default is specified by `docker-compose.yml`.
+- GSI_PROXY_HOUR: expiration hours of the certificate for grid-proxy-init or myproxy-logon
+- GSI_CERTIFICATES_DIR: a directory for public keys for trusted certificate authorities on the host OS
 - DEBUG: debug mode (1: enable)
 - DJANGO_DEBUG: debug mode of Django (True or False)
 - TZ: TZ environment variable
@@ -189,10 +153,10 @@ optional parameters (default values are listed in docker-compose.yml):
 - HOMEDIR_BASE: parent directory for local (host OS) home directories
 - SHARE_HOSTDIR: shared directory between host OS and containers
 
-## Shared directory (GFARM_S3_SHARED_DIR)
+## Directory structure for Gfarm-S3-MinIO server
 
-GFARM_S3_SHARED_DIR looks like the following via S3 client.
-
+`GFARM_S3_SHARED_DIR` is a top directory of Gfarm file system for Gfarm-S3-MinIO server.  Physically, all user's directory is `GFARM_S3_SHARED_DIR/username`, which is the top directory for a S3 client.  There is `sss` virtual bucket to share files among other users.  Under the `sss` directory, S3 client can access other users' directories if permitted.
+```
 - sss (virtual bucket to other users)
     - username1
         - bucket
@@ -206,99 +170,78 @@ GFARM_S3_SHARED_DIR looks like the following via S3 client.
     - ...
 - your_bucket2
 - ...
-
-## Stop and Start
-
-prepare:
-
 ```
-cd ./docker
-```
+## Management of containers
 
-stop:
+All the following actions should be executed in `./docker` directory.
 
+Stop all containers
 ```
-make stop
+% make stop
 ```
 
-start:
-
+Start all containers
 ```
-make restart
-```
-
-## After updating configurations
-
-```
-make reborn
+% make restart
 ```
 
+Update and restart containers when editing configurations or updating the Gfarm-S3-MinIO-Web source files
+```
+% make reborn
+```
 or
-
 ```
-make reborn-withlog
+% make reborn-withlog
 ### `ctrl-c` to stop log messages
 ```
 
-## Use shell
-
+Execute a shell in the container of Gfarm S3 MinIO server (the main gfminio container)
 ```
-make shell
-```
-
-## Update Gfarm credential
-
-Normally, when Gfarm credential and configuration files
-(.gfarm_shared_key, .globus, .gfarm2rc) for users are updated, the
-files will be copied automatically from home directories to
-containers.
-
-If the files are not copied automatically, run the following:
-
-```
-make copy-home
+% make shell
 ```
 
-## Update containers
-
-- update gfarm-s3-minio-web source
-- or, update `./docker/config.env`
-- or, update `docker-compose.yml`
-- or, run `make build-nocache` to update packages forcibly
-- and run `make reborn`
+Copy Gfarm configuration files and credentials for users from the host OS to containers manually, although these files will be copied automatically.
+```
+% make copy-home
+```
 
 ## Backup
 
-Please keep configuration files of Gfarm S3 in a safe space.
-
-- config.env
-- docker-compose.override.yml (if changed)
-
-gfarm-s3-minio-web does not use data like a database.
-Files of Gfarm will be stored carefully on Gfarm.
+Save configuration files, `config.env` and `docker-compose.override.yml` if required.
 
 ## Logging
 
-- run `make logs` to show log of gfminio (main container)
-- run `make logs@<container name>` to show log of the other containr
-- run `make logs-follow` or `make logs-follow@<container name>` to follow log
-    - NOTE: These are not included in the backup.
-    - NOTE: These logs are removed when running `make reborn` or `make down`
+Output the main gfminio container logs
+```
+% make logs
+```
 
-You can describe docker-compose.override.yml to change logging driver.
+Output logs of a specific container
+```
+% make logs@<container name>
+```
+
+Output appended logs as the log file grows
+```
+% make logs-follow
+```
+or
+```
+% make logs-follow@<container name>
+```
+
+NOTE: These logs are lost when running `make reborn` or `make down`.  If you need to keep logs, keep them manually.
+
+You can change a logging driver by modifying `docker-compose.override.yml`.
 
 - https://docs.docker.com/compose/compose-file/compose-file-v3/#logging
 - https://docs.docker.com/config/containers/logging/configure/
 
-## for developers
+## For developers
 
-- create Gfarm docker/dev environment
-- and see `config.env-docker_dev`
-- and merge the file into `config.env`
-- and run `ln -s <path to gfarm/docker/dev/mnt/COPY_DIR> /work/gfarm-dev`
-- test:
-    - WebUI: login by user1
-    - WebUI: push `Start` button
-    - run `make shell`
-    - run `sudo -i -u user1`
-    - run `/test-s3.sh; echo $?`
+It is easy to develop Gfarm-S3-MinIO-Web using Gfarm docker/dev environment.
+
+- Add the contents of `config.env-docker_dev` to `config.env`, and modify appropriately.
+- `ln -s <path to gfarm/docker/dev/mnt/COPY_DIR> /work/gfarm-dev`
+- Log in as user1, and start the Gfarm S3 MinIO server.
+- `make shell`, `sudo -i -u user1` and `/test-s3.sh; echo $?`
