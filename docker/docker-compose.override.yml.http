@@ -11,10 +11,10 @@ services:
     privileged: false
     restart: ${DOCKER_OPT_RESTART:-unless-stopped}
     ports:
-      - ${HTTP_PORT}:${HTTP_PORT}
+      - ${HTTP_PORT:-80}:${HTTP_PORT:-80}
     environment:
       - DEFAULT_HOST=${SERVER_NAME}
-      - HTTP_PORT=${HTTP_PORT:?HTTP_PORT}
+      - HTTP_PORT=${HTTP_PORT:-80}
       - HTTPS_PORT=
       - HTTPS_METHOD=noredirect
       - TZ=${TZ:-Asia/Tokyo}

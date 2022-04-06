@@ -26,6 +26,7 @@
 Create `config.env` (see details below)
 ```
 SERVER_NAME=localhost
+PROTOCOL=https
 HTTPS_PORT=61443
 MYPROXY_SERVER=myproxy-server.domain.name:7512
 GFARM_S3_SHARED_DIR=/share
@@ -121,10 +122,13 @@ KEY=VALUE
 - GFARM_S3_SHARED_DIR: Gfarm top directory for Gfarm S3 MinIO server
 - GFARM_CONF_DIR : a directory for configuration files, `gfarm2.conf` and `gfarm-s3-usermap.conf`, on the host OS
 
-## Required parameters when using http
+### Required parameters when using http
+- PROTOCOL: `http` is required
 - HTTP_PORT: http port
 
-## Required parameters when using https
+### Required parameters when using https
+- PROTOCOL: `https` is required
+- HTTP_PORT: http port (redirect to https port)
 - HTTPS_PORT: https port
 
 ### Required parameters when using myproxy server
