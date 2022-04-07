@@ -27,7 +27,6 @@ Create `config.env` (see details below)
 ```
 SERVER_NAME=localhost
 PROTOCOL=https
-HTTPS_PORT=61443
 MYPROXY_SERVER=myproxy-server.domain.name:7512
 GFARM_S3_SHARED_DIR=/share
 GFARM_CONF_DIR=/etc
@@ -119,24 +118,18 @@ KEY=VALUE
 
 ### Mandatory parameters
 - SERVER_NAME: server name of Gfarm S3 MinIO web server (without port number, not URL)
+- PROTOCOL: `https` or `http`
 - GFARM_S3_SHARED_DIR: Gfarm top directory for Gfarm S3 MinIO server
 - GFARM_CONF_DIR : a directory for configuration files, `gfarm2.conf` and `gfarm-s3-usermap.conf`, on the host OS
-
-### Required parameters when using http
-- PROTOCOL: `http` is required
-- HTTP_PORT: http port
-
-### Required parameters when using https
-- PROTOCOL: `https` is required
-- HTTP_PORT: http port (redirect to https port)
-- HTTPS_PORT: https port
 
 ### Required parameters when using myproxy server
 - MYPROXY_SERVER: myproxy server (hostname:port)
 
 ### Optional parameters
 Default is specified by `docker-compose.yml`.
-- GSI_PROXY_HOUR: expiration hours of the certificate for grid-proxy-init or myproxy-logon
+- HTTP_PORT: http port.  When PROTOCOL is https, redirected to the https port.
+- HTTPS_PORT: https port
+- GSI_PROXY_HOUR: expiration hours of the certificate for `grid-proxy-init` or `myproxy-logon`
 - GSI_CERTIFICATES_DIR: a directory for public keys for trusted certificate authorities on the host OS
 - DEBUG: debug mode (1: enable)
 - DJANGO_DEBUG: debug mode of Django (True or False)

@@ -13,7 +13,7 @@ SILENT="-s"
 
 COMPOSE=$(make -s ECHO_COMPOSE)
 
-eval $(cat config.env | egrep  '^(PROTOCOL|HTTP_PORT|HTTPS_PORT|SERVER_NAME)=')
+eval $(egrep '^(PROTOCOL|HTTP_PORT|HTTPS_PORT|SERVER_NAME)=' config.env)
 
 if [ "${PROTOCOL}" = "https" ]; then
     PORT=${HTTPS_PORT:-443}
@@ -35,7 +35,7 @@ http_get_code()
          ${RESOLVE} ${URL} -o /dev/null
 }
 
-echo -n "Waiting for ${NAME} startup..."
+echo -n "Waiting for ${NAME} to start (it may take a few minutes)"
 while :; do
     if ! container_exists; then
         make stop ${CONT_NAME}
