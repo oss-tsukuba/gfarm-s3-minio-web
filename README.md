@@ -11,10 +11,8 @@
 
 ## Software requirements
 
-- [Docker](https://docs.docker.com/engine/install/)
-- [Docker Compose](https://docs.docker.com/compose/)
-    - v1 : https://docs.docker.com/compose/install/
-    - v2 (Recommended): https://docs.docker.com/compose/cli-command/#install-on-linux
+- [Docker Engine and Docker Compose](https://docs.docker.com/engine/install/)
+    - (Docker Desktop is not required.)
 - GNU make
 
 ## Quick start (Install using Docker Compose)
